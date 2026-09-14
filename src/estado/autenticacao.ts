@@ -19,11 +19,6 @@ function publicar(novo: EstadoAuth) {
   ouvintes.forEach((ouvinte) => ouvinte());
 }
 
-/** Popups são pouco confiáveis em navegadores de celular (bloqueio, in-app browsers); nesses, usa redirecionamento. */
-function ehMovel(): boolean {
-  return typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
 function iniciar() {
   if (iniciado || !firebaseDisponivel) return;
   iniciado = true;
@@ -61,12 +56,18 @@ export function useAutenticacao(): EstadoAuth {
   return local;
 }
 
+/** Tenta popup (mais confiável quando funciona); só cai para redirecionamento se o popup for de fato bloqueado. */
 export async function entrarComGoogle(): Promise<void> {
   const kit = await carregarFirebase();
-  if (ehMovel()) {
-    await kit.authApi.signInWithRedirect(kit.auth, kit.googleProvider);
-  } else {
+  try {
     await kit.authApi.signInWithPopup(kit.auth, kit.googleProvider);
+  } catch (erro: unknown) {
+    const codigo = (erro as { code?: string } | undefined)?.code;
+    if (codigo === 'auth/popup-blocked' || codigo === 'auth/operation-not-supported-in-this-environment') {
+      await kit.authApi.signInWithRedirect(kit.auth, kit.googleProvider);
+      return;
+    }
+    throw erro;
   }
 }
 
