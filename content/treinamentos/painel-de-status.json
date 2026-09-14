@@ -1,0 +1,56 @@
+{
+  "id": "painel-de-status",
+  "titulo": "O painel de status de julho",
+  "resumo": "Operações quer saber quantos pedidos ficaram em cada status e quem acumula pedidos pendentes.",
+  "tema": "agregacoes",
+  "dificuldade": "facil",
+  "duracao_min": 20,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-01",
+  "chamado": [
+    {
+      "autor": "Júlia",
+      "papel": "Operações",
+      "texto": "Oi! Estou montando o painel de operações de julho. Preciso ver quantos pedidos ficaram em cada status e quanto dinheiro está parado. Também quero ligar para os clientes que acumulam pedidos pendentes."
+    }
+  ],
+  "consulta_inicial": "-- Quais status existem?\nSELECT DISTINCT status\nFROM pedidos;",
+  "checkpoints": [
+    {
+      "titulo": "Cancelados de julho",
+      "pergunta": "Quantos pedidos com status 'cancelado' foram criados em julho de 2026?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM pedidos WHERE status = 'cancelado' AND criado_em >= DATE '2026-07-01' AND criado_em < DATE '2026-08-01'",
+      "xp": 40,
+      "dicas": [
+        "Filtre o mês com criado_em >= '2026-07-01' AND criado_em < '2026-08-01'.",
+        "Junte o filtro de status com AND."
+      ],
+      "explicacao": "O intervalo com >= no início e < no começo do mês seguinte pega o mês inteiro, inclusive o último dia até 23:59:59, sem depender de quantos dias o mês tem."
+    },
+    {
+      "titulo": "Montar o painel",
+      "pergunta": "Monte o painel de julho/2026 com as colunas status, qtd (quantidade de pedidos) e total (soma de valor_total), uma linha por status.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT status,\n       COUNT(*) AS qtd,\n       SUM(valor_total) AS total\nFROM pedidos\nWHERE criado_em >= DATE '2026-07-01'\n  AND criado_em < DATE '2026-08-01'\nGROUP BY status;",
+      "xp": 60,
+      "dicas": [
+        "GROUP BY status gera uma linha para cada status.",
+        "Toda coluna do SELECT que não está dentro de uma agregação (COUNT, SUM...) precisa aparecer no GROUP BY."
+      ],
+      "explicacao": "GROUP BY junta as linhas com o mesmo status, e as funções de agregação resumem cada grupo. O WHERE roda antes do agrupamento, por isso o filtro de julho vale para todas as contas."
+    },
+    {
+      "titulo": "Clientes com pendências",
+      "pergunta": "Liste cliente_id e qtd_pendentes dos clientes com 2 ou mais pedidos pendentes, considerando todos os meses.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT cliente_id,\n       COUNT(*) AS qtd_pendentes\nFROM pedidos\nWHERE status = 'pendente'\nGROUP BY cliente_id\nHAVING COUNT(*) >= 2;",
+      "xp": 60,
+      "dicas": [
+        "WHERE filtra linhas antes de agrupar. HAVING filtra os grupos depois.",
+        "HAVING COUNT(*) >= 2 mantém só os clientes com duas ou mais pendências."
+      ],
+      "explicacao": "Não dá para usar COUNT(*) no WHERE, porque a contagem só existe depois do agrupamento. Por isso o filtro sobre o resultado da agregação vai no HAVING."
+    }
+  ]
+}

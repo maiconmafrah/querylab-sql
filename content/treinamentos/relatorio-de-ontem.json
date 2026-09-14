@@ -1,0 +1,64 @@
+{
+  "id": "relatorio-de-ontem",
+  "titulo": "O relatório que o gerente pediu às 8h",
+  "resumo": "O gerente comercial precisa dos números de ontem antes da reunião com a diretoria.",
+  "tema": "consultas-basicas",
+  "dificuldade": "facil",
+  "duracao_min": 15,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-01",
+  "chamado": [
+    {
+      "autor": "Rafael",
+      "papel": "Gerente comercial",
+      "texto": "Bom dia! Tenho reunião com a diretoria às 9h e preciso dos números de ontem, 14/08: quantos pedidos entraram, quanto faturamos e quais foram os maiores pedidos. Consegue me mandar antes?"
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "Os pedidos ficam na tabela pedidos. O campo criado_em guarda data e hora, e o status pode ser pago, pendente ou cancelado. Só pedidos pagos contam como faturamento."
+    }
+  ],
+  "consulta_inicial": "-- Comece olhando algumas linhas da tabela\nSELECT *\nFROM pedidos\nLIMIT 10;",
+  "checkpoints": [
+    {
+      "titulo": "Contar os pedidos",
+      "pergunta": "Quantos pedidos (de qualquer status) foram criados em 14/08/2026?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM pedidos WHERE CAST(criado_em AS DATE) = DATE '2026-08-14'",
+      "xp": 40,
+      "dicas": [
+        "criado_em tem data e hora. Para comparar só a data, use CAST(criado_em AS DATE).",
+        "COUNT(*) conta quantas linhas passaram pelo WHERE."
+      ],
+      "explicacao": "Converter criado_em para DATE descarta a hora, então todos os pedidos do dia entram na comparação. Outra forma é usar um intervalo: criado_em >= '2026-08-14' AND criado_em < '2026-08-15'."
+    },
+    {
+      "titulo": "Somar o faturamento",
+      "pergunta": "Quanto os pedidos PAGOS de 14/08/2026 somaram em valor_total?",
+      "tipo": "valor",
+      "unidade": "R$",
+      "tolerancia": 0.01,
+      "resposta_sql": "SELECT SUM(valor_total) FROM pedidos WHERE CAST(criado_em AS DATE) = DATE '2026-08-14' AND status = 'pago'",
+      "xp": 50,
+      "dicas": [
+        "Some com SUM(valor_total) e filtre também por status = 'pago'.",
+        "Use AND para juntar as duas condições no WHERE."
+      ],
+      "explicacao": "SUM soma a coluna só das linhas que passaram pelos dois filtros. Pedidos pendentes e cancelados ficam fora do faturamento."
+    },
+    {
+      "titulo": "Os maiores pedidos",
+      "pergunta": "Liste pedido_id, cliente_id e valor_total dos 3 maiores pedidos pagos de 14/08/2026, do maior para o menor.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT pedido_id, cliente_id, valor_total\nFROM pedidos\nWHERE CAST(criado_em AS DATE) = DATE '2026-08-14'\n  AND status = 'pago'\nORDER BY valor_total DESC\nLIMIT 3;",
+      "xp": 60,
+      "dicas": [
+        "ORDER BY valor_total DESC coloca os maiores primeiro.",
+        "LIMIT 3 corta o resultado nas 3 primeiras linhas."
+      ],
+      "explicacao": "A ordem das cláusulas é sempre SELECT, FROM, WHERE, ORDER BY e LIMIT. O banco filtra, depois ordena e só então corta as linhas."
+    }
+  ]
+}

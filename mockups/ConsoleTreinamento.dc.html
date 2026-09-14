@@ -1,0 +1,289 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+  <style>
+    body { margin: 0; background: #0b0f0e; color: #e2e8e4; font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #54d68c; text-decoration: none; }
+    a:hover { color: #8fe6b4; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace; }
+    .k { color: #ecb24a; }
+    .f { color: #54d68c; }
+    .s { color: #a7d8bb; }
+    .n { color: #ecb24a; }
+    .c { color: #56625d; font-style: italic; }
+    .ln { width: 44px; flex-shrink: 0; padding-right: 18px; text-align: right; color: #36413d; box-sizing: border-box; }
+    .rt th { text-align: left; font-weight: 500; color: #8a9691; height: 32px; padding: 0 16px; border-bottom: 1px solid #222b28; background: #0e1312; }
+    .rt td { height: 34px; padding: 0 16px; border-bottom: 1px solid #19211f; color: #c9d3ce; }
+    .rt .r { text-align: right; }
+  </style>
+</helmet>
+<div style="width: 1440px; height: 900px; display: flex; overflow: hidden; background: #0b0f0e;">
+
+  <aside style="width: 248px; flex-shrink: 0; background: #0e1312; border-right: 1px solid #1f2825; display: flex; flex-direction: column;">
+    <div style="height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 0 20px; border-bottom: 1px solid #1f2825;">
+      <div style="width: 28px; height: 28px; border: 1px solid #54d68c; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #54d68c;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 8 4 4-4 4"></path><path d="M13 16h5"></path></svg>
+      </div>
+      <div class="mono" style="font-size: 15px; font-weight: 700; letter-spacing: -0.01em;">querylab<span style="color: #54d68c;">_</span></div>
+    </div>
+
+    <div style="padding: 16px 14px 6px;">
+      <div style="height: 34px; display: flex; align-items: center; gap: 8px; padding: 0 10px; background: #111715; border: 1px solid #222b28; border-radius: 4px; color: #5c6863; font-size: 13px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+        <span style="flex-grow: 1;">Buscar…</span>
+        <span class="mono" style="font-size: 10.5px; border: 1px solid #2e3935; border-radius: 3px; padding: 1px 5px;">Ctrl K</span>
+      </div>
+    </div>
+
+    <nav style="flex-grow: 1; padding: 8px 14px; display: flex; flex-direction: column; gap: 2px;">
+      <div class="mono" style="font-size: 10.5px; letter-spacing: 0.1em; color: #4b5652; padding: 8px 10px 6px;">ESTUDO</div>
+
+      <div style="height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: 4px; color: #a3afa9; font-size: 13.5px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"></path></svg>
+        <span style="flex-grow: 1;">Início</span>
+      </div>
+
+      <div style="height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: 4px; color: #e2e8e4; font-size: 13.5px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"></path><path d="M10 3v6l-5.5 9.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"></path></svg>
+        <span style="flex-grow: 1;">Treinamentos</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5c6863" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+      </div>
+      <div style="margin: 0 0 6px 18px; padding-left: 12px; border-left: 1px solid #222b28; display: flex; flex-direction: column; gap: 2px;">
+        <div style="height: 30px; display: flex; align-items: center; padding: 0 10px; border-radius: 4px; font-size: 13px; color: #8a9691;">Catálogo</div>
+        <div style="height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border-radius: 4px; font-size: 13px; color: #54d68c; background: #15201c;"><span>Em andamento</span><span class="mono" style="font-size: 11px;">2</span></div>
+        <div style="height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border-radius: 4px; font-size: 13px; color: #8a9691;"><span>Concluídos</span><span class="mono" style="font-size: 11px; color: #5c6863;">14</span></div>
+      </div>
+
+      <div style="height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: 4px; color: #a3afa9; font-size: 13.5px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 4V3h6v1"></path><path d="m9 13 2 2 4-4"></path></svg>
+        <span style="flex-grow: 1;">Simulados</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5c6863" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+      </div>
+      <div style="margin: 0 0 6px 18px; padding-left: 12px; border-left: 1px solid #222b28; display: flex; flex-direction: column; gap: 2px;">
+        <div style="height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border-radius: 4px; font-size: 13px; color: #8a9691;"><span>Disponíveis</span><span class="mono" style="font-size: 11px; color: #ecb24a;">1 novo</span></div>
+        <div style="height: 30px; display: flex; align-items: center; padding: 0 10px; border-radius: 4px; font-size: 13px; color: #8a9691;">Histórico</div>
+      </div>
+
+      <div style="height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: 4px; color: #a3afa9; font-size: 13.5px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2"></circle><circle cx="18" cy="5" r="2"></circle><path d="M8 19h8.5a3.5 3.5 0 0 0 0-7h-9a3.5 3.5 0 0 1 0-7H16"></path></svg>
+        <span style="flex-grow: 1;">Trilhas</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5c6863" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+      </div>
+
+      <div class="mono" style="font-size: 10.5px; letter-spacing: 0.1em; color: #4b5652; padding: 18px 10px 6px;">CONSULTA</div>
+
+      <div style="height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: 4px; color: #a3afa9; font-size: 13.5px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"></path><path d="M5 17a3 3 0 0 1 3-3h11"></path></svg>
+        <span style="flex-grow: 1;">Referência SQL</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5c6863" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+      </div>
+      <div style="height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: 4px; color: #a3afa9; font-size: 13.5px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path></svg>
+        <span style="flex-grow: 1;">Datasets</span>
+      </div>
+      <div style="height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: 4px; color: #a3afa9; font-size: 13.5px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M6 17v-6"></path><path d="M11 17V5"></path><path d="M16 17v-9"></path></svg>
+        <span style="flex-grow: 1;">Progresso</span>
+      </div>
+    </nav>
+
+    <div style="padding: 14px; border-top: 1px solid #1f2825; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="mono" style="width: 32px; height: 32px; border-radius: 4px; background: #161d1b; border: 1px solid #2e3935; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #54d68c;">VC</div>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 13px; font-weight: 500;">Você</span>
+          <span class="mono" style="font-size: 11px; color: #8a9691;">nível 7 · analista jr</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <div style="height: 4px; background: #1f2825; border-radius: 2px; overflow: hidden;"><div style="width: 62%; height: 100%; background: #54d68c;"></div></div>
+        <div class="mono" style="display: flex; justify-content: space-between; font-size: 10.5px; color: #5c6863;"><span>1.240 XP</span><span>2.000 XP</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <main style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header style="height: 56px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid #1f2825; background: #0e1312;">
+      <div class="mono" style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #5c6863;">
+        <span>treinamentos</span><span>/</span><span>qualidade-de-dados</span><span>/</span><span style="color: #e2e8e4;">inc-07</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="mono" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; font-size: 11.5px; color: #8a9691;">
+          <span style="width: 7px; height: 7px; border-radius: 50%; background: #54d68c;"></span>DuckDB · no navegador
+        </div>
+        <div class="mono" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border: 1px solid #222b28; border-radius: 4px; font-size: 13px; color: #e2e8e4;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a9691" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>00:18:42
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border: 1px solid #2e3935; border-radius: 4px; font-size: 13px; color: #e2e8e4;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ecb24a" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 21h4"></path><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"></path></svg>Pedir dica<span class="mono" style="font-size: 11px; color: #8a9691;">1/3</span>
+        </div>
+        <div style="display: flex; align-items: center; height: 30px; padding: 0 12px; border: 1px solid #2e3935; border-radius: 4px; font-size: 13px; color: #8a9691;">Encerrar</div>
+      </div>
+    </header>
+
+    <div style="flex-grow: 1; min-height: 0; display: flex; gap: 16px; padding: 16px; background-color: #0b0f0e; background-image: radial-gradient(#151c1a 1px, transparent 1px); background-size: 22px 22px;">
+
+      <section style="width: 392px; flex-shrink: 0; background: #111715; border: 1px solid #222b28; border-radius: 4px; display: flex; flex-direction: column; overflow: hidden;">
+        <div style="display: flex; gap: 22px; padding: 0 18px; height: 44px; flex-shrink: 0; border-bottom: 1px solid #222b28; font-size: 13px;">
+          <div style="display: flex; align-items: center; color: #e2e8e4; font-weight: 500; box-shadow: inset 0 -2px 0 #54d68c;">Briefing</div>
+          <div style="display: flex; align-items: center; color: #8a9691;">Schema</div>
+          <div style="display: flex; align-items: center; gap: 6px; color: #8a9691;">Dicas<span class="mono" style="font-size: 11px; color: #5c6863;">1/3</span></div>
+        </div>
+
+        <div style="padding: 18px; display: flex; flex-direction: column; gap: 20px;">
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="mono" style="font-size: 12px; color: #8a9691;">INC-07</span>
+              <span class="mono" style="font-size: 11px; color: #ecb24a; border: 1px solid #5a4623; background: #1d1811; padding: 2px 6px; border-radius: 3px;">SEV-2</span>
+              <span class="mono" style="font-size: 11px; color: #8a9691; border: 1px solid #2e3935; padding: 2px 6px; border-radius: 3px;">médio</span>
+              <span class="mono" style="font-size: 11px; color: #54d68c; margin-left: auto;">+150 XP</span>
+            </div>
+            <h1 style="margin: 0; font-size: 21px; line-height: 1.28; font-weight: 600; letter-spacing: -0.01em; text-wrap: pretty;">A receita de ontem dobrou no painel financeiro</h1>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: #a3afa9; text-wrap: pretty;">O financeiro abriu um chamado às 09:12: o painel mostra R$ 1,21 mi em vendas no dia 12/09, e a média diária fica perto de R$ 610 mil. Ninguém alterou o dashboard. Descubra o que aconteceu na carga e entregue o número certo.</p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="mono" style="font-size: 10.5px; letter-spacing: 0.1em; color: #5c6863;">LOG DO PIPELINE · 12/09</div>
+            <div class="mono" style="background: #0b0f0e; border: 1px solid #222b28; border-radius: 3px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; line-height: 1.4;">
+              <div style="display: flex; gap: 10px;"><span style="color: #5c6863; flex-shrink: 0;">08:02</span><span style="color: #8a9691; width: 100px; flex-shrink: 0;">carga_pedidos</span><span style="color: #c9d3ce;">lote 3391 iniciado</span></div>
+              <div style="display: flex; gap: 10px;"><span style="color: #5c6863; flex-shrink: 0;">08:05</span><span style="color: #8a9691; width: 100px; flex-shrink: 0;">carga_pedidos</span><span style="color: #ecb24a;">timeout → retry auto</span></div>
+              <div style="display: flex; gap: 10px;"><span style="color: #5c6863; flex-shrink: 0;">08:07</span><span style="color: #8a9691; width: 100px; flex-shrink: 0;">carga_pedidos</span><span style="color: #c9d3ce;">lote 3391-r concluído</span></div>
+              <div style="display: flex; gap: 10px;"><span style="color: #5c6863; flex-shrink: 0;">08:19</span><span style="color: #8a9691; width: 100px; flex-shrink: 0;">painel_fin</span><span style="color: #c9d3ce;">atualizado</span></div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="mono" style="font-size: 10.5px; letter-spacing: 0.1em; color: #5c6863;">TAREFAS</span>
+              <span class="mono" style="font-size: 11px; color: #8a9691;">1 de 3 concluídas</span>
+            </div>
+
+            <div style="display: flex; gap: 12px; padding: 12px; border: 1px solid #222b28; border-radius: 3px;">
+              <div style="width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; background: #54d68c; color: #0b0f0e; display: flex; align-items: center; justify-content: center;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1;">
+                <div style="font-size: 13.5px; line-height: 1.4; color: #a3afa9;">Quantos pedidos foram carregados em duplicidade?</div>
+                <div class="mono" style="display: flex; align-items: center; gap: 8px; font-size: 12px;"><span style="color: #54d68c;">412</span><span style="color: #5c6863;">validado · +50 XP</span></div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; padding: 12px; border: 1px solid #2f5a43; background: #121c18; border-radius: 3px;">
+              <div class="mono" style="width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid #54d68c; color: #54d68c; display: flex; align-items: center; justify-content: center; font-size: 11px; box-sizing: border-box;">2</div>
+              <div style="display: flex; flex-direction: column; gap: 10px; flex-grow: 1;">
+                <div style="font-size: 13.5px; line-height: 1.4; color: #e2e8e4;">Quanto de receita foi inflada no dia 12/09?</div>
+                <div style="display: flex; gap: 8px;">
+                  <div class="mono" style="flex-grow: 1; height: 34px; display: flex; align-items: center; padding: 0 10px; background: #0b0f0e; border: 1px solid #2e3935; border-radius: 3px; font-size: 12px; color: #5c6863;">valor em R$, ex: 1234.56</div>
+                  <div style="height: 34px; padding: 0 14px; display: flex; align-items: center; background: #54d68c; color: #07120c; font-weight: 600; font-size: 13px; border-radius: 3px;">Enviar</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; padding: 12px; border: 1px dashed #222b28; border-radius: 3px;">
+              <div style="width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #4b5652;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+              </div>
+              <div style="font-size: 13.5px; line-height: 1.4; color: #5c6863;">Escreva a query que devolve a receita diária corrigida.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px; height: 36px; flex-shrink: 0;">
+          <span class="mono" style="font-size: 10.5px; letter-spacing: 0.1em; color: #5c6863; margin-right: 4px;">TABELAS</span>
+          <div class="mono" style="display: flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px; background: #111715; border: 1px solid #222b28; border-radius: 3px; font-size: 12px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8a9691" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"></rect><path d="M3 10h18"></path><path d="M9 10v10"></path></svg>pedidos<span style="color: #5c6863;">48.213</span>
+          </div>
+          <div class="mono" style="display: flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px; background: #111715; border: 1px solid #222b28; border-radius: 3px; font-size: 12px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8a9691" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"></rect><path d="M3 10h18"></path><path d="M9 10v10"></path></svg>clientes<span style="color: #5c6863;">6.102</span>
+          </div>
+          <div class="mono" style="display: flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px; background: #111715; border: 1px solid #222b28; border-radius: 3px; font-size: 12px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8a9691" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"></rect><path d="M3 10h18"></path><path d="M9 10v10"></path></svg>cargas_log<span style="color: #5c6863;">37</span>
+          </div>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #8a9691;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.3-5.7"></path><path d="M4 4v4h4"></path></svg>Restaurar dataset
+          </div>
+        </div>
+
+        <div style="flex-shrink: 0; background: #111715; border: 1px solid #222b28; border-radius: 4px; display: flex; flex-direction: column; overflow: hidden;">
+          <div style="height: 42px; display: flex; align-items: center; justify-content: space-between; padding-right: 8px; border-bottom: 1px solid #222b28;">
+            <div style="display: flex; align-items: stretch; height: 100%;">
+              <div class="mono" style="display: flex; align-items: center; gap: 8px; padding: 0 16px; font-size: 12.5px; background: #161d1b; border-right: 1px solid #222b28; color: #e2e8e4;">investigacao.sql<span style="width: 6px; height: 6px; border-radius: 50%; background: #ecb24a;"></span></div>
+              <div class="mono" style="display: flex; align-items: center; padding: 0 16px; font-size: 12.5px; color: #5c6863; border-right: 1px solid #222b28;">rascunho.sql</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <div style="height: 28px; padding: 0 10px; display: flex; align-items: center; border: 1px solid #2e3935; border-radius: 3px; font-size: 12.5px; color: #a3afa9;">Formatar</div>
+              <div style="height: 28px; padding: 0 12px; display: flex; align-items: center; gap: 8px; background: #54d68c; color: #07120c; border-radius: 3px; font-size: 12.5px; font-weight: 600;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4v16l14-8z"></path></svg>Executar<span class="mono" style="font-size: 10.5px; font-weight: 500; opacity: 0.65;">Ctrl ↵</span>
+              </div>
+            </div>
+          </div>
+          <div class="mono" style="padding: 12px 0; font-size: 13px; line-height: 21px; white-space: pre; display: flex; flex-direction: column; color: #d7dfdb;">
+            <div style="display: flex;"><span class="ln">1</span><span class="c">-- Tarefa 2: quanto de receita foi inflada?</span></div>
+            <div style="display: flex;"><span class="ln">2</span><span class="c">-- Antes, ver os pedidos repetidos e os lotes</span></div>
+            <div style="display: flex;"><span class="ln">3</span><span><span class="k">SELECT</span> p.pedido_id,</span></div>
+            <div style="display: flex;"><span class="ln">4</span><span>       p.cliente_id,</span></div>
+            <div style="display: flex;"><span class="ln">5</span><span>       <span class="f">COUNT</span>(*)                        <span class="k">AS</span> copias,</span></div>
+            <div style="display: flex;"><span class="ln">6</span><span>       <span class="f">STRING_AGG</span>(p.lote_carga, <span class="s">', '</span>)  <span class="k">AS</span> lotes,</span></div>
+            <div style="display: flex;"><span class="ln">7</span><span>       <span class="f">SUM</span>(p.valor)                    <span class="k">AS</span> valor_somado</span></div>
+            <div style="display: flex;"><span class="ln">8</span><span><span class="k">FROM</span> pedidos p</span></div>
+            <div style="display: flex;"><span class="ln">9</span><span><span class="k">WHERE</span> p.criado_em::<span class="k">date</span> = <span class="k">DATE</span> <span class="s">'2026-09-12'</span></span></div>
+            <div style="display: flex;"><span class="ln">10</span><span><span class="k">GROUP BY</span> p.pedido_id, p.cliente_id</span></div>
+            <div style="display: flex;"><span class="ln">11</span><span><span class="k">HAVING</span> <span class="f">COUNT</span>(*) &gt; <span class="n">1</span></span></div>
+            <div style="display: flex;"><span class="ln">12</span><span><span class="k">ORDER BY</span> valor_somado <span class="k">DESC</span>;<span style="display: inline-block; width: 8px; height: 16px; background: #54d68c; vertical-align: -3px; margin-left: 1px;"></span></span></div>
+          </div>
+        </div>
+
+        <div style="flex-grow: 1; min-height: 0; background: #111715; border: 1px solid #222b28; border-radius: 4px; display: flex; flex-direction: column; overflow: hidden;">
+          <div style="height: 40px; flex-shrink: 0; display: flex; align-items: stretch; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid #222b28;">
+            <div style="display: flex; gap: 22px; font-size: 13px;">
+              <div style="display: flex; align-items: center; color: #e2e8e4; font-weight: 500; box-shadow: inset 0 -2px 0 #54d68c;">Resultado</div>
+              <div style="display: flex; align-items: center; color: #8a9691;">Plano de execução</div>
+              <div style="display: flex; align-items: center; color: #8a9691;">Mensagens</div>
+            </div>
+            <div class="mono" style="display: flex; align-items: center; gap: 14px; font-size: 11.5px; color: #8a9691;">
+              <span><span style="color: #e2e8e4;">412</span> linhas · 38 ms</span>
+              <span style="color: #5c6863;">Exportar CSV</span>
+            </div>
+          </div>
+          <div style="flex-grow: 1; min-height: 0; overflow: hidden;">
+            <table class="rt mono" style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+              <thead>
+                <tr><th>pedido_id</th><th>cliente_id</th><th class="r">copias</th><th>lotes</th><th class="r">valor_somado</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>918204</td><td>4471</td><td class="r">2</td><td>3391, 3391-r</td><td class="r">9860.00</td></tr>
+                <tr><td>917655</td><td>1208</td><td class="r">2</td><td>3391, 3391-r</td><td class="r">7412.50</td></tr>
+                <tr><td>918377</td><td>3390</td><td class="r">2</td><td>3391, 3391-r</td><td class="r">6980.00</td></tr>
+                <tr><td>917902</td><td>2215</td><td class="r">2</td><td>3391, 3391-r</td><td class="r">5304.90</td></tr>
+                <tr><td>918011</td><td>873</td><td class="r">2</td><td>3391, 3391-r</td><td class="r">4775.00</td></tr>
+                <tr><td>917488</td><td>5102</td><td class="r">2</td><td>3391, 3391-r</td><td class="r">4120.40</td></tr>
+                <tr><td>918456</td><td>1936</td><td class="r">2</td><td>3391, 3391-r</td><td class="r">3998.00</td></tr>
+                <tr><td>917731</td><td>2840</td><td class="r">2</td><td>3391, 3391-r</td><td class="r">3710.00</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mono" style="height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-top: 1px solid #222b28; font-size: 11.5px; color: #5c6863;">
+            <span>mostrando 1–8 de 412</span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"></path></svg>
+              <span style="color: #8a9691;">página 1 de 52</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a9691" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+</body>
+</html>

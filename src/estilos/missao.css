@@ -1,0 +1,480 @@
+/* ============ Página da missão ============ */
+.missao {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 1680px;
+  padding: 24px 28px 56px;
+}
+
+.topo-missao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+}
+
+.topo-missao__esquerda {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.topo-missao__textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.topo-missao__contexto {
+  color: var(--mudo);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.topo-missao__titulo {
+  font-size: clamp(22px, 2.3vw, 30px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.topo-missao__direita {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.xp-ganho {
+  position: absolute;
+  top: -30px;
+  right: 0;
+  padding: 3px 12px;
+  background: var(--amarelo);
+  border: var(--borda);
+  border-radius: 999px;
+  box-shadow: var(--sombra-sm);
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 500;
+  pointer-events: none;
+  animation: xp-subir 2s ease forwards;
+}
+
+@keyframes xp-subir {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.85);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.08);
+  }
+  30% {
+    transform: scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* ============ Checkpoints ============ */
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.passo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 8px 14px;
+  border: var(--borda);
+  border-radius: 12px;
+  background: var(--cartao);
+  color: var(--tinta);
+  text-align: left;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+}
+
+.passo:not(:disabled):hover {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--sombra-sm);
+}
+
+.passo--feito {
+  background: var(--lilas);
+}
+
+.passo--atual {
+  background: var(--amarelo);
+}
+
+.passo--bloqueado {
+  background: var(--listrado);
+  color: var(--mudo);
+  cursor: not-allowed;
+}
+
+.passo--selecionado,
+.passo--selecionado:not(:disabled):hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--sombra);
+}
+
+.passo .circulo {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.passo--feito .circulo {
+  background: var(--tinta);
+  color: var(--cartao);
+}
+
+.passo--bloqueado .circulo {
+  border-color: var(--mudo);
+  color: var(--mudo);
+}
+
+.passo__textos {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.passo__titulo {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.passo__sub {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* ============ Corpo ============ */
+.missao__corpo {
+  display: grid;
+  grid-template-columns: minmax(340px, 430px) minmax(0, 1fr);
+  align-items: start;
+  gap: 22px;
+}
+
+.missao__coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+@media (max-width: 1120px) {
+  .missao__corpo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 960px) {
+  .missao {
+    padding: 20px 16px 48px;
+  }
+}
+
+/* ============ Chamado ============ */
+.chamado {
+  overflow: hidden;
+}
+
+.chamado__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  height: 42px;
+  padding: 0 14px;
+  border-bottom: var(--borda);
+}
+
+.chamado__dataset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mudo);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.chamado__mensagens {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 14px;
+}
+
+.mensagem {
+  display: flex;
+  gap: 10px;
+}
+
+.mensagem__conteudo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mensagem__autor {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mensagem__autor span {
+  color: var(--mudo);
+  font-weight: 500;
+}
+
+.mensagem__balao {
+  padding: 10px 12px;
+  background: var(--papel);
+  border: var(--borda);
+  border-radius: 4px 14px 14px 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.mensagem__log {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--codigo-fundo);
+  color: var(--codigo-texto);
+  border: var(--borda);
+  border-radius: 4px 14px 14px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.mensagem__codigo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.mensagem__codigo .codigo {
+  width: 100%;
+  border-radius: 4px 14px 14px 14px;
+  font-size: 12px;
+}
+
+.avatar--pequeno {
+  width: 26px;
+  height: 26px;
+  font-size: 10px;
+}
+
+/* ============ Cartão do checkpoint ============ */
+.checkpoint {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+}
+
+.checkpoint__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.checkpoint__pergunta {
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  text-wrap: pretty;
+}
+
+.checkpoint__form {
+  display: flex;
+  gap: 10px;
+}
+
+.checkpoint__form .campo {
+  flex: 1;
+  min-width: 0;
+}
+
+.checkpoint__query {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.checkpoint__instrucao {
+  color: var(--texto-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.checkpoint__explicacao {
+  color: var(--tinta-2);
+  font-size: 14.5px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.checkpoint__proximo {
+  align-self: flex-start;
+}
+
+.dicas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 2px dashed var(--linha-suave);
+}
+
+.dica {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--lilas);
+  border: var(--borda);
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+  animation: surgir 0.2s ease;
+}
+
+.dica svg {
+  margin-top: 1px;
+}
+
+.dicas__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dicas__custo {
+  font-size: 11.5px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.solucao {
+  background: var(--papel);
+  border: var(--borda);
+  border-radius: 12px;
+}
+
+.solucao summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.solucao summary::-webkit-details-marker {
+  display: none;
+}
+
+.solucao[open] summary {
+  border-bottom: var(--borda);
+}
+
+.solucao__conteudo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+}
+
+.solucao .codigo {
+  width: 100%;
+  font-size: 12.5px;
+}
+
+/* ============ Modal e bloqueio ============ */
+.modal-trofeu {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin-bottom: 16px;
+  background: var(--amarelo);
+  border: var(--borda);
+  border-radius: 50%;
+  box-shadow: var(--sombra);
+  animation: surgir 0.3s ease;
+}
+
+.modal__corpo {
+  margin-top: 10px;
+  color: var(--tinta-2);
+  line-height: 1.5;
+}
+
+.modal__corpo > p + p {
+  margin-top: 8px;
+}
+
+.modal__proximo {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.bloqueio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 680px;
+  padding: 32px;
+  color: var(--tinta);
+}
+
+.bloqueio__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.bloqueio__nota {
+  color: var(--texto-2);
+  font-size: 14px;
+}

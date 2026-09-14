@@ -1,0 +1,45 @@
+{
+  "pages": [
+    { "id": "page-1", "name": "Querylab (direção C)" },
+    { "id": "page-2", "name": "Direções A e B (referência)" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Início", "page": "page-1" },
+    { "file": "MissoesTrilha.dc.html", "x": 1540, "y": 0, "w": 1440, "h": 900, "title": "Trilha", "page": "page-1" },
+    { "file": "MissoesTreinamento.dc.html", "x": 3080, "y": 0, "w": 1440, "h": 900, "title": "Treinamento (missão)", "page": "page-1" },
+    { "file": "MissoesCatalogo.dc.html", "x": 0, "y": 1080, "w": 1440, "h": 900, "title": "Catálogo de treinamentos", "page": "page-1" },
+    { "file": "MissoesSimulado.dc.html", "x": 1540, "y": 1080, "w": 1440, "h": 900, "title": "Simulado (modo prova)", "page": "page-1" },
+
+    { "file": "ConsoleTreinamento.dc.html", "x": 0, "y": 0, "w": 1440, "h": 900, "title": "A · Console — Treinamento", "page": "page-2" },
+    { "file": "ConsoleSimulado.dc.html", "x": 1540, "y": 0, "w": 1440, "h": 900, "title": "A · Console — Simulado", "page": "page-2" },
+    { "file": "CadernoTreinamento.dc.html", "x": 0, "y": 1080, "w": 1440, "h": 900, "title": "B · Caderno — Treinamento", "page": "page-2" },
+    { "file": "CadernoInicio.dc.html", "x": 1540, "y": 1080, "w": 1440, "h": 900, "title": "B · Caderno — Início", "page": "page-2" }
+  ],
+  "annotations": [
+    {
+      "id": "direcao-c",
+      "page": "page-1",
+      "x": -420, "y": 0, "w": 360,
+      "text": "Querylab — direção Missões\n\nFluxo: Início → Trilha → Treinamento (missão). O Catálogo lista todos os treinamentos com filtros; o Simulado abre em modo prova, com o menu recolhido.\n\nSistema de cores dos estados:\n• amarelo = atual / ação principal\n• lilás = concluído / recompensa\n• listrado cinza = bloqueado\n• preto = seleção atual\n\nBordas de 2px, sombras duras deslocadas, Bricolage Grotesque + DM Mono."
+    },
+    {
+      "id": "base-json",
+      "page": "page-1",
+      "x": 3080, "y": 1080, "w": 480,
+      "text": "Base em JSON (proposta para a direção C)\n\n/data/trilhas/qualidade-de-dados.json\n{ \"id\": \"qualidade-de-dados\", \"numero\": 4, \"titulo\": \"Qualidade de Dados\",\n  \"missoes\": [\"nulls-media\", \"pedidos-orfaos\", \"inc-07\", \"fuso-vendas\", \"clientes-cpf\", \"scd-tipo-2\"],\n  \"simulado_final\": \"sim-qualidade\" }\n\n/data/treinamentos/inc-07.json\n{\n  \"id\": \"inc-07\",\n  \"titulo\": \"A receita que dobrou da noite para o dia\",\n  \"tema\": \"qualidade-de-dados\",\n  \"dificuldade\": \"medio\",\n  \"duracao_min\": 35,\n  \"xp\": 150,\n  \"requer\": [\"pedidos-orfaos\"],\n  \"chamado\": [\n    { \"autor\": \"Marina\", \"area\": \"Financeiro\", \"texto\": \"O painel diz R$ 1,21 mi...\" },\n    { \"autor\": \"pipeline\", \"log\": [\"08:05 timeout -> retry automático\"] }\n  ],\n  \"dataset\": \"datasets/inc-07.sql\",\n  \"checkpoints\": [\n    { \"titulo\": \"Contar os duplicados\", \"tipo\": \"valor\", \"resposta\": 412, \"xp\": 50 },\n    { \"titulo\": \"Medir o estrago\", \"tipo\": \"valor\", \"resposta\": 187340.25, \"tolerancia\": 0.01, \"xp\": 50 },\n    { \"titulo\": \"Corrigir a receita\", \"tipo\": \"query\", \"gabarito_sql\": \"SELECT ...\", \"xp\": 50 }\n  ],\n  \"dicas\": [\"Olhe a coluna lote_carga\"]\n}\n\n/data/simulados/sim-03.json\n{ \"id\": \"sim-03\", \"titulo\": \"SQL Intermediário\", \"tempo_min\": 45, \"nota_minima\": 70, \"xp_por_acerto\": 10,\n  \"questoes\": [ { \"tema\": \"joins\", \"enunciado\": \"...\", \"alternativas\": [\"...\"], \"correta\": 1, \"explicacao\": \"...\" } ] }\n\nConteúdo (JSON) e progresso do aluno (XP, sequência, missões concluídas) ficam separados; no começo o progresso pode morar no navegador."
+    },
+    {
+      "id": "direcao-a",
+      "page": "page-2",
+      "x": -420, "y": 0, "w": 360,
+      "text": "Direção A — Console de Incidentes (não escolhida)\n\nEscuro, denso, cara de sala de operações: cada treinamento é um chamado aberto com log do pipeline, editor e resultado lado a lado. JetBrains Mono + IBM Plex Sans, verde e âmbar.\n\nPró: aguenta muita informação na tela.\n\nContra: cansa em leituras longas e pode intimidar quem está começando."
+    },
+    {
+      "id": "direcao-b",
+      "page": "page-2",
+      "x": -420, "y": 1080, "w": 360,
+      "text": "Direção B — Caderno de Estudos (não escolhida)\n\nClaro, calmo, editorial: o caso se lê como um exercício de livro, com nota de margem para a dica e tabelas em estilo de publicação. Newsreader + Instrument Sans, azul-tinta e terracota.\n\nPró: ótima para sessões longas e estudo com foco.\n\nContra: menos cara de jogo; a sensação de desafio depende mais do texto de cada caso."
+    }
+  ],
+  "launch": { "view": "canvas", "page": "page-1" }
+}

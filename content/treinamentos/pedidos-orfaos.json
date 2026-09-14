@@ -1,0 +1,68 @@
+{
+  "id": "pedidos-orfaos",
+  "titulo": "Pedidos sem cliente depois da migração",
+  "resumo": "Desde a troca do CRM, a receita por estado não bate com o total do mês.",
+  "tema": "joins",
+  "dificuldade": "medio",
+  "duracao_min": 30,
+  "dataset": "migracao-crm.sql",
+  "publicado_em": "2026-09-08",
+  "chamado": [
+    {
+      "autor": "Diego",
+      "papel": "Controladoria",
+      "texto": "Fechando agosto: o total de pedidos pagos dá R$ 199.395,00, mas o relatório de receita por estado soma só R$ 176.922,45. Ninguém mexeu no relatório. A única mudança foi a migração do CRM em 31/07."
+    },
+    {
+      "autor": "relatorio_por_estado",
+      "papel": "consulta do relatório",
+      "codigo": "SELECT c.uf, SUM(p.valor_total) AS receita\nFROM pedidos p\nJOIN clientes c ON c.cliente_id = p.cliente_id\nWHERE p.status = 'pago'\nGROUP BY c.uf;"
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "O cadastro do sistema antigo continua disponível só para consulta, na tabela clientes_legado."
+    }
+  ],
+  "consulta_inicial": "SELECT\n  (SELECT COUNT(*) FROM clientes_legado) AS clientes_antigos,\n  (SELECT COUNT(*) FROM clientes) AS clientes_crm_novo;",
+  "checkpoints": [
+    {
+      "titulo": "Encontrar os órfãos",
+      "pergunta": "Quantos pedidos (de qualquer status) não encontram cliente correspondente na tabela clientes?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM pedidos p LEFT JOIN clientes c ON c.cliente_id = p.cliente_id WHERE c.cliente_id IS NULL",
+      "xp": 40,
+      "dicas": [
+        "O JOIN do relatório esconde essas linhas. Troque por LEFT JOIN e procure onde o lado de clientes ficou vazio.",
+        "Depois do LEFT JOIN, filtre com WHERE c.cliente_id IS NULL."
+      ],
+      "explicacao": "O LEFT JOIN mantém todos os pedidos, mesmo sem par em clientes; nesses casos as colunas de clientes vêm NULL. É o jeito clássico de auditar chaves que não batem."
+    },
+    {
+      "titulo": "Medir o sumiço",
+      "pergunta": "Quanto de receita PAGA some do relatório por estado por causa desses pedidos?",
+      "tipo": "valor",
+      "unidade": "R$",
+      "tolerancia": 0.01,
+      "resposta_sql": "SELECT SUM(p.valor_total) FROM pedidos p LEFT JOIN clientes c ON c.cliente_id = p.cliente_id WHERE c.cliente_id IS NULL AND p.status = 'pago'",
+      "xp": 50,
+      "dicas": [
+        "Use a consulta do checkpoint anterior, somando valor_total e filtrando status = 'pago'.",
+        "Confira se o valor explica toda a diferença entre o total do mês e o relatório."
+      ],
+      "explicacao": "A soma dos pedidos órfãos pagos é exatamente a diferença entre o total do mês e o relatório. O dinheiro não sumiu: o INNER JOIN descartou as linhas."
+    },
+    {
+      "titulo": "Descobrir a causa",
+      "pergunta": "Liste cliente_id, nome, email e qtd_pedidos dos clientes que têm pedidos mas não existem na tabela clientes. Busque nome e email em clientes_legado.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT l.cliente_id,\n       l.nome,\n       l.email,\n       COUNT(*) AS qtd_pedidos\nFROM pedidos p\nJOIN clientes_legado l ON l.cliente_id = p.cliente_id\nLEFT JOIN clientes c ON c.cliente_id = p.cliente_id\nWHERE c.cliente_id IS NULL\nGROUP BY l.cliente_id, l.nome, l.email;",
+      "xp": 70,
+      "dicas": [
+        "Junte pedidos com clientes_legado para buscar nome e email, e mantenha o LEFT JOIN com clientes.",
+        "Olhe com atenção a coluna email do resultado."
+      ],
+      "explicacao": "Todos os clientes perdidos tinham email vazio no sistema antigo: a migração copiou só quem tinha email (WHERE email IS NOT NULL). Toda migração merece uma auditoria com LEFT JOIN ou NOT EXISTS comparando origem e destino."
+    }
+  ]
+}

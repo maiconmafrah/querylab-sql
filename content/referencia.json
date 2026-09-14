@@ -1,0 +1,260 @@
+[
+  {
+    "id": "consultas",
+    "titulo": "Consultas básicas",
+    "entradas": [
+      {
+        "id": "select",
+        "titulo": "SELECT e FROM",
+        "descricao": "Escolhe as colunas que você quer ver e a tabela de onde elas vêm.",
+        "sintaxe": "SELECT coluna1, coluna2\nFROM tabela;",
+        "exemplo": "SELECT nome, cidade, uf\nFROM clientes;",
+        "dica": "SELECT * traz todas as colunas: ótimo para explorar, ruim para relatórios."
+      },
+      {
+        "id": "where",
+        "titulo": "WHERE",
+        "descricao": "Filtra as linhas antes de qualquer agrupamento ou ordenação.",
+        "sintaxe": "SELECT colunas\nFROM tabela\nWHERE condicao;",
+        "exemplo": "SELECT pedido_id, valor_total\nFROM pedidos\nWHERE status = 'pago'\n  AND valor_total > 1000;",
+        "dica": "AND tem prioridade sobre OR. Use parênteses para deixar a intenção clara."
+      },
+      {
+        "id": "order-by-limit",
+        "titulo": "ORDER BY e LIMIT",
+        "descricao": "Ordena o resultado (ASC crescente, DESC decrescente) e corta nas primeiras linhas.",
+        "sintaxe": "SELECT colunas\nFROM tabela\nORDER BY coluna DESC\nLIMIT n;",
+        "exemplo": "SELECT nome, preco\nFROM produtos\nORDER BY preco DESC\nLIMIT 5;"
+      },
+      {
+        "id": "in-between-like",
+        "titulo": "IN, BETWEEN e LIKE",
+        "descricao": "Atalhos de filtro: lista de valores, faixa de valores e padrão de texto.",
+        "sintaxe": "WHERE coluna IN ('a', 'b')\n  AND valor BETWEEN 10 AND 20\n  AND nome LIKE 'Ana%'",
+        "exemplo": "SELECT nome, uf\nFROM clientes\nWHERE uf IN ('SP', 'RJ')\n  AND nome LIKE 'A%';",
+        "dica": "BETWEEN inclui as duas pontas. No LIKE, % representa qualquer sequência de caracteres e _ um único caractere."
+      },
+      {
+        "id": "distinct",
+        "titulo": "DISTINCT",
+        "descricao": "Remove linhas repetidas do resultado.",
+        "sintaxe": "SELECT DISTINCT coluna\nFROM tabela;",
+        "exemplo": "SELECT DISTINCT categoria\nFROM produtos;"
+      },
+      {
+        "id": "case-when",
+        "titulo": "CASE WHEN",
+        "descricao": "Cria valores condicionais, como um se/senão dentro da consulta.",
+        "sintaxe": "CASE WHEN condicao THEN valor\n     WHEN outra THEN outro\n     ELSE padrao END",
+        "exemplo": "SELECT pedido_id,\n       valor_total,\n       CASE WHEN valor_total >= 1000 THEN 'grande'\n            WHEN valor_total >= 300 THEN 'médio'\n            ELSE 'pequeno' END AS porte\nFROM pedidos\nLIMIT 10;"
+      }
+    ]
+  },
+  {
+    "id": "agregacoes",
+    "titulo": "Agregações",
+    "entradas": [
+      {
+        "id": "funcoes-agregacao",
+        "titulo": "COUNT, SUM, AVG, MIN e MAX",
+        "descricao": "Resumem várias linhas em um único valor.",
+        "sintaxe": "SELECT COUNT(*), SUM(coluna), AVG(coluna), MIN(coluna), MAX(coluna)\nFROM tabela;",
+        "exemplo": "SELECT COUNT(*) AS pedidos,\n       SUM(valor_total) AS total,\n       ROUND(AVG(valor_total), 2) AS ticket_medio\nFROM pedidos\nWHERE status = 'pago';",
+        "dica": "COUNT(coluna) ignora NULLs; COUNT(*) conta todas as linhas."
+      },
+      {
+        "id": "group-by",
+        "titulo": "GROUP BY",
+        "descricao": "Divide as linhas em grupos e aplica as agregações em cada grupo.",
+        "sintaxe": "SELECT coluna, COUNT(*)\nFROM tabela\nGROUP BY coluna;",
+        "exemplo": "SELECT categoria, COUNT(*) AS produtos\nFROM produtos\nGROUP BY categoria;",
+        "dica": "Toda coluna do SELECT que não está dentro de uma agregação precisa estar no GROUP BY."
+      },
+      {
+        "id": "having",
+        "titulo": "HAVING",
+        "descricao": "Filtra grupos depois da agregação. É o WHERE dos grupos.",
+        "sintaxe": "SELECT coluna, COUNT(*)\nFROM tabela\nGROUP BY coluna\nHAVING COUNT(*) > n;",
+        "exemplo": "SELECT cliente_id, COUNT(*) AS pedidos\nFROM pedidos\nGROUP BY cliente_id\nHAVING COUNT(*) >= 20;"
+      },
+      {
+        "id": "filter",
+        "titulo": "FILTER (agregação condicional)",
+        "descricao": "Aplica a agregação só às linhas que atendem a uma condição.",
+        "sintaxe": "COUNT(*) FILTER (WHERE condicao)",
+        "exemplo": "SELECT COUNT(*) FILTER (WHERE status = 'pago') AS pagos,\n       COUNT(*) FILTER (WHERE status = 'cancelado') AS cancelados\nFROM pedidos;",
+        "dica": "Em bancos sem FILTER, use SUM(CASE WHEN condicao THEN 1 ELSE 0 END)."
+      }
+    ]
+  },
+  {
+    "id": "joins",
+    "titulo": "Joins",
+    "entradas": [
+      {
+        "id": "inner-join",
+        "titulo": "INNER JOIN",
+        "descricao": "Combina linhas de duas tabelas que têm par na condição. Quem não tem par fica de fora.",
+        "sintaxe": "SELECT a.coluna, b.coluna\nFROM tabela_a a\nJOIN tabela_b b ON b.chave = a.chave;",
+        "exemplo": "SELECT p.pedido_id, c.nome, p.valor_total\nFROM pedidos p\nJOIN clientes c ON c.cliente_id = p.cliente_id\nLIMIT 10;"
+      },
+      {
+        "id": "left-join",
+        "titulo": "LEFT JOIN",
+        "descricao": "Mantém todas as linhas da tabela da esquerda. Sem par, as colunas da direita vêm NULL.",
+        "sintaxe": "SELECT a.coluna, b.coluna\nFROM tabela_a a\nLEFT JOIN tabela_b b ON b.chave = a.chave;",
+        "exemplo": "SELECT c.nome, COUNT(p.pedido_id) AS pedidos\nFROM clientes c\nLEFT JOIN pedidos p ON p.cliente_id = c.cliente_id\nGROUP BY c.nome\nORDER BY pedidos;",
+        "dica": "Conte uma coluna do lado direito, como COUNT(p.pedido_id), para quem não tem par aparecer com 0."
+      },
+      {
+        "id": "anti-join",
+        "titulo": "Anti-join: o que não tem par",
+        "descricao": "Encontra linhas de uma tabela sem correspondência na outra.",
+        "sintaxe": "SELECT a.*\nFROM tabela_a a\nWHERE NOT EXISTS (\n  SELECT 1 FROM tabela_b b WHERE b.chave = a.chave\n);",
+        "exemplo": "SELECT c.nome\nFROM clientes c\nWHERE NOT EXISTS (\n  SELECT 1 FROM pedidos p WHERE p.cliente_id = c.cliente_id\n);",
+        "dica": "Evite NOT IN com subconsultas que podem ter NULL: o resultado volta vazio."
+      },
+      {
+        "id": "union",
+        "titulo": "UNION e UNION ALL",
+        "descricao": "Empilha resultados de consultas com as mesmas colunas.",
+        "sintaxe": "SELECT colunas FROM tabela_a\nUNION ALL\nSELECT colunas FROM tabela_b;",
+        "exemplo": "SELECT nome, 'cliente' AS tipo FROM clientes WHERE uf = 'PE'\nUNION ALL\nSELECT nome, 'produto' FROM produtos WHERE categoria = 'Livros';",
+        "dica": "UNION remove linhas duplicadas; UNION ALL mantém tudo e é mais rápido."
+      }
+    ]
+  },
+  {
+    "id": "nulls",
+    "titulo": "NULLs",
+    "entradas": [
+      {
+        "id": "is-null",
+        "titulo": "IS NULL e IS NOT NULL",
+        "descricao": "Testa se um valor está ausente. Comparações com = NULL nunca são verdadeiras.",
+        "sintaxe": "WHERE coluna IS NULL",
+        "exemplo": "SELECT nome\nFROM clientes\nWHERE email IS NULL;"
+      },
+      {
+        "id": "coalesce",
+        "titulo": "COALESCE",
+        "descricao": "Devolve o primeiro argumento que não é NULL.",
+        "sintaxe": "COALESCE(coluna, valor_padrao)",
+        "exemplo": "SELECT nome, COALESCE(email, 'sem email') AS contato\nFROM clientes;",
+        "dica": "Cuidado com COALESCE(x, 0) dentro de médias: o zero entra na conta."
+      },
+      {
+        "id": "nullif",
+        "titulo": "NULLIF",
+        "descricao": "Transforma um valor em NULL. Muito usado para evitar divisão por zero.",
+        "sintaxe": "valor / NULLIF(divisor, 0)",
+        "exemplo": "SELECT categoria,\n       SUM(preco) / NULLIF(COUNT(*), 0) AS preco_medio\nFROM produtos\nGROUP BY categoria;"
+      }
+    ]
+  },
+  {
+    "id": "datas",
+    "titulo": "Datas e horas",
+    "entradas": [
+      {
+        "id": "cast-date",
+        "titulo": "CAST(... AS DATE)",
+        "descricao": "Descarta a hora de um TIMESTAMP para agrupar ou comparar por dia.",
+        "sintaxe": "CAST(coluna AS DATE)",
+        "exemplo": "SELECT CAST(criado_em AS DATE) AS dia, COUNT(*) AS pedidos\nFROM pedidos\nGROUP BY 1\nORDER BY 1\nLIMIT 10;"
+      },
+      {
+        "id": "date-trunc",
+        "titulo": "DATE_TRUNC",
+        "descricao": "Arredonda a data para o início do período (dia, semana, mês, ano).",
+        "sintaxe": "DATE_TRUNC('month', coluna)",
+        "exemplo": "SELECT DATE_TRUNC('month', criado_em) AS mes, SUM(valor_total) AS receita\nFROM pedidos\nGROUP BY 1\nORDER BY 1;"
+      },
+      {
+        "id": "extract",
+        "titulo": "EXTRACT",
+        "descricao": "Pega uma parte da data: ano, mês, dia, hora, dia da semana.",
+        "sintaxe": "EXTRACT(hour FROM coluna)",
+        "exemplo": "SELECT EXTRACT(hour FROM criado_em) AS hora, COUNT(*) AS pedidos\nFROM pedidos\nGROUP BY 1\nORDER BY 1;"
+      },
+      {
+        "id": "intervalos",
+        "titulo": "Intervalos e diferenças",
+        "descricao": "Soma períodos a uma data e calcula a distância entre duas datas.",
+        "sintaxe": "coluna + INTERVAL 7 DAY\nDATE_DIFF('day', inicio, fim)",
+        "exemplo": "SELECT pedido_id,\n       criado_em,\n       criado_em + INTERVAL 7 DAY AS prazo_entrega,\n       DATE_DIFF('day', DATE '2026-06-01', criado_em) AS dias_desde_junho\nFROM pedidos\nLIMIT 5;"
+      },
+      {
+        "id": "strftime",
+        "titulo": "strftime",
+        "descricao": "Formata a data como texto no padrão que você quiser.",
+        "sintaxe": "strftime(coluna, '%d/%m/%Y')",
+        "exemplo": "SELECT strftime(criado_em, '%d/%m/%Y %H:%M') AS quando\nFROM pedidos\nLIMIT 5;",
+        "dica": "Formate só na hora de exibir. Para filtrar e ordenar, mantenha o tipo data."
+      }
+    ]
+  },
+  {
+    "id": "subqueries",
+    "titulo": "Subqueries e CTEs",
+    "entradas": [
+      {
+        "id": "subquery-where",
+        "titulo": "Subquery no WHERE",
+        "descricao": "Usa o resultado de outra consulta como valor de comparação.",
+        "sintaxe": "WHERE coluna > (SELECT AVG(coluna) FROM tabela)",
+        "exemplo": "SELECT nome, preco\nFROM produtos\nWHERE preco > (SELECT AVG(preco) FROM produtos);"
+      },
+      {
+        "id": "subquery-from",
+        "titulo": "Subquery no FROM",
+        "descricao": "Trata o resultado de uma consulta como se fosse uma tabela.",
+        "sintaxe": "SELECT ...\nFROM (SELECT ... ) AS apelido;",
+        "exemplo": "SELECT AVG(qtd) AS media_itens\nFROM (\n  SELECT pedido_id, COUNT(*) AS qtd\n  FROM itens_pedido\n  GROUP BY pedido_id\n) AS por_pedido;"
+      },
+      {
+        "id": "cte",
+        "titulo": "CTE (WITH)",
+        "descricao": "Dá nome a um passo intermediário. Deixa consultas longas legíveis.",
+        "sintaxe": "WITH passo AS (\n  SELECT ...\n)\nSELECT ... FROM passo;",
+        "exemplo": "WITH receita_cliente AS (\n  SELECT cliente_id, SUM(valor_total) AS receita\n  FROM pedidos\n  WHERE status = 'pago'\n  GROUP BY cliente_id\n)\nSELECT c.nome, r.receita\nFROM receita_cliente r\nJOIN clientes c ON c.cliente_id = r.cliente_id\nORDER BY r.receita DESC\nLIMIT 5;"
+      }
+    ]
+  },
+  {
+    "id": "window-functions",
+    "titulo": "Window functions",
+    "entradas": [
+      {
+        "id": "ranking",
+        "titulo": "ROW_NUMBER, RANK e DENSE_RANK",
+        "descricao": "Numeram as linhas dentro de cada partição, sem agrupar o resultado.",
+        "sintaxe": "RANK() OVER (PARTITION BY grupo ORDER BY coluna DESC)",
+        "exemplo": "SELECT nome, categoria, preco,\n       RANK() OVER (PARTITION BY categoria ORDER BY preco DESC) AS posicao\nFROM produtos;",
+        "dica": "Com empate, ROW_NUMBER dá 1, 2; RANK dá 1, 1, 3; DENSE_RANK dá 1, 1, 2."
+      },
+      {
+        "id": "soma-acumulada",
+        "titulo": "Soma acumulada",
+        "descricao": "SUM com OVER e ORDER BY acumula o valor linha a linha.",
+        "sintaxe": "SUM(coluna) OVER (ORDER BY data)",
+        "exemplo": "SELECT CAST(criado_em AS DATE) AS dia,\n       SUM(valor_total) AS receita,\n       SUM(SUM(valor_total)) OVER (ORDER BY CAST(criado_em AS DATE)) AS acumulado\nFROM pedidos\nWHERE status = 'pago'\nGROUP BY 1\nORDER BY 1;"
+      },
+      {
+        "id": "lag-lead",
+        "titulo": "LAG e LEAD",
+        "descricao": "Acessam o valor da linha anterior ou da próxima, ótimos para comparar períodos.",
+        "sintaxe": "valor - LAG(valor) OVER (ORDER BY periodo)",
+        "exemplo": "WITH mensal AS (\n  SELECT DATE_TRUNC('month', criado_em) AS mes, SUM(valor_total) AS receita\n  FROM pedidos\n  WHERE status = 'pago'\n  GROUP BY 1\n)\nSELECT mes, receita,\n       receita - LAG(receita) OVER (ORDER BY mes) AS variacao\nFROM mensal\nORDER BY mes;"
+      },
+      {
+        "id": "qualify",
+        "titulo": "QUALIFY",
+        "descricao": "Filtra pelo resultado de uma window function, sem precisar de subquery.",
+        "sintaxe": "SELECT ...\nFROM tabela\nQUALIFY ROW_NUMBER() OVER (...) = 1;",
+        "exemplo": "SELECT categoria, nome, preco\nFROM produtos\nQUALIFY ROW_NUMBER() OVER (PARTITION BY categoria ORDER BY preco DESC) = 1;",
+        "dica": "QUALIFY existe no DuckDB, no Snowflake e no BigQuery. Em outros bancos, calcule a janela numa CTE e filtre na consulta de fora."
+      }
+    ]
+  }
+]

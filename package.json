@@ -1,0 +1,41 @@
+{
+  "name": "querylab",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Plataforma para treinar SQL resolvendo incidentes reais de dados.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "abrir": "node scripts/abrir-site.ts",
+    "test": "vitest run",
+    "validar": "node scripts/validar-conteudo.ts"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.20.3",
+    "@codemirror/commands": "^6.11.0",
+    "@codemirror/lang-sql": "^6.10.0",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/state": "^6.7.4",
+    "@codemirror/view": "^6.43.11",
+    "@duckdb/duckdb-wasm": "^1.33.1-dev57.0",
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource/dm-mono": "^5.3.0",
+    "@lezer/highlight": "^1.2.3",
+    "apache-arrow": "^17.0.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.3"
+  },
+  "devDependencies": {
+    "@duckdb/node-api": "^1.5.5-r.5",
+    "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.0"
+  }
+}

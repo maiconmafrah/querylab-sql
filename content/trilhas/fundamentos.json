@@ -1,0 +1,8 @@
+{
+  "id": "fundamentos",
+  "numero": 1,
+  "titulo": "Fundamentos de SQL",
+  "descricao": "SELECT, filtros, ordenação, agregações e o primeiro JOIN, atendendo pedidos reais do time comercial de uma loja on-line.",
+  "missoes": ["relatorio-de-ontem", "painel-de-status", "mais-vendidos"],
+  "simulado_final": "sql-fundamentos"
+}

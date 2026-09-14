@@ -1,0 +1,76 @@
+{
+  "id": "receita-dobrada",
+  "titulo": "A receita que dobrou da noite para o dia",
+  "resumo": "O painel financeiro mostra o dobro da receita de um dia normal, e ninguém mexeu no dashboard.",
+  "tema": "qualidade-de-dados",
+  "dificuldade": "medio",
+  "duracao_min": 35,
+  "dataset": "cargas-pedidos.sql",
+  "publicado_em": "2026-09-12",
+  "chamado": [
+    {
+      "autor": "Marina",
+      "papel": "Financeiro",
+      "texto": "Bom dia! O painel diz que vendemos R$ 554 mil ontem, 12/09. Seria ótimo, mas a nossa média é de uns R$ 275 mil por dia. Ninguém mexeu no dashboard. Consegue descobrir o que houve?"
+    },
+    {
+      "autor": "pipeline",
+      "papel": "carga_pedidos",
+      "log": [
+        "08:02  lote 3391 iniciado",
+        "08:05  timeout ao confirmar a escrita",
+        "08:05  retry automático: lote 3391-r",
+        "08:07  lote 3391-r concluído",
+        "08:19  painel_financeiro atualizado"
+      ]
+    },
+    {
+      "autor": "painel_financeiro",
+      "papel": "consulta do painel",
+      "codigo": "SELECT CAST(criado_em AS DATE) AS dia,\n       SUM(valor) AS receita\nFROM pedidos\nGROUP BY 1\nORDER BY 1;"
+    }
+  ],
+  "consulta_inicial": "SELECT lote_carga, COUNT(*) AS linhas\nFROM pedidos\nGROUP BY lote_carga\nORDER BY lote_carga;",
+  "checkpoints": [
+    {
+      "titulo": "Contar os duplicados",
+      "pergunta": "Quantos pedido_id aparecem mais de uma vez na tabela pedidos?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM (SELECT pedido_id FROM pedidos GROUP BY pedido_id HAVING COUNT(*) > 1)",
+      "xp": 50,
+      "dicas": [
+        "Agrupe por pedido_id e fique só com os grupos que têm COUNT(*) > 1.",
+        "Para contar quantos grupos sobraram, coloque a consulta dentro de outra: SELECT COUNT(*) FROM (...)."
+      ],
+      "explicacao": "GROUP BY pedido_id + HAVING COUNT(*) > 1 é o teste padrão de duplicidade. Rode esse teste em qualquer tabela que deveria ter uma linha por chave."
+    },
+    {
+      "titulo": "Medir o estrago",
+      "pergunta": "Quanto de receita foi somado a mais por causa das cópias?",
+      "tipo": "valor",
+      "unidade": "R$",
+      "tolerancia": 0.01,
+      "resposta_sql": "SELECT SUM(valor) - (SELECT SUM(valor) FROM (SELECT DISTINCT pedido_id, valor FROM pedidos)) FROM pedidos",
+      "xp": 50,
+      "dicas": [
+        "Receita inflada = soma de todas as linhas − soma contando cada pedido uma vez só.",
+        "SELECT DISTINCT pedido_id, valor elimina as cópias idênticas."
+      ],
+      "explicacao": "As cópias são idênticas ao original (menos o lote), então DISTINCT sobre pedido_id e valor remove a duplicidade. A diferença é o valor inflado no painel."
+    },
+    {
+      "titulo": "Corrigir a receita",
+      "pergunta": "Escreva a receita diária corrigida: dia (data) e receita (soma de valor contando cada pedido_id uma vez), em ordem cronológica.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "tolerancia": 0.01,
+      "gabarito_sql": "WITH pedidos_unicos AS (\n  SELECT DISTINCT pedido_id, valor, criado_em\n  FROM pedidos\n)\nSELECT CAST(criado_em AS DATE) AS dia,\n       SUM(valor) AS receita\nFROM pedidos_unicos\nGROUP BY 1\nORDER BY 1;",
+      "xp": 70,
+      "dicas": [
+        "Remova as cópias primeiro (com DISTINCT) e só depois agrupe por dia.",
+        "Uma CTE deixa a consulta legível: WITH pedidos_unicos AS (SELECT DISTINCT ...) SELECT ... FROM pedidos_unicos."
+      ],
+      "explicacao": "O retry regravou o lote inteiro, e a tabela não tem chave primária para barrar pedido_id repetido. Corrigir o dado é metade do trabalho: o job de carga precisa ser idempotente, apagando o lote antes de regravar ou usando INSERT ... ON CONFLICT DO NOTHING."
+    }
+  ]
+}

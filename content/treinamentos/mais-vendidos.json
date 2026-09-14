@@ -1,0 +1,64 @@
+{
+  "id": "mais-vendidos",
+  "titulo": "A vitrine de mais vendidos",
+  "resumo": "O marketing vai refazer a vitrine da home e precisa saber o que realmente vende.",
+  "tema": "joins",
+  "dificuldade": "medio",
+  "duracao_min": 25,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-03",
+  "chamado": [
+    {
+      "autor": "Bruno",
+      "papel": "Marketing",
+      "texto": "Vamos refazer a vitrine \"Mais vendidos\" da home. Quero saber quais produtos mais saem e qual categoria traz mais receita. Ah, e só vale pedido pago!"
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "Cada linha de itens_pedido é um produto dentro de um pedido, com quantidade e preco_unitario. O status fica em pedidos; o nome e a categoria ficam em produtos."
+    }
+  ],
+  "consulta_inicial": "-- Veja como um pedido se abre em itens\nSELECT *\nFROM itens_pedido\nWHERE pedido_id = 2;",
+  "checkpoints": [
+    {
+      "titulo": "O campeão de vendas",
+      "pergunta": "Qual é o nome do produto com mais unidades vendidas (soma de quantidade) em pedidos pagos?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT pr.nome FROM itens_pedido i JOIN pedidos p ON p.pedido_id = i.pedido_id JOIN produtos pr ON pr.produto_id = i.produto_id WHERE p.status = 'pago' GROUP BY pr.nome ORDER BY SUM(i.quantidade) DESC LIMIT 1",
+      "xp": 50,
+      "dicas": [
+        "Você precisa de três tabelas: itens_pedido (quantidade), pedidos (status) e produtos (nome).",
+        "JOIN pedidos p ON p.pedido_id = i.pedido_id liga cada item ao seu pedido."
+      ],
+      "explicacao": "O JOIN traz o status do pedido e o nome do produto para cada item. Depois é só agrupar por produto, somar a quantidade e ordenar do maior para o menor."
+    },
+    {
+      "titulo": "Receita por categoria",
+      "pergunta": "Mostre categoria e receita (soma de quantidade × preco_unitario) em pedidos pagos, da maior receita para a menor.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "tolerancia": 0.01,
+      "gabarito_sql": "SELECT pr.categoria,\n       SUM(i.quantidade * i.preco_unitario) AS receita\nFROM itens_pedido i\nJOIN pedidos p ON p.pedido_id = i.pedido_id\nJOIN produtos pr ON pr.produto_id = i.produto_id\nWHERE p.status = 'pago'\nGROUP BY pr.categoria\nORDER BY receita DESC;",
+      "xp": 60,
+      "dicas": [
+        "Dá para agregar uma expressão: SUM(i.quantidade * i.preco_unitario).",
+        "Você pode ordenar pelo apelido da coluna: ORDER BY receita DESC."
+      ],
+      "explicacao": "A receita de cada item é quantidade × preço. Somando por categoria, Eletrônicos lidera com folga, mesmo sem ter o produto mais vendido."
+    },
+    {
+      "titulo": "Montar a vitrine",
+      "pergunta": "Liste os 5 produtos com mais unidades vendidas em pedidos pagos: nome, categoria e unidades, do maior para o menor.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT pr.nome,\n       pr.categoria,\n       SUM(i.quantidade) AS unidades\nFROM itens_pedido i\nJOIN pedidos p ON p.pedido_id = i.pedido_id\nJOIN produtos pr ON pr.produto_id = i.produto_id\nWHERE p.status = 'pago'\nGROUP BY pr.nome, pr.categoria\nORDER BY unidades DESC\nLIMIT 5;",
+      "xp": 70,
+      "dicas": [
+        "É a consulta do primeiro checkpoint com mais uma coluna e LIMIT 5.",
+        "Coloque nome e categoria no GROUP BY."
+      ],
+      "explicacao": "Com JOIN, GROUP BY, ORDER BY e LIMIT você monta praticamente qualquer ranking. Guarde esse formato: ele aparece em muito relatório."
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "id": "sql-intermediario",
+  "numero": 2,
+  "titulo": "SQL Intermediário",
+  "descricao": "Joins, NULLs, datas, CTEs e window functions. As três últimas questões são para escrever a consulta.",
+  "dificuldade": "medio",
+  "tempo_min": 40,
+  "nota_minima": 70,
+  "xp_por_acerto": 15,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-10",
+  "questoes": [
+    {
+      "id": "nunca-compraram",
+      "tipo": "multipla",
+      "tema": "joins",
+      "enunciado": "Você precisa listar os clientes que nunca fizeram um pedido. A coluna pedidos.cliente_id aceita NULL (compras de convidados). Qual consulta devolve o resultado correto?",
+      "formato_alternativas": "codigo",
+      "alternativas": [
+        "SELECT c.nome FROM clientes c\nWHERE c.cliente_id NOT IN (SELECT cliente_id FROM pedidos);",
+        "SELECT c.nome FROM clientes c\nLEFT JOIN pedidos p ON p.cliente_id = c.cliente_id\nWHERE p.pedido_id IS NULL;",
+        "SELECT c.nome FROM clientes c\nJOIN pedidos p ON p.cliente_id = c.cliente_id\nWHERE p.cliente_id IS NULL;",
+        "SELECT c.nome FROM clientes c\nLEFT JOIN pedidos p ON p.cliente_id = c.cliente_id\n                   AND p.pedido_id IS NULL;"
+      ],
+      "correta": 1,
+      "explicacao": "Com um NULL na subconsulta, NOT IN nunca é verdadeiro e a alternativa A volta vazia. A C usa INNER JOIN, que já descarta quem não tem pedido. A D põe o filtro no ON e devolve todos os clientes. O LEFT JOIN com WHERE p.pedido_id IS NULL é o anti-join correto."
+    },
+    {
+      "id": "row-number-rank",
+      "tipo": "multipla",
+      "tema": "window-functions",
+      "enunciado": "Qual é a diferença entre ROW_NUMBER() e RANK() quando há empate na ordenação?",
+      "alternativas": [
+        "ROW_NUMBER numera 1, 2, 3 mesmo com empate; RANK repete a posição e pula a seguinte (1, 1, 3).",
+        "Nenhuma: RANK é só outro nome para ROW_NUMBER.",
+        "RANK numera 1, 2, 3 mesmo com empate; ROW_NUMBER repete a posição (1, 1, 2).",
+        "RANK não aceita ORDER BY dentro do OVER."
+      ],
+      "correta": 0,
+      "explicacao": "ROW_NUMBER sempre dá números únicos (o desempate é arbitrário). RANK dá a mesma posição aos empatados e pula as seguintes; DENSE_RANK repete sem pular (1, 1, 2)."
+    },
+    {
+      "id": "vantagem-cte",
+      "tipo": "multipla",
+      "tema": "subqueries",
+      "enunciado": "Qual é a principal vantagem de escrever uma CTE (WITH nome AS (...))?",
+      "alternativas": [
+        "Dar nome a um passo intermediário, deixando a consulta mais legível e reaproveitável dentro dela mesma",
+        "Criar uma tabela permanente no banco",
+        "Deixar a consulta sempre mais rápida do que uma subquery",
+        "Permitir window functions, que não funcionam em subqueries"
+      ],
+      "correta": 0,
+      "explicacao": "A CTE existe só durante a consulta. O ganho principal é organização: cada passo ganha um nome e pode ser referenciado mais de uma vez."
+    },
+    {
+      "id": "coalesce",
+      "tipo": "multipla",
+      "tema": "nulls",
+      "enunciado": "O que retorna o comando abaixo?",
+      "codigo": "SELECT COALESCE(NULL, 0, 5);",
+      "alternativas": ["NULL", "0", "5", "Erro: COALESCE aceita só dois argumentos"],
+      "correta": 1,
+      "explicacao": "COALESCE devolve o primeiro argumento não nulo, da esquerda para a direita. Zero não é nulo, então o resultado é 0."
+    },
+    {
+      "id": "agrupar-mes",
+      "tipo": "multipla",
+      "tema": "datas",
+      "enunciado": "Qual expressão agrupa pedidos por mês sem misturar anos diferentes?",
+      "formato_alternativas": "codigo",
+      "alternativas": [
+        "DATE_TRUNC('month', criado_em)",
+        "EXTRACT(month FROM criado_em)",
+        "CAST(criado_em AS DATE)",
+        "DATE_TRUNC('day', criado_em)"
+      ],
+      "correta": 0,
+      "explicacao": "DATE_TRUNC('month', ...) leva cada data para o primeiro dia do mês, mantendo o ano. EXTRACT(month ...) devolve só o número do mês e juntaria janeiro de 2025 com janeiro de 2026."
+    },
+    {
+      "id": "soma-acumulada",
+      "tipo": "multipla",
+      "tema": "window-functions",
+      "enunciado": "O que a expressão abaixo calcula em cada linha de pedidos?",
+      "codigo": "SUM(valor_total) OVER (PARTITION BY cliente_id ORDER BY criado_em)",
+      "alternativas": [
+        "O total acumulado de cada cliente, pedido a pedido, ao longo do tempo",
+        "O total geral de todos os pedidos da tabela",
+        "Um total por cliente, reduzindo o resultado a uma linha por cliente",
+        "A média móvel dos últimos 3 pedidos do cliente"
+      ],
+      "correta": 0,
+      "explicacao": "PARTITION BY reinicia a conta a cada cliente e ORDER BY faz a soma acumular na ordem das datas. Diferente do GROUP BY, a window function mantém todas as linhas."
+    },
+    {
+      "id": "cross-join",
+      "tipo": "multipla",
+      "tema": "joins",
+      "enunciado": "A tabela A tem 3 linhas e a tabela B tem 4. Quantas linhas tem o resultado de A CROSS JOIN B?",
+      "alternativas": ["7", "12", "3", "4"],
+      "correta": 1,
+      "explicacao": "CROSS JOIN combina cada linha de A com cada linha de B: 3 × 4 = 12 linhas."
+    },
+    {
+      "id": "sql-nunca-compraram",
+      "tipo": "sql",
+      "tema": "joins",
+      "enunciado": "Liste o nome dos clientes que nunca fizeram nenhum pedido.",
+      "gabarito_sql": "SELECT c.nome\nFROM clientes c\nLEFT JOIN pedidos p ON p.cliente_id = c.cliente_id\nWHERE p.pedido_id IS NULL;",
+      "explicacao": "O LEFT JOIN mantém todos os clientes; quem não tem pedido fica com as colunas de pedidos nulas. NOT EXISTS também resolve."
+    },
+    {
+      "id": "ranking-clientes",
+      "tipo": "sql",
+      "tema": "window-functions",
+      "enunciado": "Faça o ranking de clientes por receita paga: cliente_id, receita (soma de valor_total dos pedidos pagos) e posicao calculada com RANK(), em que 1 é a maior receita. Uma linha por cliente com pedido pago.",
+      "tolerancia": 0.01,
+      "gabarito_sql": "SELECT cliente_id,\n       SUM(valor_total) AS receita,\n       RANK() OVER (ORDER BY SUM(valor_total) DESC) AS posicao\nFROM pedidos\nWHERE status = 'pago'\nGROUP BY cliente_id;",
+      "explicacao": "A window function roda depois do GROUP BY, então dá para ordenar o RANK pela própria soma. Outra opção é agregar numa CTE e aplicar o RANK na consulta de fora."
+    },
+    {
+      "id": "receita-mensal",
+      "tipo": "sql",
+      "tema": "datas",
+      "enunciado": "Mostre a receita paga por mês: mes (use DATE_TRUNC) e receita (soma de valor_total), em ordem cronológica.",
+      "ordem_importa": true,
+      "tolerancia": 0.01,
+      "gabarito_sql": "SELECT DATE_TRUNC('month', criado_em) AS mes,\n       SUM(valor_total) AS receita\nFROM pedidos\nWHERE status = 'pago'\nGROUP BY 1\nORDER BY 1;",
+      "explicacao": "DATE_TRUNC leva cada pedido ao primeiro dia do seu mês; agrupando por essa expressão você tem uma linha por mês. GROUP BY 1 e ORDER BY 1 se referem à primeira coluna do SELECT."
+    }
+  ]
+}

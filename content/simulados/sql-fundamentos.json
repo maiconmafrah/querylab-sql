@@ -1,0 +1,127 @@
+{
+  "id": "sql-fundamentos",
+  "numero": 1,
+  "titulo": "SQL Fundamentos",
+  "descricao": "SELECT, WHERE, ORDER BY, agregações e o básico de JOIN e NULL. Três questões pedem que você escreva a consulta.",
+  "dificuldade": "facil",
+  "tempo_min": 25,
+  "nota_minima": 70,
+  "xp_por_acerto": 10,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-01",
+  "questoes": [
+    {
+      "id": "where-antes-group",
+      "tipo": "multipla",
+      "tema": "agregacoes",
+      "enunciado": "Qual cláusula filtra as linhas ANTES do agrupamento?",
+      "alternativas": ["WHERE", "HAVING", "ORDER BY", "GROUP BY"],
+      "correta": 0,
+      "explicacao": "WHERE roda antes do GROUP BY e filtra linhas. HAVING roda depois e filtra grupos, por isso aceita funções como COUNT(*)."
+    },
+    {
+      "id": "order-limit",
+      "tipo": "multipla",
+      "tema": "consultas-basicas",
+      "enunciado": "O que esta consulta devolve?",
+      "codigo": "SELECT nome\nFROM clientes\nORDER BY cadastrado_em DESC\nLIMIT 5;",
+      "alternativas": [
+        "Os 5 clientes cadastrados mais recentemente",
+        "Os 5 primeiros clientes cadastrados",
+        "5 clientes em ordem aleatória",
+        "Todos os clientes, começando pelos 5 mais antigos"
+      ],
+      "correta": 0,
+      "explicacao": "DESC ordena da data mais nova para a mais antiga, e LIMIT 5 mantém só as cinco primeiras linhas dessa ordem."
+    },
+    {
+      "id": "is-null",
+      "tipo": "multipla",
+      "tema": "nulls",
+      "enunciado": "Qual filtro encontra os clientes sem email cadastrado (email nulo)?",
+      "formato_alternativas": "codigo",
+      "alternativas": ["WHERE email = NULL", "WHERE email IS NULL", "WHERE email = ''", "WHERE NOT email"],
+      "correta": 1,
+      "explicacao": "Comparar com = NULL sempre resulta em NULL (nunca verdadeiro). Para testar ausência de valor use IS NULL. Texto vazio ('') é um valor, diferente de NULL."
+    },
+    {
+      "id": "count-coluna",
+      "tipo": "multipla",
+      "tema": "agregacoes",
+      "enunciado": "Uma tabela tem 10 linhas e a coluna desconto está NULL em 4 delas. O que retorna COUNT(desconto)?",
+      "alternativas": ["10", "6", "4", "NULL"],
+      "correta": 1,
+      "explicacao": "COUNT(coluna) conta só os valores não nulos. COUNT(*) é que conta todas as linhas."
+    },
+    {
+      "id": "having-categorias",
+      "tipo": "multipla",
+      "tema": "agregacoes",
+      "enunciado": "Qual consulta mostra só as categorias com mais de 3 produtos?",
+      "formato_alternativas": "codigo",
+      "alternativas": [
+        "SELECT categoria, COUNT(*)\nFROM produtos\nWHERE COUNT(*) > 3\nGROUP BY categoria;",
+        "SELECT categoria, COUNT(*)\nFROM produtos\nGROUP BY categoria\nHAVING COUNT(*) > 3;",
+        "SELECT categoria\nFROM produtos\nGROUP BY COUNT(*) > 3;",
+        "SELECT categoria, COUNT(*) > 3\nFROM produtos\nGROUP BY categoria;"
+      ],
+      "correta": 1,
+      "explicacao": "Funções de agregação não podem ser usadas no WHERE. O filtro sobre a contagem de cada grupo vai no HAVING."
+    },
+    {
+      "id": "and-or",
+      "tipo": "multipla",
+      "tema": "consultas-basicas",
+      "enunciado": "O que o filtro abaixo seleciona?",
+      "codigo": "WHERE status = 'pago' OR status = 'pendente' AND valor_total > 1000",
+      "alternativas": [
+        "Pedidos pagos de qualquer valor e pedidos pendentes acima de 1000",
+        "Pedidos pagos ou pendentes, todos acima de 1000",
+        "Nada: a consulta dá erro de sintaxe",
+        "Só pedidos acima de 1000, de qualquer status"
+      ],
+      "correta": 0,
+      "explicacao": "AND tem prioridade sobre OR, então o filtro vira status = 'pago' OR (status = 'pendente' AND valor_total > 1000). Na dúvida, use parênteses."
+    },
+    {
+      "id": "inner-join-sem-par",
+      "tipo": "multipla",
+      "tema": "joins",
+      "enunciado": "Em um INNER JOIN entre pedidos e clientes, o que acontece com um pedido cujo cliente_id não existe em clientes?",
+      "alternativas": [
+        "Aparece com as colunas de cliente preenchidas com NULL",
+        "Não aparece no resultado",
+        "A consulta dá erro",
+        "Aparece duplicado"
+      ],
+      "correta": 1,
+      "explicacao": "O INNER JOIN só devolve linhas que têm par nos dois lados. Para manter o pedido com colunas de cliente nulas, use LEFT JOIN."
+    },
+    {
+      "id": "livros-por-preco",
+      "tipo": "sql",
+      "tema": "consultas-basicas",
+      "enunciado": "Liste nome e preco dos produtos da categoria 'Livros', do mais caro para o mais barato.",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT nome, preco\nFROM produtos\nWHERE categoria = 'Livros'\nORDER BY preco DESC;",
+      "explicacao": "Filtre a categoria no WHERE e ordene por preço decrescente com ORDER BY preco DESC."
+    },
+    {
+      "id": "clientes-por-uf",
+      "tipo": "sql",
+      "tema": "agregacoes",
+      "enunciado": "Mostre uf e qtd (quantidade de clientes) de cada estado.",
+      "gabarito_sql": "SELECT uf, COUNT(*) AS qtd\nFROM clientes\nGROUP BY uf;",
+      "explicacao": "GROUP BY uf cria um grupo por estado e COUNT(*) conta os clientes de cada grupo."
+    },
+    {
+      "id": "resumo-pagos",
+      "tipo": "sql",
+      "tema": "agregacoes",
+      "enunciado": "Quantos pedidos pagos existem e quanto eles somam? Retorne uma linha com as colunas qtd e total.",
+      "tolerancia": 0.01,
+      "gabarito_sql": "SELECT COUNT(*) AS qtd,\n       SUM(valor_total) AS total\nFROM pedidos\nWHERE status = 'pago';",
+      "explicacao": "Sem GROUP BY, as agregações resumem todas as linhas que passaram pelo WHERE em uma única linha."
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "id": "nulls-media",
+  "titulo": "Os NULLs que derrubaram a média",
+  "resumo": "A nota do app despencou em agosto, mas os comentários continuam ótimos. Tem algo errado no painel.",
+  "tema": "nulls",
+  "dificuldade": "medio",
+  "duracao_min": 25,
+  "dataset": "avaliacoes-app.sql",
+  "publicado_em": "2026-09-05",
+  "chamado": [
+    {
+      "autor": "Letícia",
+      "papel": "Produto",
+      "texto": "Socorro! A nota média do app caiu de 4,12 em julho para 2,81 em agosto. O time quer desfazer a versão 2.0, mas eu li os comentários e está todo mundo elogiando. Pode investigar antes de alguém tomar essa decisão?"
+    },
+    {
+      "autor": "painel_satisfacao",
+      "papel": "consulta do painel",
+      "codigo": "SELECT DATE_TRUNC('month', criada_em) AS mes,\n       ROUND(AVG(COALESCE(nota, 0)), 2) AS nota_media\nFROM avaliacoes\nGROUP BY 1\nORDER BY 1;"
+    },
+    {
+      "autor": "Notas da versão",
+      "papel": "app 2.0.1",
+      "texto": "01/08: avaliar o pedido ficou opcional. O cliente pode fechar a tela sem dar nota."
+    }
+  ],
+  "consulta_inicial": "SELECT versao_app, nota, comentario, criada_em\nFROM avaliacoes\nORDER BY criada_em DESC\nLIMIT 20;",
+  "checkpoints": [
+    {
+      "titulo": "Achar as notas vazias",
+      "pergunta": "Quantas avaliações de agosto de 2026 estão sem nota (nota IS NULL)?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM avaliacoes WHERE nota IS NULL AND criada_em >= DATE '2026-08-01' AND criada_em < DATE '2026-09-01'",
+      "xp": 40,
+      "dicas": [
+        "Para achar valores ausentes use IS NULL. A comparação nota = NULL nunca é verdadeira.",
+        "Filtre agosto com criada_em >= '2026-08-01' AND criada_em < '2026-09-01'."
+      ],
+      "explicacao": "NULL significa \"sem valor\", e qualquer comparação com ele (=, <>, >) dá NULL, não verdadeiro. Por isso existe o operador IS NULL."
+    },
+    {
+      "titulo": "A média de verdade",
+      "pergunta": "Qual é a nota média REAL de agosto, considerando só quem deu nota? Arredonde para 2 casas decimais.",
+      "tipo": "valor",
+      "tolerancia": 0.005,
+      "resposta_sql": "SELECT ROUND(AVG(nota), 2) FROM avaliacoes WHERE criada_em >= DATE '2026-08-01' AND criada_em < DATE '2026-09-01'",
+      "xp": 50,
+      "dicas": [
+        "AVG já ignora os NULLs sozinho.",
+        "Repare no COALESCE(nota, 0) da consulta do painel: ele transforma \"sem nota\" em nota zero."
+      ],
+      "explicacao": "A nota real de agosto subiu. O COALESCE(nota, 0) do painel contava cada cliente que pulou a avaliação como se tivesse dado nota zero."
+    },
+    {
+      "titulo": "Consertar o painel",
+      "pergunta": "Reescreva a consulta do painel com as colunas mes (use DATE_TRUNC), nota_media (ignorando notas nulas, 2 casas) e pct_sem_nota (percentual de avaliações sem nota, 1 casa), um mês por linha.",
+      "tipo": "query",
+      "tolerancia": 0.05,
+      "gabarito_sql": "SELECT DATE_TRUNC('month', criada_em) AS mes,\n       ROUND(AVG(nota), 2) AS nota_media,\n       ROUND(100.0 * COUNT(*) FILTER (WHERE nota IS NULL) / COUNT(*), 1) AS pct_sem_nota\nFROM avaliacoes\nGROUP BY 1;",
+      "xp": 70,
+      "dicas": [
+        "COUNT(*) conta todas as linhas; COUNT(nota) conta só as que têm nota.",
+        "Percentual sem nota: 100.0 * (COUNT(*) - COUNT(nota)) / COUNT(*)."
+      ],
+      "explicacao": "Mostrar a taxa de avaliações sem nota ao lado da média deixa o painel honesto: a satisfação subiu, e o que mudou foi quantas pessoas deixam de avaliar. Use COALESCE só quando o zero tem significado de verdade."
+    }
+  ]
+}
