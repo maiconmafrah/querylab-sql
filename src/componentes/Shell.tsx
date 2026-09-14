@@ -153,7 +153,8 @@ function ContaWidget() {
             entrarComGoogle().catch((erro: unknown) => {
               const codigo = (erro as { code?: string } | undefined)?.code;
               if (codigo === 'auth/popup-closed-by-user' || codigo === 'auth/cancelled-popup-request') return;
-              setErro('Não deu para entrar. Tente de novo.');
+              console.error('Falha no login com Google:', erro);
+              setErro(codigo ? `Não deu para entrar (${codigo}).` : 'Não deu para entrar. Tente de novo.');
             });
           }}
         >
