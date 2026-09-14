@@ -1,4 +1,5 @@
-// Espelha o progresso local no Firestore enquanto o usuário está logado.
+// Espelha o progresso local no Firestore enquanto o usuário está logado, em tempo real (onSnapshot):
+// uma mudança feita em outro aparelho chega sozinha, sem precisar recarregar a página.
 import { useEffect, useRef, useState } from 'react';
 import { carregarFirebase, firebaseDisponivel } from '../lib/firebase.ts';
 import { useAutenticacao } from './autenticacao.ts';
@@ -13,7 +14,7 @@ async function enviar(uid: string) {
   await kit.firestoreApi.setDoc(kit.firestoreApi.doc(kit.db, 'progressos', uid), JSON.parse(exportarProgresso()));
 }
 
-/** Monte uma vez perto da raiz do app: busca o progresso da nuvem ao logar e reenvia a cada mudança local. */
+/** Monte uma vez perto da raiz do app: mantém o progresso local e o da nuvem sempre em sincronia. */
 export function useSincronizarProgresso(): StatusSincronizacao {
   const { usuario } = useAutenticacao();
   const [status, setStatus] = useState<StatusSincronizacao>('ocioso');
@@ -26,26 +27,45 @@ export function useSincronizarProgresso(): StatusSincronizacao {
       return;
     }
     let cancelado = false;
+    let pararDeEscutarNuvem: (() => void) | undefined;
 
     (async () => {
       try {
         const kit = await carregarFirebase();
-        const referencia = kit.firestoreApi.doc(kit.db, 'progressos', usuario.uid);
-        const instantaneo = await kit.firestoreApi.getDoc(referencia);
         if (cancelado) return;
-        if (instantaneo.exists()) {
-          ignorarProximaMudanca.current = true;
-          importarProgresso(JSON.stringify(instantaneo.data()));
-        } else {
-          await enviar(usuario.uid);
-        }
-        if (!cancelado) setStatus('sincronizado');
-      } catch {
+        const referencia = kit.firestoreApi.doc(kit.db, 'progressos', usuario.uid);
+        let primeiraLeitura = true;
+
+        pararDeEscutarNuvem = kit.firestoreApi.onSnapshot(
+          referencia,
+          (instantaneo) => {
+            if (cancelado) return;
+            if (instantaneo.exists()) {
+              ignorarProximaMudanca.current = true;
+              importarProgresso(JSON.stringify(instantaneo.data()));
+              setStatus('sincronizado');
+            } else if (primeiraLeitura) {
+              enviar(usuario.uid)
+                .then(() => !cancelado && setStatus('sincronizado'))
+                .catch((erro: unknown) => {
+                  console.error('Falha ao enviar progresso inicial para a nuvem:', erro);
+                  if (!cancelado) setStatus('erro');
+                });
+            }
+            primeiraLeitura = false;
+          },
+          (erro) => {
+            console.error('Falha ao escutar o progresso na nuvem:', erro);
+            if (!cancelado) setStatus('erro');
+          },
+        );
+      } catch (erro) {
+        console.error('Falha ao iniciar a sincronização:', erro);
         if (!cancelado) setStatus('erro');
       }
     })();
 
-    const pararDeOuvir = assinarProgresso(() => {
+    const pararDeOuvirLocal = assinarProgresso(() => {
       if (ignorarProximaMudanca.current) {
         ignorarProximaMudanca.current = false;
         return;
@@ -55,13 +75,17 @@ export function useSincronizarProgresso(): StatusSincronizacao {
       pendente.current = setTimeout(() => {
         enviar(usuario.uid)
           .then(() => !cancelado && setStatus('sincronizado'))
-          .catch(() => !cancelado && setStatus('erro'));
+          .catch((erro: unknown) => {
+            console.error('Falha ao enviar progresso para a nuvem:', erro);
+            if (!cancelado) setStatus('erro');
+          });
       }, ATRASO_ENVIO_MS);
     });
 
     return () => {
       cancelado = true;
-      pararDeOuvir();
+      pararDeEscutarNuvem?.();
+      pararDeOuvirLocal();
       if (pendente.current) clearTimeout(pendente.current);
     };
   }, [usuario]);

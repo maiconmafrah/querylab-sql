@@ -136,13 +136,14 @@ function BotaoTema() {
 }
 
 function ContaWidget() {
-  const { carregando, usuario } = useAutenticacao();
+  const { carregando, usuario, erro: erroRedirecionamento } = useAutenticacao();
   const status = useSincronizarProgresso();
   const [erro, setErro] = useState<string | null>(null);
 
   if (!firebaseDisponivel || carregando) return null;
 
   if (!usuario) {
+    const mensagemErro = erro ?? (erroRedirecionamento ? `Não deu para entrar (${erroRedirecionamento}).` : null);
     return (
       <div className="conta-login">
         <button
@@ -161,7 +162,7 @@ function ContaWidget() {
           <IconeGoogle />
           Entrar com Google
         </button>
-        {erro && <p className="conta-login__erro">{erro}</p>}
+        {mensagemErro && <p className="conta-login__erro">{mensagemErro}</p>}
       </div>
     );
   }
