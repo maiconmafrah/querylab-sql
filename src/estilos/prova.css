@@ -382,7 +382,26 @@
   }
 
   .prova__topo {
+    grid-template-columns: 1fr;
+    row-gap: 10px;
     padding: 10px 16px;
+  }
+
+  .prova__identificacao {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .prova__acoes {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .prova__progresso {
+    grid-row: 3;
   }
 
   .prova__corpo {
