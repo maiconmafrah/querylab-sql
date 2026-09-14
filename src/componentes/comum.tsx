@@ -1,5 +1,7 @@
 import { NOMES_DIFICULDADE } from '../conteudo/index.ts';
+import { explicarErro } from '../lib/sql.ts';
 import type { Dificuldade } from '../tipos.ts';
+import { Icone } from './Icone.tsx';
 
 export function Carregando({ texto }: { texto: string }) {
   return (
@@ -48,6 +50,27 @@ export function Segmentos({ total, feitos }: { total: number; feitos: number }) 
         <span key={i} className={i < feitos ? 'segmentos__item segmentos__item--feito' : 'segmentos__item'} />
       ))}
     </span>
+  );
+}
+
+/** Mensagem de erro de uma execução SQL: título traduzido, explicação em português quando reconhece o padrão, e a mensagem crua do DuckDB escondida por trás de "Ver mensagem técnica". */
+export function MensagemErroSql({ titulo, mensagem, sufixo }: { titulo: string; mensagem: string; sufixo?: string }) {
+  const explicacao = explicarErro(mensagem);
+  return (
+    <div className="aviso aviso--erro erro-sql" role="alert">
+      <Icone nome="alerta" />
+      <div>
+        <strong>
+          {titulo}
+          {sufixo}
+        </strong>
+        {explicacao && <p className="erro-sql__explicacao">{explicacao}</p>}
+        <details className="erro-sql__detalhes">
+          <summary>Ver mensagem técnica</summary>
+          <pre>{mensagem}</pre>
+        </details>
+      </div>
+    </div>
   );
 }
 

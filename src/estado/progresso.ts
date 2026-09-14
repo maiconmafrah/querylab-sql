@@ -49,6 +49,13 @@ export interface ProgressoSimulado {
   emAndamento?: ProvaEmAndamento;
 }
 
+export interface ProgressoDesafio {
+  respondidoEm: string;
+  escolhida: number;
+  acertou: boolean;
+  xp: number;
+}
+
 export interface Progresso {
   versao: 1;
   xp: number;
@@ -58,10 +65,14 @@ export interface Progresso {
   simulados: Record<string, ProgressoSimulado>;
   modoLivre: boolean;
   ultimaMissao?: string;
+  /** Apelido público, mostrado no ranking. Só existe pra quem já definiu um. */
+  apelido?: string;
+  /** Chave: data (AAAA-MM-DD) do desafio. */
+  desafios: Record<string, ProgressoDesafio>;
 }
 
 function progressoVazio(): Progresso {
-  return { versao: 1, xp: 0, dias: [], missoes: {}, simulados: {}, modoLivre: false };
+  return { versao: 1, xp: 0, dias: [], missoes: {}, simulados: {}, modoLivre: false, desafios: {} };
 }
 
 function lerArmazenado(): Progresso {
@@ -260,10 +271,33 @@ export function registrarTentativa(id: string, tentativa: Omit<TentativaSimulado
   return registrada;
 }
 
+// ---------- Desafio diário ----------
+
+/** Registra a resposta do desafio do dia. Não faz nada se aquele dia já tiver resposta. */
+export function responderDesafio(data: string, escolhida: number, acertou: boolean, xp: number): void {
+  atualizar((p) => {
+    if (p.desafios[data]) return p;
+    const ganho = acertou ? xp : 0;
+    return comDiaDeEstudo({
+      ...p,
+      xp: p.xp + ganho,
+      desafios: { ...p.desafios, [data]: { respondidoEm: agora(), escolhida, acertou, xp: ganho } },
+    });
+  });
+}
+
 // ---------- Configurações ----------
 
 export function definirModoLivre(ativo: boolean) {
   atualizar((p) => ({ ...p, modoLivre: ativo }));
+}
+
+/** Apelido público (2 a 24 caracteres) mostrado no ranking. */
+export function definirApelido(nome: string): boolean {
+  const limpo = nome.trim().replace(/\s+/g, ' ');
+  if (limpo.length < 2 || limpo.length > 24) return false;
+  atualizar((p) => ({ ...p, apelido: limpo }));
+  return true;
 }
 
 export function apagarProgresso() {

@@ -1,0 +1,63 @@
+{
+  "id": "um-passo-de-cada-vez",
+  "titulo": "Um passo de cada vez",
+  "resumo": "Bruno quer a média de itens por pedido — uma conta que não cabe num único GROUP BY.",
+  "tema": "subqueries",
+  "dificuldade": "medio",
+  "duracao_min": 20,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-28",
+  "chamado": [
+    {
+      "autor": "Bruno",
+      "papel": "Marketing",
+      "texto": "Quero saber a média de quantos itens tem um pedido. Não é a média de quantidade de um item específico — é assim: primeiro soma os itens DE CADA pedido, depois tira a média disso. Não sei fazer isso num GROUP BY só."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "Pra agregar \"a agregação de outra coisa\", primeiro calcule o passo intermediário numa subquery (ou numa CTE com WITH) e trate o resultado como se fosse uma tabela."
+    }
+  ],
+  "consulta_inicial": "-- Quantos itens cada pedido tem?\nSELECT pedido_id, SUM(quantidade) AS qtd_itens\nFROM itens_pedido\nGROUP BY pedido_id\nLIMIT 5;",
+  "checkpoints": [
+    {
+      "titulo": "Itens por pedido",
+      "pergunta": "Para os pedidos 1 a 5, some quantos itens cada um tem (soma de quantidade). Mostre pedido_id e qtd_itens.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT pedido_id, SUM(quantidade) AS qtd_itens\nFROM itens_pedido\nWHERE pedido_id <= 5\nGROUP BY pedido_id\nORDER BY pedido_id;",
+      "xp": 40,
+      "dicas": [
+        "Isso é só um GROUP BY normal, igual você já fez antes — a novidade vem no próximo checkpoint."
+      ],
+      "explicacao": "Essa consulta já responde \"quantos itens tem CADA pedido\". O problema é a próxima pergunta: a média DESSE resultado, que um único GROUP BY não calcula sozinho."
+    },
+    {
+      "titulo": "A média das médias",
+      "pergunta": "Qual é a média de itens por pedido, considerando TODOS os pedidos? Arredonde para 2 casas. Primeiro calcule os itens por pedido, depois tire a média disso.",
+      "tipo": "valor",
+      "tolerancia": 0.01,
+      "resposta_sql": "SELECT ROUND(AVG(qtd_itens), 2) FROM (SELECT pedido_id, SUM(quantidade) AS qtd_itens FROM itens_pedido GROUP BY pedido_id) AS por_pedido",
+      "xp": 50,
+      "dicas": [
+        "Coloque a consulta do checkpoint anterior (sem o WHERE pedido_id <= 5) entre parênteses, com um apelido, no lugar do FROM.",
+        "FROM (SELECT ...) AS por_pedido trata o resultado dessa consulta como se fosse uma tabela normal, que você pode agregar de novo."
+      ],
+      "explicacao": "Não dá pra fazer AVG(SUM(quantidade)) direto — agregação dentro de agregação não é permitido. A solução é calcular a soma primeiro (numa subquery) e só then tirar a média do resultado, numa segunda consulta por cima."
+    },
+    {
+      "titulo": "A mesma ideia, com WITH",
+      "pergunta": "Reescreva a consulta anterior usando uma CTE (WITH) no lugar da subquery no FROM. Mostre o resultado como média_itens_por_pedido.",
+      "tipo": "query",
+      "tolerancia": 0.01,
+      "gabarito_sql": "WITH por_pedido AS (\n  SELECT pedido_id, SUM(quantidade) AS qtd_itens\n  FROM itens_pedido\n  GROUP BY pedido_id\n)\nSELECT ROUND(AVG(qtd_itens), 2) AS media_itens_por_pedido\nFROM por_pedido;",
+      "xp": 50,
+      "dicas": [
+        "WITH nome_do_passo AS (sua subquery) vai ANTES do SELECT principal.",
+        "Depois do WITH, você usa por_pedido como se fosse uma tabela normal no FROM da consulta de fora."
+      ],
+      "explicacao": "CTE e subquery no FROM fazem exatamente a mesma coisa — a diferença é só de leitura. WITH dá um nome ao passo intermediário e tira ele de dentro do FROM, o que ajuda muito quando a consulta cresce e tem vários passos."
+    }
+  ]
+}

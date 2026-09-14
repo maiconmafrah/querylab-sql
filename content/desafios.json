@@ -1,0 +1,226 @@
+[
+  {
+    "id": "limit-sem-order",
+    "tipo": "multipla",
+    "tema": "consultas-basicas",
+    "enunciado": "Uma consulta usa LIMIT 5 mas não tem ORDER BY. O que se pode afirmar sobre as 5 linhas devolvidas?",
+    "alternativas": [
+      "Não há garantia de quais 5 linhas virão nem em que ordem",
+      "Sempre virão as 5 primeiras linhas inseridas na tabela",
+      "Sempre virão as 5 últimas linhas inseridas na tabela",
+      "O banco recusa a consulta sem ORDER BY"
+    ],
+    "correta": 0,
+    "explicacao": "Sem ORDER BY, o banco é livre para devolver as linhas na ordem que for mais conveniente internamente. Se \"quais\" linhas importa, sempre use ORDER BY antes do LIMIT."
+  },
+  {
+    "id": "and-or-parenteses",
+    "tipo": "multipla",
+    "tema": "consultas-basicas",
+    "formato_alternativas": "codigo",
+    "enunciado": "Você quer clientes de 'SP' OU 'RJ' que tenham cadastro a partir de 2026. Qual filtro faz isso corretamente?",
+    "alternativas": [
+      "WHERE uf = 'SP' OR uf = 'RJ' AND cadastrado_em >= DATE '2026-01-01'",
+      "WHERE (uf = 'SP' OR uf = 'RJ') AND cadastrado_em >= DATE '2026-01-01'",
+      "WHERE uf = 'SP' AND uf = 'RJ' AND cadastrado_em >= DATE '2026-01-01'",
+      "WHERE uf IN ('SP' OR 'RJ') AND cadastrado_em >= DATE '2026-01-01'"
+    ],
+    "correta": 1,
+    "explicacao": "AND tem prioridade sobre OR. Sem parênteses, a primeira alternativa vira \"SP de qualquer data, ou RJ recente\" — não é isso que foi pedido. Os parênteses forçam o OR a ser resolvido antes."
+  },
+  {
+    "id": "having-vs-where",
+    "tipo": "multipla",
+    "tema": "agregacoes",
+    "enunciado": "Por que \"WHERE COUNT(*) > 5\" dá erro, mas \"HAVING COUNT(*) > 5\" funciona?",
+    "alternativas": [
+      "Porque o WHERE roda antes do agrupamento, quando COUNT(*) ainda não existe; o HAVING roda depois",
+      "Porque WHERE só aceita texto, não números",
+      "Porque HAVING é mais rápido que WHERE",
+      "Não há diferença real, é só estilo de escrita"
+    ],
+    "correta": 0,
+    "explicacao": "A ordem de execução é FROM → WHERE → GROUP BY → HAVING → SELECT. Funções de agregação só existem depois do GROUP BY, por isso não podem aparecer no WHERE."
+  },
+  {
+    "id": "count-estrela-vs-coluna",
+    "tipo": "multipla",
+    "tema": "agregacoes",
+    "enunciado": "Uma tabela tem 20 linhas, e a coluna cupom está preenchida em 6 delas (as outras 14 são NULL). O que COUNT(cupom) retorna?",
+    "alternativas": ["20", "14", "6", "NULL"],
+    "correta": 2,
+    "explicacao": "COUNT(coluna) conta só os valores não nulos daquela coluna. COUNT(*) é que sempre conta todas as 20 linhas, independente de NULL."
+  },
+  {
+    "id": "left-join-sem-par",
+    "tipo": "multipla",
+    "tema": "joins",
+    "enunciado": "Num LEFT JOIN entre pedidos (esquerda) e cupons (direita), o que acontece com um pedido que não usou nenhum cupom?",
+    "alternativas": [
+      "Ele aparece com as colunas de cupons preenchidas com NULL",
+      "Ele desaparece do resultado",
+      "A consulta dá erro",
+      "Ele aparece duplicado, uma vez para cada cupom existente"
+    ],
+    "correta": 0,
+    "explicacao": "LEFT JOIN mantém TODAS as linhas da tabela da esquerda. Quando não há par na direita, as colunas dessa tabela vêm NULL em vez de a linha ser descartada."
+  },
+  {
+    "id": "anti-join-conceito",
+    "tipo": "multipla",
+    "tema": "joins",
+    "enunciado": "Qual é a forma mais direta de achar os clientes que NUNCA fizeram um pedido?",
+    "alternativas": [
+      "LEFT JOIN de clientes com pedidos, filtrando onde a coluna do lado de pedidos veio NULL",
+      "INNER JOIN de clientes com pedidos, sem filtro nenhum",
+      "Somar o total de clientes com o total de pedidos",
+      "CROSS JOIN de clientes com pedidos"
+    ],
+    "correta": 0,
+    "explicacao": "Esse é o padrão de anti-join: um LEFT JOIN mantém todo cliente, e quem não tem pedido fica com as colunas de pedidos em branco (NULL) — é só filtrar por isso."
+  },
+  {
+    "id": "coalesce-cuidado",
+    "tipo": "multipla",
+    "tema": "nulls",
+    "enunciado": "Uma coluna nota tem algumas linhas NULL (avaliações não respondidas). Por que trocar essas linhas por COALESCE(nota, 0) antes de calcular AVG(nota) pode ser um erro?",
+    "alternativas": [
+      "Porque transforma \"sem resposta\" em nota zero, e esse zero entra na média, puxando ela pra baixo sem motivo",
+      "Porque COALESCE não funciona dentro de AVG",
+      "Porque AVG(nota) já dá erro se existir qualquer NULL na coluna",
+      "Porque COALESCE só aceita texto, não número"
+    ],
+    "correta": 0,
+    "explicacao": "AVG(nota) sozinho já ignora os NULLs, calculando a média só de quem respondeu. Envolver com COALESCE(nota, 0) faz cada não-resposta contar como uma nota zero real."
+  },
+  {
+    "id": "is-null-vs-igual",
+    "tipo": "multipla",
+    "tema": "nulls",
+    "formato_alternativas": "codigo",
+    "enunciado": "Qual filtro encontra corretamente as linhas onde a coluna desconto está ausente?",
+    "alternativas": [
+      "WHERE desconto = NULL",
+      "WHERE desconto <> NULL",
+      "WHERE desconto IS NULL",
+      "WHERE desconto == NULL"
+    ],
+    "correta": 2,
+    "explicacao": "Qualquer comparação com = ou <> envolvendo NULL resulta em NULL, nunca em verdadeiro. Só o operador IS NULL (ou IS NOT NULL) testa ausência de valor corretamente."
+  },
+  {
+    "id": "duplicidade-having",
+    "tipo": "multipla",
+    "tema": "qualidade-de-dados",
+    "enunciado": "Uma tabela pedidos deveria ter um pedido_id único por linha, mas você desconfia de duplicatas vindas de um retry de carga. Como confirmar isso em SQL?",
+    "alternativas": [
+      "GROUP BY pedido_id HAVING COUNT(*) > 1",
+      "SELECT DISTINCT pedido_id",
+      "ORDER BY pedido_id",
+      "WHERE pedido_id IS NOT NULL"
+    ],
+    "correta": 0,
+    "explicacao": "Agrupar pela chave que deveria ser única e manter só os grupos com mais de uma linha é o teste padrão de duplicidade — funciona em qualquer tabela."
+  },
+  {
+    "id": "migracao-orfaos",
+    "tipo": "multipla",
+    "tema": "qualidade-de-dados",
+    "enunciado": "Depois de uma migração de sistema, você quer saber se algum pedido ficou \"órfão\" (referenciando um cliente_id que não existe mais na tabela clientes). Qual abordagem confirma isso?",
+    "alternativas": [
+      "LEFT JOIN de pedidos com clientes, filtrando onde o lado de clientes veio NULL",
+      "Contar quantas linhas tem a tabela clientes",
+      "INNER JOIN de pedidos com clientes",
+      "Somar o valor_total de todos os pedidos"
+    ],
+    "correta": 0,
+    "explicacao": "O LEFT JOIN mantém todo pedido, mesmo sem par em clientes. Quando as colunas de clientes vêm NULL, é sinal de que aquele cliente_id não existe mais — o clássico jeito de auditar chaves órfãs."
+  },
+  {
+    "id": "date-trunc-vs-extract",
+    "tipo": "multipla",
+    "tema": "datas",
+    "formato_alternativas": "codigo",
+    "enunciado": "Você tem pedidos de 2025 e 2026 e quer agrupar por mês SEM misturar janeiro de 2025 com janeiro de 2026. Qual expressão usar?",
+    "alternativas": [
+      "DATE_TRUNC('month', criado_em)",
+      "EXTRACT(month FROM criado_em)",
+      "EXTRACT(year FROM criado_em) + EXTRACT(month FROM criado_em)",
+      "CAST(criado_em AS DATE)"
+    ],
+    "correta": 0,
+    "explicacao": "DATE_TRUNC('month', ...) leva a data pro primeiro dia do mês, mantendo o ano — janeiro/2025 e janeiro/2026 viram valores diferentes. EXTRACT(month ...) devolve só o número do mês (1 a 12), perdendo o ano."
+  },
+  {
+    "id": "date-diff-uso",
+    "tipo": "multipla",
+    "tema": "datas",
+    "formato_alternativas": "codigo",
+    "enunciado": "Qual expressão calcula quantos dias se passaram entre a data de um pedido (criado_em) e hoje?",
+    "alternativas": [
+      "DATE_DIFF('day', criado_em, CURRENT_DATE)",
+      "EXTRACT(day FROM criado_em)",
+      "DATE_TRUNC('day', criado_em)",
+      "criado_em + INTERVAL 1 DAY"
+    ],
+    "correta": 0,
+    "explicacao": "DATE_DIFF(unidade, inicio, fim) mede a distância entre duas datas na unidade escolhida. As outras opções extraem uma parte de UMA data ou deslocam uma data — não comparam duas datas."
+  },
+  {
+    "id": "cte-vantagem",
+    "tipo": "multipla",
+    "tema": "subqueries",
+    "enunciado": "Qual é o principal ganho de reescrever uma subquery aninhada como uma CTE (WITH passo AS (...))?",
+    "alternativas": [
+      "Dar um nome ao passo intermediário, deixando a consulta mais fácil de ler e revisar",
+      "Fazer a consulta rodar sempre mais rápido",
+      "Criar uma tabela nova e permanente no banco",
+      "Permitir usar window functions, que não funcionam em subqueries"
+    ],
+    "correta": 0,
+    "explicacao": "A CTE existe só durante a consulta — não é uma tabela permanente nem garante mais performance. O ganho real é organização: cada passo ganha um nome, o que ajuda muito em consultas com várias etapas."
+  },
+  {
+    "id": "subquery-comparacao",
+    "tipo": "multipla",
+    "tema": "subqueries",
+    "formato_alternativas": "codigo",
+    "enunciado": "Qual consulta lista os produtos com preço ACIMA da média de todos os produtos, sem cravar um número fixo?",
+    "alternativas": [
+      "SELECT * FROM produtos WHERE preco > (SELECT AVG(preco) FROM produtos);",
+      "SELECT * FROM produtos WHERE preco > AVG(preco);",
+      "SELECT * FROM produtos GROUP BY preco HAVING preco > AVG(preco);",
+      "SELECT * FROM produtos ORDER BY preco > AVG(preco);"
+    ],
+    "correta": 0,
+    "explicacao": "A subquery entre parênteses roda primeiro, calcula a média e devolve um número só; a consulta de fora compara cada produto com esse número. AVG(preco) sozinho no WHERE não funciona: agregação não pode aparecer ali."
+  },
+  {
+    "id": "rank-vs-row-number",
+    "tipo": "multipla",
+    "tema": "window-functions",
+    "enunciado": "Dois produtos empatam no preço mais alto de uma categoria. O que muda entre usar RANK() e ROW_NUMBER() nesse ranking?",
+    "alternativas": [
+      "RANK() dá a mesma posição aos dois empatados e pula a posição seguinte; ROW_NUMBER() sempre dá posições diferentes, mesmo empatados",
+      "Não muda nada, as duas funções sempre dão o mesmo resultado",
+      "ROW_NUMBER() dá a mesma posição aos empatados; RANK() nunca aceita empate",
+      "RANK() só funciona com PARTITION BY; ROW_NUMBER() não aceita partição"
+    ],
+    "correta": 0,
+    "explicacao": "Com empate, RANK() repete a posição (1, 1, 3...), enquanto ROW_NUMBER() sempre numera de forma única (1, 2, 3...), decidindo a ordem entre os empatados de forma arbitrária."
+  },
+  {
+    "id": "partition-by-proposito",
+    "tipo": "multipla",
+    "tema": "window-functions",
+    "enunciado": "Para que serve o PARTITION BY dentro de uma window function como RANK() OVER (PARTITION BY categoria ORDER BY preco DESC)?",
+    "alternativas": [
+      "Reinicia o cálculo (o ranking, nesse caso) a cada novo valor de categoria, sem reduzir o número de linhas do resultado",
+      "Filtra o resultado, mostrando só uma categoria",
+      "Funciona exatamente como um GROUP BY, reduzindo a uma linha por categoria",
+      "Ordena as categorias em ordem alfabética"
+    ],
+    "correta": 0,
+    "explicacao": "PARTITION BY divide as linhas em grupos (partições) só para o cálculo da window function — diferente do GROUP BY, todas as linhas originais continuam aparecendo no resultado."
+  }
+]

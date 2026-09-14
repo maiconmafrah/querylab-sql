@@ -1,0 +1,56 @@
+{
+  "id": "produtos-mais-caros",
+  "titulo": "O top 5 do catálogo",
+  "resumo": "O time de precificação quer um ranking rápido pra decidir onde focar a próxima promoção.",
+  "tema": "consultas-basicas",
+  "dificuldade": "facil",
+  "duracao_min": 10,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-17",
+  "chamado": [
+    {
+      "autor": "Simone",
+      "papel": "Precificação",
+      "texto": "Preciso de um ranking dos produtos mais caros pra reunião de amanhã. E separado, quero ver nossos 5 clientes mais antigos — o pessoal de fidelidade quer mandar um agrado pra eles."
+    }
+  ],
+  "consulta_inicial": "-- Sem ORDER BY, a ordem das linhas não é garantida\nSELECT nome, preco\nFROM produtos\nLIMIT 5;",
+  "checkpoints": [
+    {
+      "titulo": "Do mais caro pro mais barato",
+      "pergunta": "Mostre nome e preco de todos os produtos, do mais caro para o mais barato.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT nome, preco\nFROM produtos\nORDER BY preco DESC;",
+      "xp": 30,
+      "dicas": [
+        "ORDER BY preco DESC ordena da maior pra menor. Sem DESC, a ordem seria crescente (ASC, o padrão)."
+      ],
+      "explicacao": "ORDER BY define a ordem das linhas no resultado. DESC é decrescente (maior primeiro); ASC é crescente e é o padrão quando você não escreve nada."
+    },
+    {
+      "titulo": "Só os 5 primeiros",
+      "pergunta": "Agora mostre só os 5 produtos mais caros: nome e preco.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT nome, preco\nFROM produtos\nORDER BY preco DESC\nLIMIT 5;",
+      "xp": 40,
+      "dicas": [
+        "Junte o ORDER BY DESC do checkpoint anterior com um LIMIT 5 no final."
+      ],
+      "explicacao": "O banco ordena TODAS as linhas primeiro e só depois corta com LIMIT. Por isso ORDER BY sempre vem antes de LIMIT na consulta, e o resultado é sempre \"os 5 primeiros da ordem escolhida\", não 5 linhas aleatórias."
+    },
+    {
+      "titulo": "Os clientes mais antigos",
+      "pergunta": "Mostre nome e cadastrado_em dos 5 clientes cadastrados há mais tempo (os mais antigos primeiro).",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT nome, cadastrado_em\nFROM clientes\nORDER BY cadastrado_em ASC\nLIMIT 5;",
+      "xp": 30,
+      "dicas": [
+        "\"Mais antigo\" é a data menor. Use ORDER BY cadastrado_em ASC (ou nem escreva ASC, já que é o padrão)."
+      ],
+      "explicacao": "A mesma dupla ORDER BY + LIMIT resolve praticamente qualquer ranking: só muda a coluna e a direção (ASC ou DESC) conforme o que \"primeiro\" significa no pedido."
+    }
+  ]
+}

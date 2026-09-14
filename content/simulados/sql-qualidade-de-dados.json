@@ -1,0 +1,135 @@
+{
+  "id": "sql-qualidade-de-dados",
+  "numero": 2,
+  "titulo": "SQL Qualidade de Dados",
+  "descricao": "NULLs traiçoeiros, chaves órfãs depois de uma migração e cargas duplicadas. Três questões pedem que você escreva a consulta.",
+  "dificuldade": "medio",
+  "tempo_min": 30,
+  "nota_minima": 70,
+  "xp_por_acerto": 15,
+  "dataset": "migracao-crm.sql",
+  "publicado_em": "2026-10-03",
+  "questoes": [
+    {
+      "id": "igual-null",
+      "tipo": "multipla",
+      "tema": "nulls",
+      "enunciado": "O que retorna a comparação abaixo?",
+      "codigo": "email = NULL",
+      "alternativas": [
+        "Verdadeiro, se o email realmente for nulo",
+        "Falso, sempre",
+        "NULL — nunca é verdadeiro nem falso",
+        "Depende do banco de dados"
+      ],
+      "correta": 2,
+      "explicacao": "Qualquer comparação com NULL usando = (ou <>, >, <...) resulta em NULL, nunca em verdadeiro ou falso. Por isso existe o operador IS NULL."
+    },
+    {
+      "id": "coalesce-media",
+      "tipo": "multipla",
+      "tema": "nulls",
+      "enunciado": "Por que COALESCE(nota, 0) pode distorcer a média de avaliações de um app?",
+      "alternativas": [
+        "Porque transforma quem não avaliou em nota zero, e esse zero entra na conta do AVG",
+        "Porque AVG já ignora NULL, então o COALESCE não muda nada no resultado",
+        "Porque COALESCE só funciona com colunas de texto, não com números",
+        "Porque COALESCE remove da tabela as linhas com NULL"
+      ],
+      "correta": 0,
+      "explicacao": "AVG(nota) sozinho já ignora os NULLs. Envolver a coluna em COALESCE(nota, 0) faz cada avaliação ausente contar como nota zero, derrubando a média de verdade."
+    },
+    {
+      "id": "count-coluna-qualidade",
+      "tipo": "multipla",
+      "tema": "agregacoes",
+      "enunciado": "Uma tabela tem 12 linhas e a coluna desconto está NULL em 5 delas. O que retorna COUNT(desconto)?",
+      "alternativas": ["12", "7", "5", "NULL"],
+      "correta": 1,
+      "explicacao": "COUNT(coluna) conta só os valores não nulos: 12 linhas menos as 5 com NULL dão 7."
+    },
+    {
+      "id": "quem-nao-tem-pedido",
+      "tipo": "multipla",
+      "tema": "joins",
+      "formato_alternativas": "codigo",
+      "enunciado": "Qual consulta encontra os clientes que existem na tabela clientes mas NUNCA aparecem em pedidos?",
+      "alternativas": [
+        "SELECT c.*\nFROM clientes c\nJOIN pedidos p ON p.cliente_id = c.cliente_id\nWHERE p.pedido_id IS NULL;",
+        "SELECT c.*\nFROM clientes c\nLEFT JOIN pedidos p ON p.cliente_id = c.cliente_id\nWHERE p.pedido_id IS NULL;",
+        "SELECT c.*\nFROM clientes c\nWHERE c.cliente_id IN (SELECT cliente_id FROM pedidos);",
+        "SELECT c.*, p.*\nFROM clientes c, pedidos p\nWHERE p.pedido_id IS NULL;"
+      ],
+      "correta": 1,
+      "explicacao": "O INNER JOIN da alternativa A já descarta quem não tem pedido, então o WHERE nunca encontra nada. O LEFT JOIN mantém todo cliente, e quem não tem par em pedidos fica com p.pedido_id NULL — é esse que o WHERE captura."
+    },
+    {
+      "id": "duplicados-having",
+      "tipo": "multipla",
+      "tema": "qualidade-de-dados",
+      "enunciado": "Qual combinação identifica quais pedido_id aparecem duplicados numa tabela pedidos?",
+      "formato_alternativas": "codigo",
+      "alternativas": [
+        "GROUP BY pedido_id\nHAVING COUNT(*) > 1",
+        "WHERE pedido_id = pedido_id",
+        "SELECT DISTINCT pedido_id",
+        "ORDER BY pedido_id DESC"
+      ],
+      "correta": 0,
+      "explicacao": "Agrupar por pedido_id e manter só os grupos com mais de uma linha (HAVING COUNT(*) > 1) é o teste padrão de duplicidade em qualquer chave que deveria ser única."
+    },
+    {
+      "id": "soma-sem-duplicar",
+      "tipo": "multipla",
+      "tema": "qualidade-de-dados",
+      "formato_alternativas": "codigo",
+      "enunciado": "Um retry de carga duplicou linhas inteiras (idênticas) na tabela pedidos. Qual consulta soma a receita SEM contar as cópias?",
+      "alternativas": [
+        "SELECT SUM(valor) FROM pedidos;",
+        "SELECT SUM(valor)\nFROM (SELECT DISTINCT pedido_id, valor FROM pedidos);",
+        "SELECT SUM(DISTINCT valor) FROM pedidos;",
+        "SELECT SUM(valor)\nFROM pedidos\nGROUP BY pedido_id;"
+      ],
+      "correta": 1,
+      "explicacao": "A é a soma inflada, contando as cópias. C é uma armadilha: SUM(DISTINCT valor) também descarta pedidos DIFERENTES que por coincidência têm o mesmo valor. D devolve uma linha por pedido_id, não um total só. A resposta certa remove as cópias exatas primeiro (DISTINCT pedido_id, valor) e só depois soma."
+    },
+    {
+      "id": "vantagem-with",
+      "tipo": "multipla",
+      "tema": "subqueries",
+      "enunciado": "Qual é a principal vantagem de usar WITH (CTE) numa correção de dados feita em vários passos?",
+      "alternativas": [
+        "Dar nome a cada passo intermediário, deixando a consulta mais fácil de ler e revisar",
+        "Fazer a consulta rodar mais rápido do que qualquer subquery equivalente",
+        "Criar uma tabela nova e permanente no banco",
+        "Evitar ter que escrever WHERE na consulta"
+      ],
+      "correta": 0,
+      "explicacao": "A CTE existe só durante a consulta — o ganho é organização. Em correções de dados com vários passos (remover cópias, depois agregar, por exemplo), nomear cada passo ajuda quem for revisar depois."
+    },
+    {
+      "id": "pedidos-cliente-perdido",
+      "tipo": "sql",
+      "tema": "joins",
+      "enunciado": "Quantos pedidos pertencem a clientes que NÃO existem no CRM novo (tabela clientes)?",
+      "gabarito_sql": "SELECT COUNT(*) AS qtd\nFROM pedidos p\nLEFT JOIN clientes c ON c.cliente_id = p.cliente_id\nWHERE c.cliente_id IS NULL;",
+      "explicacao": "O LEFT JOIN mantém todo pedido, mesmo sem par em clientes. Quando c.cliente_id vem NULL, é porque aquele cliente não foi migrado."
+    },
+    {
+      "id": "clientes-nao-migrados",
+      "tipo": "sql",
+      "tema": "joins",
+      "enunciado": "Liste cliente_id, nome e uf dos clientes que existem no cadastro antigo (clientes_legado) mas NÃO foram migrados para o CRM novo (clientes).",
+      "gabarito_sql": "SELECT l.cliente_id, l.nome, l.uf\nFROM clientes_legado l\nLEFT JOIN clientes c ON c.cliente_id = l.cliente_id\nWHERE c.cliente_id IS NULL;",
+      "explicacao": "O mesmo padrão de anti-join, agora comparando o cadastro antigo com o novo: quem não tem par em clientes é quem ficou de fora da migração."
+    },
+    {
+      "id": "legado-sem-email",
+      "tipo": "sql",
+      "tema": "nulls",
+      "enunciado": "Quantos clientes do cadastro antigo (clientes_legado) estão sem email cadastrado?",
+      "gabarito_sql": "SELECT COUNT(*) AS qtd FROM clientes_legado WHERE email IS NULL;",
+      "explicacao": "A migração copiou pro CRM novo só quem tinha email preenchido — por isso essa é exatamente a causa da pergunta anterior."
+    }
+  ]
+}

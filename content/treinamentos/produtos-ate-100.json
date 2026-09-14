@@ -1,0 +1,59 @@
+{
+  "id": "produtos-ate-100",
+  "titulo": "A vitrine \"até R$100\"",
+  "resumo": "O marketing quer duas vitrines novas: uma de produtos baratos e outra da linha premium.",
+  "tema": "consultas-basicas",
+  "dificuldade": "facil",
+  "duracao_min": 10,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-16",
+  "chamado": [
+    {
+      "autor": "Otávio",
+      "papel": "Marketing",
+      "texto": "Quero lançar duas vitrines na home: \"até R$100\", pra quem tá economizando, e uma linha premium com os produtos mais caros, acima de R$300. Manda os dois levantamentos?"
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "O preço do produto fica em produtos.preco. Além de = você pode comparar com <, <=, > e >=."
+    }
+  ],
+  "consulta_inicial": "-- Veja a faixa de preços da loja\nSELECT MIN(preco), MAX(preco)\nFROM produtos;",
+  "checkpoints": [
+    {
+      "titulo": "Quantos até R$100",
+      "pergunta": "Quantos produtos custam R$100 ou menos (preco <= 100)?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM produtos WHERE preco <= 100",
+      "xp": 30,
+      "dicas": [
+        "<= significa \"menor ou igual\". WHERE preco <= 100 mantém quem custa até 100 reais, inclusive.",
+        "COUNT(*) conta as linhas que passaram pelo filtro."
+      ],
+      "explicacao": "Operadores de comparação (<, <=, >, >=) funcionam em WHERE do mesmo jeito que o =, só que testando \"menor\", \"maior\" etc. em vez de igualdade."
+    },
+    {
+      "titulo": "A vitrine \"até R$100\"",
+      "pergunta": "Mostre nome, categoria e preco dos produtos que custam R$100 ou menos.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, categoria, preco\nFROM produtos\nWHERE preco <= 100;",
+      "xp": 40,
+      "dicas": [
+        "Junte SELECT das três colunas pedidas com o WHERE preco <= 100."
+      ],
+      "explicacao": "Nada muda na estrutura da consulta: só trocamos o = de missões anteriores por <=, porque agora o pedido é sobre uma faixa de valores, não um valor exato."
+    },
+    {
+      "titulo": "A linha premium",
+      "pergunta": "Agora mostre nome, categoria e preco dos produtos com preco acima de R$300 (estritamente maior).",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, categoria, preco\nFROM produtos\nWHERE preco > 300;",
+      "xp": 30,
+      "dicas": [
+        "\"Acima de 300\" é preco > 300 — sem o igual, porque quem tem preco exatamente 300 não entraria na linha premium."
+      ],
+      "explicacao": "> exclui o valor exato; >= incluiria. A diferença entre esses dois é um erro comum, então vale sempre reler o enunciado: \"acima de\" costuma ser >, \"a partir de\" costuma ser >=."
+    }
+  ]
+}

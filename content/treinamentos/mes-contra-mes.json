@@ -1,0 +1,63 @@
+{
+  "id": "mes-contra-mes",
+  "titulo": "Mês contra mês",
+  "resumo": "A diretoria não quer só o número do mês — quer saber se subimos ou caímos em relação ao anterior.",
+  "tema": "window-functions",
+  "dificuldade": "dificil",
+  "duracao_min": 25,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-10-02",
+  "chamado": [
+    {
+      "autor": "Rafael",
+      "papel": "Gerente comercial",
+      "texto": "A diretoria não quer só o número de cada mês — quer saber se a gente subiu ou caiu em relação ao mês anterior, e por quanto."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "LAG(coluna) OVER (ORDER BY periodo) traz o valor da LINHA ANTERIOR, mantendo a linha atual — ótimo pra comparar um período com o de antes. LEAD faz o mesmo, mas olhando pra frente."
+    }
+  ],
+  "consulta_inicial": "-- Receita de cada mês, sem comparar ainda\nSELECT DATE_TRUNC('month', criado_em) AS mes, SUM(valor_total) AS receita\nFROM pedidos\nWHERE status = 'pago'\nGROUP BY 1\nORDER BY 1;",
+  "checkpoints": [
+    {
+      "titulo": "A receita de cada mês",
+      "pergunta": "Monte a receita mensal (mes, receita) dos pedidos pagos, um mês por linha (são só 3 meses de dados).",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT DATE_TRUNC('month', criado_em) AS mes, SUM(valor_total) AS receita\nFROM pedidos\nWHERE status = 'pago'\nGROUP BY 1\nORDER BY 1;",
+      "xp": 40,
+      "dicas": [
+        "É o resumo mensal que você já fez na missão \"O mês fechou como\"."
+      ],
+      "explicacao": "Essa é a base: a receita de cada mês, isolada. Falta comparar cada linha com a anterior — é isso que o LAG resolve."
+    },
+    {
+      "titulo": "Comparando com o mês anterior",
+      "pergunta": "Adicione a coluna variacao: a diferença de receita em relação ao mês anterior. Use LAG.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "tolerancia": 0.01,
+      "gabarito_sql": "WITH mensal AS (\n  SELECT DATE_TRUNC('month', criado_em) AS mes, SUM(valor_total) AS receita\n  FROM pedidos\n  WHERE status = 'pago'\n  GROUP BY 1\n)\nSELECT mes, receita,\n       receita - LAG(receita) OVER (ORDER BY mes) AS variacao\nFROM mensal\nORDER BY mes;",
+      "xp": 60,
+      "dicas": [
+        "Comece com uma CTE (WITH mensal AS (...)) pro resumo mensal, igual você fez na missão de subqueries — fica mais fácil de ler do que aninhar tudo numa consulta só.",
+        "LAG(receita) OVER (ORDER BY mes) traz a receita da linha de cima (o mês anterior). Subtraia da receita atual."
+      ],
+      "explicacao": "LAG \"puxa\" o valor de uma linha anterior pra dentro da linha atual, na ordem que você definir. Isso permite comparar período com período sem precisar de um JOIN complicado da tabela com ela mesma."
+    },
+    {
+      "titulo": "A variação do último mês",
+      "pergunta": "Qual foi a variação (em reais, pode ser negativa) do último mês em relação ao anterior? Arredonde para 2 casas.",
+      "tipo": "valor",
+      "tolerancia": 0.01,
+      "resposta_sql": "WITH mensal AS (\n  SELECT DATE_TRUNC('month', criado_em) AS mes, SUM(valor_total) AS receita\n  FROM pedidos\n  WHERE status = 'pago'\n  GROUP BY 1\n)\nSELECT ROUND(receita - LAG(receita) OVER (ORDER BY mes), 2) AS variacao\nFROM mensal\nORDER BY mes DESC\nLIMIT 1",
+      "xp": 50,
+      "dicas": [
+        "É a coluna variacao do checkpoint anterior, olhando só a última linha (ORDER BY mes DESC LIMIT 1)."
+      ],
+      "explicacao": "O primeiro mês da série sempre teria variacao NULL, porque não existe mês anterior a ele — não tem com o que comparar. Aqui pegamos o outro extremo: o mês mais recente, que é o que a diretoria realmente quer ver."
+    }
+  ]
+}

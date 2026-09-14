@@ -1,0 +1,62 @@
+{
+  "id": "vendas-sem-agrupar",
+  "titulo": "O resumo rápido pro financeiro",
+  "resumo": "O financeiro quer três números soltos antes da reunião — nada de tabela, só o resumo.",
+  "tema": "agregacoes",
+  "dificuldade": "facil",
+  "duracao_min": 15,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-20",
+  "chamado": [
+    {
+      "autor": "Rafael",
+      "papel": "Gerente comercial",
+      "texto": "Antes da reunião de hoje preciso de três números sobre os pedidos pagos: quantos são, quanto somam e qual o ticket médio. Não precisa de tabela nem gráfico, só os números."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "Funções de agregação (COUNT, SUM, AVG, MIN, MAX) resumem várias linhas em uma só. Sem GROUP BY, elas resumem TODAS as linhas que passaram pelo WHERE em uma única linha de resultado."
+    }
+  ],
+  "consulta_inicial": "-- Quantas linhas existem no total?\nSELECT COUNT(*)\nFROM pedidos;",
+  "checkpoints": [
+    {
+      "titulo": "Quantos pedidos pagos",
+      "pergunta": "Quantos pedidos têm status = 'pago', considerando todos os meses?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM pedidos WHERE status = 'pago'",
+      "xp": 30,
+      "dicas": [
+        "COUNT(*) conta as linhas que sobraram depois do WHERE."
+      ],
+      "explicacao": "Sem GROUP BY, COUNT(*) sempre devolve um único número: o total de linhas que passaram pelo filtro."
+    },
+    {
+      "titulo": "O ticket médio",
+      "pergunta": "Qual é o ticket médio (AVG de valor_total) dos pedidos pagos? Arredonde para 2 casas decimais.",
+      "tipo": "valor",
+      "tolerancia": 0.01,
+      "resposta_sql": "SELECT ROUND(AVG(valor_total), 2) FROM pedidos WHERE status = 'pago'",
+      "xp": 40,
+      "dicas": [
+        "AVG(valor_total) calcula a média da coluna, já ignorando linhas que não passaram no WHERE.",
+        "ROUND(expressao, 2) arredonda para 2 casas decimais."
+      ],
+      "explicacao": "AVG soma todos os valores e divide pela quantidade de linhas consideradas — nesse caso, só os pedidos pagos, porque o WHERE roda antes da agregação."
+    },
+    {
+      "titulo": "O resumo em uma linha",
+      "pergunta": "Monte um resumo com uma linha só: qtd (quantidade de pedidos pagos), total (soma de valor_total) e ticket_medio (média, 2 casas).",
+      "tipo": "query",
+      "tolerancia": 0.01,
+      "gabarito_sql": "SELECT COUNT(*) AS qtd,\n       ROUND(SUM(valor_total), 2) AS total,\n       ROUND(AVG(valor_total), 2) AS ticket_medio\nFROM pedidos\nWHERE status = 'pago';",
+      "xp": 50,
+      "dicas": [
+        "Você pode colocar várias agregações no mesmo SELECT, separadas por vírgula.",
+        "Dê um apelido pra cada uma com AS, igual você já fez em consultas anteriores."
+      ],
+      "explicacao": "Várias funções de agregação podem conviver no mesmo SELECT — cada uma resume a mesma leva de linhas (aqui, os pedidos pagos) de um jeito diferente, tudo numa única linha de resultado."
+    }
+  ]
+}

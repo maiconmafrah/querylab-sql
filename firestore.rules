@@ -6,5 +6,18 @@ service cloud.firestore {
     match /progressos/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
+
+    // Ranking público: qualquer um lê, só o dono escreve o próprio apelido e XP.
+    match /rankings/{uid} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['apelido', 'xp', 'atualizadoEm'])
+        && request.resource.data.apelido is string
+        && request.resource.data.apelido.size() >= 2
+        && request.resource.data.apelido.size() <= 24
+        && request.resource.data.xp is int
+        && request.resource.data.xp >= 0;
+    }
   }
 }

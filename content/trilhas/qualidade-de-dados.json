@@ -4,5 +4,5 @@
   "titulo": "Qualidade de Dados",
   "descricao": "Incidentes de pipeline que acontecem de verdade: NULLs traiçoeiros, chaves órfãs e cargas duplicadas. Aqui o SQL vira ferramenta de investigação.",
   "missoes": ["nulls-media", "pedidos-orfaos", "receita-dobrada"],
-  "simulado_final": "sql-intermediario"
+  "simulado_final": "sql-qualidade-de-dados"
 }

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { CartaoDesafio } from '../componentes/CartaoDesafio.tsx';
 import { CartaoMissao } from '../componentes/CartaoMissao.tsx';
 import { BarraProgresso } from '../componentes/comum.tsx';
 import { Icone } from '../componentes/Icone.tsx';
@@ -12,9 +13,12 @@ import {
   resumoTrilha,
   statusMissao,
 } from '../conteudo/status.ts';
+import { useAutenticacao } from '../estado/autenticacao.ts';
 import { lerConsulta, useProgresso, type Progresso } from '../estado/progresso.ts';
+import { useRanking } from '../estado/ranking.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
-import { dataPorExtenso, doisDigitos, iniciais } from '../lib/formato.ts';
+import { firebaseDisponivel } from '../lib/firebase.ts';
+import { dataPorExtenso, doisDigitos, formatarNumero, iniciais } from '../lib/formato.ts';
 import { calcularSequencia, dataLocal, inicialDiaSemana, ultimosDias } from '../lib/niveis.ts';
 import type { Simulado, Treinamento } from '../tipos.ts';
 
@@ -50,6 +54,11 @@ export function Inicio() {
         {simulado && <CartaoSimulado simulado={simulado} progresso={progresso} />}
         <CartaoTrilhas progresso={progresso} missaoAtual={missao} />
         <CartaoSequencia progresso={progresso} />
+      </div>
+
+      <div className="inicio__secundarios">
+        <CartaoDesafio />
+        <CartaoRankingResumo />
       </div>
 
       {sugestoes.length > 0 && (
@@ -246,6 +255,44 @@ function CartaoSequencia({ progresso }: { progresso: Progresso }) {
             ? `Rode uma consulta ou resolva um checkpoint hoje para chegar a ${sequencia + 1} dias.`
             : 'Rode uma consulta ou resolva um checkpoint hoje para começar sua sequência.'}
       </p>
+    </article>
+  );
+}
+
+function CartaoRankingResumo() {
+  const { usuario } = useAutenticacao();
+  const estado = useRanking();
+  const TOPO = 5;
+
+  return (
+    <article className="cartao ranking-resumo">
+      <div className="linha-entre">
+        <h2 className="titulo-secao">
+          <Icone nome="trofeu" tamanho={17} />
+          Ranking
+        </h2>
+        <Link to="/ranking" className="link-forte">
+          ver tudo
+        </Link>
+      </div>
+
+      {!firebaseDisponivel || estado.fase === 'indisponivel' || estado.fase === 'erro' ? (
+        <p className="ranking-resumo__vazio">Ranking indisponível no momento.</p>
+      ) : estado.fase === 'carregando' ? (
+        <p className="ranking-resumo__vazio">Carregando…</p>
+      ) : estado.linhas.length === 0 ? (
+        <p className="ranking-resumo__vazio">Ninguém no ranking ainda. Entre com Google e defina um apelido pra ser o primeiro.</p>
+      ) : (
+        <ol className="ranking-resumo__lista">
+          {estado.linhas.slice(0, TOPO).map((linha, i) => (
+            <li key={linha.uid} className={linha.uid === usuario?.uid ? 'ranking-resumo__linha ranking-resumo__linha--voce' : 'ranking-resumo__linha'}>
+              <span className="ranking-resumo__posicao">{i + 1}</span>
+              <span className="ranking-resumo__apelido">{linha.apelido}</span>
+              <span className="mono ranking-resumo__xp">{formatarNumero(linha.xp)} XP</span>
+            </li>
+          ))}
+        </ol>
+      )}
     </article>
   );
 }

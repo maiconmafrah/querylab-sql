@@ -1,0 +1,61 @@
+{
+  "id": "clientes-sp-rj-recentes",
+  "titulo": "A campanha do Sudeste",
+  "resumo": "O marketing regional quer uma lista bem específica, e o filtro vai precisar de mais de uma condição.",
+  "tema": "consultas-basicas",
+  "dificuldade": "facil",
+  "duracao_min": 15,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-18",
+  "chamado": [
+    {
+      "autor": "Bianca",
+      "papel": "Marketing regional",
+      "texto": "Vamos lançar uma campanha pro Sudeste. Primeiro quero ver clientes de SP ou RJ. Depois, só os que se cadastraram a partir de junho de 2025 pra frente — clientes muito antigos já receberam outra campanha parecida."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "Combine condições com AND (as duas precisam ser verdadeiras) ou OR (pelo menos uma precisa ser verdadeira). Datas em DuckDB se escrevem como DATE 'AAAA-MM-DD'."
+    }
+  ],
+  "consulta_inicial": "-- Veja o formato da data de cadastro\nSELECT nome, uf, cadastrado_em\nFROM clientes\nLIMIT 5;",
+  "checkpoints": [
+    {
+      "titulo": "SP ou RJ",
+      "pergunta": "Mostre nome e cidade dos clientes de SP ou RJ.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, cidade\nFROM clientes\nWHERE uf = 'SP' OR uf = 'RJ';",
+      "xp": 30,
+      "dicas": [
+        "OR mantém a linha se PELO MENOS UMA das condições for verdadeira.",
+        "WHERE uf = 'SP' OR uf = 'RJ' — repare que a coluna uf aparece nas duas condições."
+      ],
+      "explicacao": "Diferente do AND (que exige as duas condições verdadeiras), o OR passa a linha se qualquer uma das condições bater. Aqui, basta o cliente ser de SP ou de RJ."
+    },
+    {
+      "titulo": "E que sejam recentes",
+      "pergunta": "Quantos clientes de SP se cadastraram a partir de 01/06/2025 (incluindo esse dia)?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM clientes WHERE uf = 'SP' AND cadastrado_em >= DATE '2025-06-01'",
+      "xp": 40,
+      "dicas": [
+        "AND exige que as duas condições sejam verdadeiras ao mesmo tempo.",
+        "\"A partir de\" inclui o próprio dia, então use >= DATE '2025-06-01'."
+      ],
+      "explicacao": "AND é mais restritivo que OR: só passam as linhas que atendem a TODAS as condições. Aqui, ser de SP e ter cadastro em 01/06/2025 ou depois."
+    },
+    {
+      "titulo": "Juntando tudo",
+      "pergunta": "Mostre nome, uf e cadastrado_em dos clientes de SP OU RJ que se cadastraram a partir de 01/06/2025.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, uf, cadastrado_em\nFROM clientes\nWHERE (uf = 'SP' OR uf = 'RJ')\n  AND cadastrado_em >= DATE '2025-06-01';",
+      "xp": 50,
+      "dicas": [
+        "AND tem prioridade sobre OR. Sem parênteses, \"uf = 'SP' OR uf = 'RJ' AND cadastrado_em >= ...\" seria lido como \"SP de qualquer data, ou RJ recente\" — não é isso que queremos.",
+        "Use parênteses pra deixar explícito: (uf = 'SP' OR uf = 'RJ') AND cadastrado_em >= DATE '2025-06-01'."
+      ],
+      "explicacao": "Quando AND e OR aparecem juntos, o AND é avaliado primeiro. Por isso o (uf = 'SP' OR uf = 'RJ') precisa de parênteses: eles forçam o \"ou\" a ser resolvido antes do \"e\", exatamente como na campanha pedida."
+    }
+  ]
+}

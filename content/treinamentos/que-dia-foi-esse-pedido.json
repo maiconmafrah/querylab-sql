@@ -1,0 +1,62 @@
+{
+  "id": "que-dia-foi-esse-pedido",
+  "titulo": "Que dia foi esse pedido",
+  "resumo": "Um cliente diz que fez o pedido num dia específico, e a logística precisa confirmar isso sem se perder na hora.",
+  "tema": "datas",
+  "dificuldade": "facil",
+  "duracao_min": 15,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-23",
+  "chamado": [
+    {
+      "autor": "Renato",
+      "papel": "Logística",
+      "texto": "Um cliente diz que fez o pedido dia 15/06 mas não recebeu nada. O sistema guarda data E hora juntas nessa coluna criado_em — preciso confirmar quantos pedidos caíram nesse dia certinho, sem a hora atrapalhar a conta."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "criado_em é TIMESTAMP: tem data e hora. Pra comparar ou agrupar só pelo dia, descarte a hora com CAST(criado_em AS DATE)."
+    }
+  ],
+  "consulta_inicial": "-- Repare que criado_em tem data e hora junto\nSELECT pedido_id, criado_em\nFROM pedidos\nLIMIT 5;",
+  "checkpoints": [
+    {
+      "titulo": "Confirmando o dia",
+      "pergunta": "Quantos pedidos (de qualquer status) foram feitos no dia 15/06/2026?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM pedidos WHERE CAST(criado_em AS DATE) = DATE '2026-06-15'",
+      "xp": 30,
+      "dicas": [
+        "CAST(criado_em AS DATE) descarta a hora, sobrando só a data.",
+        "Compare a data com DATE '2026-06-15'."
+      ],
+      "explicacao": "criado_em guarda hora até o segundo, então comparar direto com uma data raramente bate. CAST(coluna AS DATE) resolve isso descartando a hora antes da comparação."
+    },
+    {
+      "titulo": "Os pedidos daquele dia",
+      "pergunta": "Mostre pedido_id e criado_em dos pedidos feitos em 15/06/2026, do mais cedo para o mais tarde.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT pedido_id, criado_em\nFROM pedidos\nWHERE CAST(criado_em AS DATE) = DATE '2026-06-15'\nORDER BY criado_em;",
+      "xp": 40,
+      "dicas": [
+        "O WHERE usa a versão sem hora (CAST), mas o SELECT e o ORDER BY podem continuar usando criado_em com hora e tudo."
+      ],
+      "explicacao": "Só porque você filtrou por CAST(criado_em AS DATE) não significa que precisa exibir a data sem hora — o WHERE e o SELECT são independentes."
+    },
+    {
+      "titulo": "Um resumo diário",
+      "pergunta": "Monte um resumo dos 5 primeiros dias de junho de 2026 (01 a 05/06): dia (a data, sem hora) e qtd (quantidade de pedidos).",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT CAST(criado_em AS DATE) AS dia, COUNT(*) AS qtd\nFROM pedidos\nWHERE criado_em >= DATE '2026-06-01'\n  AND criado_em < DATE '2026-06-06'\nGROUP BY 1\nORDER BY 1;",
+      "xp": 50,
+      "dicas": [
+        "Você pode agrupar por uma expressão, não só por uma coluna: GROUP BY CAST(criado_em AS DATE), ou GROUP BY 1 pra não repetir a expressão.",
+        "O filtro de intervalo (>= início AND < depois do fim) é mais seguro que comparar só a data final."
+      ],
+      "explicacao": "GROUP BY aceita qualquer expressão, não só nomes de coluna — inclusive CAST(criado_em AS DATE). Isso transforma um TIMESTAMP em \"balde por dia\", a base de qualquer relatório diário."
+    }
+  ]
+}

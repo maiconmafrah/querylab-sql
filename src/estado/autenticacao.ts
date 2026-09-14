@@ -56,9 +56,32 @@ export function useAutenticacao(): EstadoAuth {
   return local;
 }
 
+const CHAVE_LOGIN_RECENTE = 'querylab:login-recente';
+
+/** Marca que um login acabou de acontecer, pra pedir o apelido assim que a conta carregar. */
+function marcarLoginRecente() {
+  try {
+    sessionStorage.setItem(CHAVE_LOGIN_RECENTE, '1');
+  } catch {
+    // ignora: sem sessionStorage, só não pede o apelido automaticamente
+  }
+}
+
+/** Lê e apaga a marca de login recente — por isso só dispara o pedido de apelido uma vez. */
+export function consumirLoginRecente(): boolean {
+  try {
+    if (sessionStorage.getItem(CHAVE_LOGIN_RECENTE) !== '1') return false;
+    sessionStorage.removeItem(CHAVE_LOGIN_RECENTE);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Tenta popup (mais confiável quando funciona); só cai para redirecionamento se o popup for de fato bloqueado. */
 export async function entrarComGoogle(): Promise<void> {
   const kit = await carregarFirebase();
+  marcarLoginRecente();
   try {
     await kit.authApi.signInWithPopup(kit.auth, kit.googleProvider);
   } catch (erro: unknown) {
@@ -66,6 +89,11 @@ export async function entrarComGoogle(): Promise<void> {
     if (codigo === 'auth/popup-blocked' || codigo === 'auth/operation-not-supported-in-this-environment') {
       await kit.authApi.signInWithRedirect(kit.auth, kit.googleProvider);
       return;
+    }
+    try {
+      sessionStorage.removeItem(CHAVE_LOGIN_RECENTE);
+    } catch {
+      // ignora
     }
     throw erro;
   }

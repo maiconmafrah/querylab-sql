@@ -11,7 +11,17 @@ export type StatusSincronizacao = 'ocioso' | 'sincronizando' | 'sincronizado' | 
 
 async function enviar(uid: string) {
   const kit = await carregarFirebase();
-  await kit.firestoreApi.setDoc(kit.firestoreApi.doc(kit.db, 'progressos', uid), JSON.parse(exportarProgresso()));
+  const progresso = JSON.parse(exportarProgresso()) as { xp: number; apelido?: string };
+  await kit.firestoreApi.setDoc(kit.firestoreApi.doc(kit.db, 'progressos', uid), progresso);
+
+  // Ranking público: só existe pra quem já escolheu um apelido.
+  if (progresso.apelido) {
+    await kit.firestoreApi.setDoc(kit.firestoreApi.doc(kit.db, 'rankings', uid), {
+      apelido: progresso.apelido,
+      xp: progresso.xp,
+      atualizadoEm: new Date().toISOString(),
+    });
+  }
 }
 
 /** Monte uma vez perto da raiz do app: mantém o progresso local e o da nuvem sempre em sincronia. */

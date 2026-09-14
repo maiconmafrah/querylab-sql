@@ -1,10 +1,12 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { CampoApelido } from '../componentes/Apelido.tsx';
 import { BarraProgresso } from '../componentes/comum.tsx';
 import { Icone, type NomeIcone } from '../componentes/Icone.tsx';
 import { Modal } from '../componentes/Modal.tsx';
 import { nomeTema, simulados, treinamentos } from '../conteudo/index.ts';
 import { simuladoAprovado, tentativasSimulado, xpGanhoMissao } from '../conteudo/status.ts';
+import { useAutenticacao } from '../estado/autenticacao.ts';
 import {
   apagarProgresso,
   definirModoLivre,
@@ -21,6 +23,7 @@ import { contarAtividadesPorDia, gradeAtividade, totalPulsos } from '../lib/ativ
 export function Progresso() {
   useTitulo('Progresso');
   const progresso = useProgresso();
+  const { usuario } = useAutenticacao();
   const nivel = infoNivel(progresso.xp);
   const hoje = dataLocal();
   const sequencia = calcularSequencia(progresso.dias, hoje);
@@ -173,6 +176,20 @@ export function Progresso() {
         <h2 className="titulo-secao" id="titulo-configuracoes">
           Configurações
         </h2>
+
+        {usuario && (
+          <div className="configuracoes__linha">
+            <div className="configuracoes__texto">
+              <strong>Apelido do ranking</strong>
+              <span>
+                {progresso.apelido
+                  ? `Você aparece no ranking como "${progresso.apelido}".`
+                  : 'Defina um apelido pra aparecer no ranking com seu XP.'}
+              </span>
+            </div>
+            <CampoApelido atual={progresso.apelido} />
+          </div>
+        )}
 
         <label className="interruptor">
           <input type="checkbox" checked={progresso.modoLivre} onChange={(evento) => definirModoLivre(evento.target.checked)} />

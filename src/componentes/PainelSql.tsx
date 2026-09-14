@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { EstadoAmbiente, PainelSqlEstado } from '../hooks/useAmbiente.ts';
 import { formatarNumero } from '../lib/formato.ts';
-import { Carregando, TECLA_ATALHO } from './comum.tsx';
+import { Carregando, MensagemErroSql, TECLA_ATALHO } from './comum.tsx';
 import { EditorSql, type EditorSqlHandle } from './EditorSql.tsx';
 import { Icone } from './Icone.tsx';
 import { TabelaResultado } from './TabelaResultado.tsx';
@@ -180,16 +180,11 @@ function CorpoResultado({
       return <Carregando texto="Rodando…" />;
     case 'erro':
       return (
-        <div className="aviso aviso--erro erro-sql" role="alert">
-          <Icone nome="alerta" />
-          <div>
-            <strong>
-              {execucao.titulo}
-              {execucao.total > 1 ? ` (no comando ${execucao.comando} de ${execucao.total})` : ''}
-            </strong>
-            <pre>{execucao.mensagem}</pre>
-          </div>
-        </div>
+        <MensagemErroSql
+          titulo={execucao.titulo}
+          mensagem={execucao.mensagem}
+          sufixo={execucao.total > 1 ? ` (no comando ${execucao.comando} de ${execucao.total})` : ''}
+        />
       );
     case 'ok':
       return <TabelaResultado resultado={execucao.resultado} alturaMaxima={alturaResultado} />;

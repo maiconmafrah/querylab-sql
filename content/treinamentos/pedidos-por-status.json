@@ -1,0 +1,62 @@
+{
+  "id": "pedidos-por-status",
+  "titulo": "Um resumo por status",
+  "resumo": "Operações não quer mais um número só — quer o resumo quebrado por status, em forma de tabela.",
+  "tema": "agregacoes",
+  "dificuldade": "medio",
+  "duracao_min": 15,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-21",
+  "chamado": [
+    {
+      "autor": "Júlia",
+      "papel": "Operações",
+      "texto": "O resumo de pedidos pagos ajudou, mas agora eu preciso ver os três status lado a lado: pago, pendente e cancelado. Quantos pedidos e quanto dinheiro tem em cada um. E ordena do status com mais pedidos pro com menos."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "Pra resumir por grupo (em vez de resumir tudo numa linha só) existe o GROUP BY: ele cria uma linha de resultado pra cada valor distinto da coluna."
+    }
+  ],
+  "consulta_inicial": "-- Quais status existem?\nSELECT DISTINCT status\nFROM pedidos;",
+  "checkpoints": [
+    {
+      "titulo": "Quantos pedidos por status",
+      "pergunta": "Mostre quantos pedidos existem para cada status: colunas status e qtd.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT status, COUNT(*) AS qtd\nFROM pedidos\nGROUP BY status;",
+      "xp": 40,
+      "dicas": [
+        "GROUP BY status cria uma linha de resultado para cada status diferente.",
+        "COUNT(*) dentro de um GROUP BY conta as linhas de CADA grupo, não da tabela inteira."
+      ],
+      "explicacao": "Sem GROUP BY, COUNT(*) resume tudo numa linha só. Com GROUP BY status, o banco separa as linhas em grupos por status e aplica o COUNT(*) dentro de cada grupo, gerando uma linha de resultado por grupo."
+    },
+    {
+      "titulo": "Com o valor total",
+      "pergunta": "Adicione ao resumo a coluna total, com a soma de valor_total de cada status.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT status, COUNT(*) AS qtd, SUM(valor_total) AS total\nFROM pedidos\nGROUP BY status;",
+      "xp": 50,
+      "dicas": [
+        "Você pode usar mais de uma função de agregação no mesmo GROUP BY — cada uma resume o grupo à sua maneira.",
+        "Toda coluna do SELECT que não é agregação (aqui, status) precisa estar no GROUP BY."
+      ],
+      "explicacao": "COUNT(*) e SUM(valor_total) rodam separadamente dentro de cada grupo de status, então cada linha do resultado traz a contagem E a soma daquele status específico."
+    },
+    {
+      "titulo": "Do maior pro menor",
+      "pergunta": "Ordene esse resumo do status com mais pedidos para o status com menos pedidos.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT status, COUNT(*) AS qtd, SUM(valor_total) AS total\nFROM pedidos\nGROUP BY status\nORDER BY qtd DESC;",
+      "xp": 40,
+      "dicas": [
+        "ORDER BY funciona depois do GROUP BY do mesmo jeito que numa consulta normal.",
+        "Você pode ordenar pelo apelido da coluna: ORDER BY qtd DESC."
+      ],
+      "explicacao": "A ordem de execução é SELECT (com as agregações) → FROM → WHERE → GROUP BY → ORDER BY → LIMIT. Por isso dá pra ordenar por uma coluna que só existe por causa da agregação, como qtd."
+    }
+  ]
+}

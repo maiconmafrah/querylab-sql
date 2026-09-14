@@ -1,0 +1,60 @@
+{
+  "id": "emails-que-faltam",
+  "titulo": "Quem a gente não alcança por email",
+  "resumo": "Antes de disparar a campanha por email, alguém precisa achar quem não tem email cadastrado.",
+  "tema": "nulls",
+  "dificuldade": "facil",
+  "duracao_min": 10,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-19",
+  "chamado": [
+    {
+      "autor": "Bianca",
+      "papel": "Marketing regional",
+      "texto": "Vamos disparar a campanha por email amanhã. Mas nem todo cliente tem email cadastrado — preciso saber quem são, pra avisar o time de call center e ligar pra esses."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "Quando não sabemos o email de um cliente, o campo fica NULL — não é texto vazio (''), é \"sem valor\". Pra testar isso use IS NULL ou IS NOT NULL; = NULL não funciona."
+    }
+  ],
+  "consulta_inicial": "-- Repare que email aparece em branco pra alguns clientes\nSELECT nome, email\nFROM clientes\nLIMIT 15;",
+  "checkpoints": [
+    {
+      "titulo": "Quantos estão sem email",
+      "pergunta": "Quantos clientes estão sem email cadastrado?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM clientes WHERE email IS NULL",
+      "xp": 30,
+      "dicas": [
+        "\"Sem email\" quer dizer que a coluna email está NULL, não vazia ('').",
+        "O jeito certo de testar é WHERE email IS NULL — nunca WHERE email = NULL."
+      ],
+      "explicacao": "NULL representa ausência de valor, e nenhuma comparação com = ou <> nunca dá verdadeiro pra NULL — nem NULL = NULL. Por isso SQL tem um operador só pra isso: IS NULL (e o oposto, IS NOT NULL)."
+    },
+    {
+      "titulo": "A lista pro call center",
+      "pergunta": "Mostre nome e cidade dos clientes sem email, pra alguém ligar pra eles.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, cidade\nFROM clientes\nWHERE email IS NULL;",
+      "xp": 30,
+      "dicas": [
+        "Mesma estrutura de sempre: SELECT das colunas + WHERE email IS NULL."
+      ],
+      "explicacao": "IS NULL se comporta como qualquer outro filtro do WHERE: mantém só as linhas onde a condição é verdadeira — aqui, onde não existe email cadastrado."
+    },
+    {
+      "titulo": "E quem tem email",
+      "pergunta": "Agora mostre nome e email dos 5 primeiros clientes que TÊM email cadastrado.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, email\nFROM clientes\nWHERE email IS NOT NULL\nLIMIT 5;",
+      "xp": 40,
+      "dicas": [
+        "IS NOT NULL é o oposto de IS NULL: mantém só quem TEM valor na coluna.",
+        "Combine com o LIMIT que você já conhece pra pegar só os 5 primeiros."
+      ],
+      "explicacao": "IS NOT NULL aparece bastante quando você quer garantir que só vai trabalhar com dados completos — por exemplo, antes de mandar uma campanha que depende do email existir."
+    }
+  ]
+}

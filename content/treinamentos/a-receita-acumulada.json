@@ -1,0 +1,63 @@
+{
+  "id": "a-receita-acumulada",
+  "titulo": "A receita acumulada",
+  "resumo": "O financeiro quer um gráfico de receita acumulada, dia a dia, pro início de junho.",
+  "tema": "window-functions",
+  "dificuldade": "dificil",
+  "duracao_min": 20,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-10-01",
+  "chamado": [
+    {
+      "autor": "Fernanda",
+      "papel": "Financeiro",
+      "texto": "Pro gráfico da diretoria eu preciso da receita acumulada, dia a dia — não só quanto entrou naquele dia, mas a soma de tudo até ali."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "SUM(coluna) OVER (ORDER BY data) soma a coluna linha a linha, na ordem escolhida, sem colapsar o resultado — cada linha traz o total até ali, não só o valor daquele dia."
+    }
+  ],
+  "consulta_inicial": "-- Receita por dia, sem acumular ainda\nSELECT CAST(criado_em AS DATE) AS dia, SUM(valor_total) AS receita\nFROM pedidos\nWHERE status = 'pago'\nGROUP BY 1\nORDER BY 1\nLIMIT 5;",
+  "checkpoints": [
+    {
+      "titulo": "Receita diária",
+      "pergunta": "Monte a receita diária (dia, receita) dos pedidos pagos, só dos 5 primeiros dias de junho de 2026 (01 a 05/06).",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT CAST(criado_em AS DATE) AS dia, SUM(valor_total) AS receita\nFROM pedidos\nWHERE status = 'pago'\n  AND criado_em >= DATE '2026-06-01'\n  AND criado_em < DATE '2026-06-06'\nGROUP BY 1\nORDER BY 1;",
+      "xp": 40,
+      "dicas": [
+        "É o mesmo resumo diário que você já fez antes: CAST(criado_em AS DATE) + GROUP BY 1."
+      ],
+      "explicacao": "Essa é a base do relatório: a receita de CADA dia, isolada. O próximo passo é acumular esses valores sem perder essa visão dia a dia."
+    },
+    {
+      "titulo": "Somando dia após dia",
+      "pergunta": "Agora adicione a coluna acumulado: a soma da receita até aquele dia (incluindo ele), para os mesmos 5 dias.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "tolerancia": 0.01,
+      "gabarito_sql": "SELECT CAST(criado_em AS DATE) AS dia,\n       SUM(valor_total) AS receita,\n       SUM(SUM(valor_total)) OVER (ORDER BY CAST(criado_em AS DATE)) AS acumulado\nFROM pedidos\nWHERE status = 'pago'\n  AND criado_em >= DATE '2026-06-01'\n  AND criado_em < DATE '2026-06-06'\nGROUP BY 1\nORDER BY 1;",
+      "xp": 60,
+      "dicas": [
+        "SUM(SUM(valor_total)) parece estranho, mas faz sentido: o SUM de dentro agrega os pedidos do dia; o SUM(...) OVER de fora acumula esses totais diários ao longo da ordem.",
+        "OVER (ORDER BY CAST(criado_em AS DATE)) sem PARTITION BY soma tudo, na ordem dos dias."
+      ],
+      "explicacao": "Uma window function pode envolver o resultado de uma agregação (o SUM de dentro, já resumido por dia) e acumular ESSE resultado, linha a linha, na ordem que você escolher. É assim que se calcula qualquer \"total corrido\"."
+    },
+    {
+      "titulo": "Conferindo o total",
+      "pergunta": "No fim desses 5 dias, qual é o total acumulado? (Deve bater com a soma da receita dos 5 dias.)",
+      "tipo": "valor",
+      "tolerancia": 0.01,
+      "resposta_sql": "SELECT SUM(valor_total) FROM pedidos WHERE status = 'pago' AND criado_em >= DATE '2026-06-01' AND criado_em < DATE '2026-06-06'",
+      "xp": 50,
+      "dicas": [
+        "O último valor da coluna acumulado é, por definição, a soma de tudo — dá pra calcular direto com um SUM simples, sem window function."
+      ],
+      "explicacao": "Essa é uma boa forma de conferir seu próprio trabalho: o último número de uma coluna acumulada sempre tem que bater com a soma total do período, calculada do jeito simples."
+    }
+  ]
+}

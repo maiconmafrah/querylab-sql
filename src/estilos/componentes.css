@@ -1,3 +1,36 @@
+/* ============ Apelido ============ */
+.campo-apelido {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.campo-apelido .campo {
+  flex: 1;
+  min-width: 180px;
+}
+
+.campo-apelido__erro {
+  flex-basis: 100%;
+  margin: 0;
+  color: #a3321a;
+  font-size: 13px;
+}
+
+[data-tema='escuro'] .campo-apelido__erro {
+  color: #ff8f6b;
+}
+
+.campo-apelido__depois {
+  display: block;
+  margin-top: 12px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 13px;
+}
+
 /* ============ Painel SQL (editor + resultado) ============ */
 .painel-sql {
   display: flex;
@@ -169,6 +202,20 @@
   font-size: 12.5px;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.erro-sql__explicacao {
+  margin: 4px 0 0;
+}
+
+.erro-sql__detalhes {
+  margin-top: 8px;
+}
+
+.erro-sql__detalhes summary {
+  cursor: pointer;
+  font-size: 12.5px;
+  opacity: 0.75;
 }
 
 /* ============ Tabela de resultado ============ */

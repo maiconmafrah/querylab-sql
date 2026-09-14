@@ -1,0 +1,60 @@
+{
+  "id": "acima-da-media",
+  "titulo": "Acima da média",
+  "resumo": "Precificação quer uma lista que se atualiza sozinha, sem ninguém precisar recalcular a média toda vez.",
+  "tema": "subqueries",
+  "dificuldade": "medio",
+  "duracao_min": 15,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-27",
+  "chamado": [
+    {
+      "autor": "Simone",
+      "papel": "Precificação",
+      "texto": "Quero uma lista dos produtos que custam acima da média. Mas não me dê um número fixo — a média muda toda vez que a gente cadastra um produto novo, e a consulta tem que calcular isso sozinha."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "Uma subquery entre parênteses roda primeiro e devolve um valor que a consulta de fora usa. WHERE coluna > (SELECT AVG(coluna) FROM tabela) compara cada linha com a média calculada na hora."
+    }
+  ],
+  "consulta_inicial": "-- A subquery entre parênteses roda primeiro\nSELECT AVG(preco) FROM produtos;",
+  "checkpoints": [
+    {
+      "titulo": "A média de hoje",
+      "pergunta": "Qual é o preço médio de todos os produtos? Arredonde para 2 casas decimais.",
+      "tipo": "valor",
+      "tolerancia": 0.01,
+      "resposta_sql": "SELECT ROUND(AVG(preco), 2) FROM produtos",
+      "xp": 30,
+      "dicas": [
+        "AVG(preco) sozinho, sem WHERE nem GROUP BY, resume a tabela inteira numa linha."
+      ],
+      "explicacao": "Esse número é só pra você conferir mentalmente o resultado dos próximos checkpoints — mas repare que ele pode mudar amanhã se a loja cadastrar produtos novos."
+    },
+    {
+      "titulo": "Os produtos acima da média",
+      "pergunta": "Mostre nome, categoria e preco dos produtos com preco ACIMA da média de todos os produtos — usando uma subquery, não o número fixo do checkpoint anterior.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, categoria, preco\nFROM produtos\nWHERE preco > (SELECT AVG(preco) FROM produtos);",
+      "xp": 50,
+      "dicas": [
+        "Troque o número fixo por (SELECT AVG(preco) FROM produtos) inteiro, entre parênteses, no lugar onde iria o valor.",
+        "O banco resolve a subquery primeiro (vira um número só) e depois compara cada produto com ele."
+      ],
+      "explicacao": "Diferente de um número digitado, essa subquery recalcula a média toda vez que a consulta roda. Se a loja cadastrar um produto caríssimo amanhã, a lista muda sozinha — sem ninguém editar a consulta."
+    },
+    {
+      "titulo": "E nos pedidos também",
+      "pergunta": "Mostre pedido_id, cliente_id e valor_total dos pedidos pagos com valor_total ACIMA da média de valor_total dos pedidos pagos.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT pedido_id, cliente_id, valor_total\nFROM pedidos\nWHERE status = 'pago'\n  AND valor_total > (SELECT AVG(valor_total) FROM pedidos WHERE status = 'pago');",
+      "xp": 50,
+      "dicas": [
+        "A subquery também precisa do WHERE status = 'pago' — senão a média inclui pedidos cancelados e pendentes, que não deveriam contar."
+      ],
+      "explicacao": "A mesma ideia de \"comparar com a média calculada na hora\" funciona em qualquer tabela. Repare que o filtro de status precisa aparecer nos dois lugares: na consulta de fora E dentro da subquery, porque são cálculos independentes."
+    }
+  ]
+}

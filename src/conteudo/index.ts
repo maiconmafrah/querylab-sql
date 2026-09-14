@@ -1,7 +1,8 @@
 // Carrega todo o conteúdo de /content. Arquivos novos aparecem automaticamente no site.
-import type { Dificuldade, SecaoReferencia, Simulado, Tema, Treinamento, Trilha } from '../tipos.ts';
+import type { Dificuldade, QuestaoMultipla, SecaoReferencia, Simulado, Tema, Treinamento, Trilha } from '../tipos.ts';
 import temasJson from '../../content/temas.json';
 import referenciaJson from '../../content/referencia.json';
+import desafiosJson from '../../content/desafios.json';
 
 const modulosTreinamentos = import.meta.glob<Treinamento>('../../content/treinamentos/*.json', {
   eager: true,
@@ -19,6 +20,7 @@ const modulosDatasets = import.meta.glob<string>('../../content/datasets/*.sql',
 
 export const temas: Tema[] = temasJson;
 export const referencia = referenciaJson as SecaoReferencia[];
+export const desafios: QuestaoMultipla[] = desafiosJson as QuestaoMultipla[];
 
 export const trilhas: Trilha[] = Object.values(modulosTrilhas).sort((a, b) => a.numero - b.numero);
 export const simulados: Simulado[] = Object.values(modulosSimulados).sort((a, b) => a.numero - b.numero);

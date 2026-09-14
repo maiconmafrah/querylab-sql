@@ -1,0 +1,19 @@
+{
+  "id": "consultas-avancadas",
+  "numero": 3,
+  "titulo": "Consultas Avançadas",
+  "descricao": "Datas, subqueries, CTEs e window functions para relatórios mais sofisticados, sempre em cima dos pedidos e produtos da loja on-line.",
+  "missoes": [
+    "que-dia-foi-esse-pedido",
+    "o-mes-fechou-como",
+    "a-hora-do-rush",
+    "o-prazo-e-a-distancia",
+    "acima-da-media",
+    "um-passo-de-cada-vez",
+    "quem-nunca-comprou",
+    "o-ranking-por-categoria",
+    "a-receita-acumulada",
+    "mes-contra-mes"
+  ],
+  "simulado_final": "sql-intermediario"
+}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { CodigoSql } from '../componentes/CodigoSql.tsx';
-import { BarraProgresso, Carregando, TECLA_ATALHO } from '../componentes/comum.tsx';
+import { BarraProgresso, Carregando, MensagemErroSql, TECLA_ATALHO } from '../componentes/comum.tsx';
 import { EditorSql } from '../componentes/EditorSql.tsx';
 import { Icone } from '../componentes/Icone.tsx';
 import { Modal } from '../componentes/Modal.tsx';
@@ -435,15 +435,7 @@ function QuestaoDeSql({
       </p>
       {carregando && <Carregando texto="Preparando o banco para você testar…" />}
       {teste.fase === 'rodando' && <Carregando texto="Rodando…" />}
-      {teste.fase === 'erro' && (
-        <div className="aviso aviso--erro" role="alert">
-          <Icone nome="alerta" />
-          <div>
-            <strong>{teste.titulo}</strong>
-            <pre className="erro-sql__mensagem">{teste.mensagem}</pre>
-          </div>
-        </div>
-      )}
+      {teste.fase === 'erro' && <MensagemErroSql titulo={teste.titulo} mensagem={teste.mensagem} />}
       {teste.fase === 'ok' && (
         <div className="cartao questao-sql__resultado">
           <TabelaResultado resultado={teste.resultado} limite={50} alturaMaxima={260} />

@@ -1,0 +1,60 @@
+{
+  "id": "a-hora-do-rush",
+  "titulo": "A hora do rush",
+  "resumo": "Operações quer montar a escala de atendimento com base no horário em que os pedidos realmente chegam.",
+  "tema": "datas",
+  "dificuldade": "medio",
+  "duracao_min": 15,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-25",
+  "chamado": [
+    {
+      "autor": "Júlia",
+      "papel": "Operações",
+      "texto": "Vou montar a escala de atendimento e preciso saber em que horário do dia mais chegam pedidos. Não interessa o dia, só a hora do relógio."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "EXTRACT(hour FROM coluna) pega só a hora (de 0 a 23) de um TIMESTAMP, ignorando o resto. Também dá pra extrair day, month, year e outras partes."
+    }
+  ],
+  "consulta_inicial": "-- Veja a hora de cada pedido\nSELECT criado_em, EXTRACT(hour FROM criado_em) AS hora\nFROM pedidos\nLIMIT 5;",
+  "checkpoints": [
+    {
+      "titulo": "Quantos às 14h",
+      "pergunta": "Quantos pedidos foram feitos na hora 14 (das 14:00 às 14:59), somando todos os dias?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM pedidos WHERE EXTRACT(hour FROM criado_em) = 14",
+      "xp": 30,
+      "dicas": [
+        "EXTRACT(hour FROM criado_em) devolve um número de 0 a 23.",
+        "Compare esse número com = 14 no WHERE."
+      ],
+      "explicacao": "EXTRACT funciona como uma função normal dentro do WHERE: primeiro calcula a hora de cada linha, depois compara com o valor pedido."
+    },
+    {
+      "titulo": "O movimento por hora",
+      "pergunta": "Monte um resumo por hora do dia: hora e qtd (quantidade de pedidos), uma linha por hora.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT EXTRACT(hour FROM criado_em) AS hora, COUNT(*) AS qtd\nFROM pedidos\nGROUP BY 1\nORDER BY 1;",
+      "xp": 40,
+      "dicas": [
+        "Assim como CAST(criado_em AS DATE) no checkpoint sobre dias, dá pra agrupar por EXTRACT(hour FROM criado_em) do mesmo jeito."
+      ],
+      "explicacao": "GROUP BY aceita qualquer expressão que apareça no SELECT, inclusive o resultado de EXTRACT. Cada hora do dia vira um grupo."
+    },
+    {
+      "titulo": "O pico do dia",
+      "pergunta": "Agora mostre só a hora com mais pedidos: hora e qtd, uma única linha.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT EXTRACT(hour FROM criado_em) AS hora, COUNT(*) AS qtd\nFROM pedidos\nGROUP BY 1\nORDER BY qtd DESC\nLIMIT 1;",
+      "xp": 50,
+      "dicas": [
+        "É o resumo do checkpoint anterior, ordenado pela quantidade e cortado na primeira linha."
+      ],
+      "explicacao": "O combo GROUP BY + ORDER BY + LIMIT 1 acha \"o campeão de qualquer coisa\" — funciona igual com hora, dia, categoria ou cliente."
+    }
+  ]
+}

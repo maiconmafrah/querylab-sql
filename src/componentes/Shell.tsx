@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { referencia, simulados, treinamentos, trilhas } from '../conteudo/index.ts';
 import { ehNovo, resumoTrilha, statusMissao } from '../conteudo/status.ts';
@@ -6,9 +6,10 @@ import { useProgresso, type Progresso } from '../estado/progresso.ts';
 import { calcularSequencia, dataLocal, infoNivel } from '../lib/niveis.ts';
 import { formatarNumero } from '../lib/formato.ts';
 import { useTema } from '../hooks/useTema.ts';
-import { entrarComGoogle, sair, useAutenticacao } from '../estado/autenticacao.ts';
+import { consumirLoginRecente, entrarComGoogle, sair, useAutenticacao } from '../estado/autenticacao.ts';
 import { useSincronizarProgresso } from '../estado/sincronizacao.ts';
 import { firebaseDisponivel } from '../lib/firebase.ts';
+import { ModalApelido } from './Apelido.tsx';
 import { BarraProgresso } from './comum.tsx';
 import { Icone, IconeGoogle, type NomeIcone } from './Icone.tsx';
 
@@ -115,6 +116,7 @@ function montarMenu(caminho: string, busca: URLSearchParams, hash: string, progr
         ativo: caminho === '/referencia' && hash === `#${secao.id}`,
       })),
     },
+    { id: 'ranking', rotulo: 'Ranking', icone: 'trofeu', para: '/ranking', ativo: caminho === '/ranking' },
     { id: 'progresso', rotulo: 'Progresso', icone: 'grafico', para: '/progresso', ativo: caminho === '/progresso' },
   ];
 }
@@ -222,8 +224,18 @@ function CartaoNivel({ progresso }: { progresso: Progresso }) {
 export function Shell() {
   const localizacao = useLocation();
   const progresso = useProgresso();
+  const { usuario } = useAutenticacao();
   const [abertos, setAbertos] = useState<string[]>(lerGruposAbertos);
   const [menuMovelAberto, setMenuMovelAberto] = useState(false);
+  const [pedirApelido, setPedirApelido] = useState(false);
+  const usuarioAnterior = useRef(usuario);
+
+  useEffect(() => {
+    if (usuario && !usuarioAnterior.current && consumirLoginRecente() && !progresso.apelido) {
+      setPedirApelido(true);
+    }
+    usuarioAnterior.current = usuario;
+  }, [usuario, progresso.apelido]);
 
   const menu = montarMenu(localizacao.pathname, new URLSearchParams(localizacao.search), localizacao.hash, progresso);
   const grupoAtivo = menu.find((item) => item.filhos && item.ativo)?.id;
@@ -336,6 +348,8 @@ export function Shell() {
       <main id="conteudo" className="conteudo" tabIndex={-1}>
         <Outlet />
       </main>
+
+      <ModalApelido aberto={pedirApelido} aoFechar={() => setPedirApelido(false)} />
     </div>
   );
 }

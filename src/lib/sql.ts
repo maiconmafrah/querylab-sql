@@ -78,6 +78,9 @@ export function tipoComando(comando: string): string {
 /** Traduz o começo das mensagens de erro do DuckDB para um título amigável. */
 export function tituloErro(mensagem: string): string {
   const tipos: [RegExp, string][] = [
+    // Casos específicos de Binder Error, checados antes do genérico abaixo.
+    [/Ambiguous reference to column/i, 'Coluna ambígua'],
+    [/must appear in the GROUP BY clause/i, 'Coluna fora do GROUP BY'],
     [/^Parser Error/i, 'Erro de sintaxe'],
     [/^Binder Error/i, 'Coluna ou tabela não encontrada'],
     [/^Catalog Error/i, 'Tabela ou função não existe'],
@@ -90,4 +93,43 @@ export function tituloErro(mensagem: string): string {
     [/^TransactionContext Error/i, 'Erro de transação'],
   ];
   return tipos.find(([padrao]) => padrao.test(mensagem))?.[1] ?? 'Erro ao executar a consulta';
+}
+
+/**
+ * Tenta traduzir a mensagem crua do DuckDB numa explicação em português, pros erros mais comuns
+ * de quem está aprendendo. Devolve null quando não reconhece o formato — nesse caso, mostre a
+ * mensagem original.
+ */
+export function explicarErro(mensagem: string): string | null {
+  let m: RegExpExecArray | null;
+
+  if ((m = /Ambiguous reference to column name "([^"]+)" \(use: (.+?)\)/i.exec(mensagem))) {
+    const opcoes = m[2].replace(/ or /gi, ' ou ');
+    return `A coluna "${m[1]}" existe em mais de uma tabela dessa consulta, e o banco não sabe qual você quer dizer. Use ${opcoes} pra indicar de qual tabela.`;
+  }
+
+  if ((m = /column "([^"]+)" must appear in the GROUP BY clause/i.exec(mensagem))) {
+    return `A coluna "${m[1]}" não está dentro de uma função de agregação (como COUNT ou SUM), então ela precisa aparecer no GROUP BY.`;
+  }
+
+  if ((m = /Referenced column "([^"]+)" not found/i.exec(mensagem))) {
+    const candidatos = /Candidate bindings:\s*(.+)/i.exec(mensagem);
+    const sugestao = candidatos?.[1].split(',')[0]?.trim();
+    return `A coluna "${m[1]}" não existe nessa tabela.${sugestao ? ` Você quis dizer ${sugestao}?` : ''}`;
+  }
+
+  if ((m = /Table with name (\S+) does not exist/i.exec(mensagem))) {
+    const sugestao = /Did you mean "([^"]+)"/i.exec(mensagem)?.[1];
+    return `A tabela "${m[1]}" não existe.${sugestao ? ` Você quis dizer "${sugestao}"?` : ''}`;
+  }
+
+  if (/syntax error at end of input/i.test(mensagem)) {
+    return 'A consulta parece ter parado no meio — falta alguma coisa no final (uma condição depois do WHERE, um valor, um parêntese fechando).';
+  }
+
+  if ((m = /syntax error at or near "([^"]+)"/i.exec(mensagem))) {
+    return `Tem alguma coisa estranha perto de "${m[1]}" — confira se não falta uma vírgula, um parêntese ou se não sobrou uma palavra a mais ali.`;
+  }
+
+  return null;
 }

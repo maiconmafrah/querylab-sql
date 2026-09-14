@@ -1,0 +1,62 @@
+{
+  "id": "o-mes-fechou-como",
+  "titulo": "O mês fechou como",
+  "resumo": "O financeiro não quer mais ver pedido por pedido — quer saber como cada mês fechou.",
+  "tema": "datas",
+  "dificuldade": "facil",
+  "duracao_min": 15,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-24",
+  "chamado": [
+    {
+      "autor": "Fernanda",
+      "papel": "Financeiro",
+      "texto": "Preciso fechar o resultado por mês, não por pedido — quero ver como cada mês foi, considerando só os pedidos pagos."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "Pra agrupar por mês (em vez de por dia exato), use DATE_TRUNC('month', coluna): ele arredonda a data para o primeiro dia daquele mês."
+    }
+  ],
+  "consulta_inicial": "-- DATE_TRUNC arredonda pro início do período\nSELECT criado_em, DATE_TRUNC('month', criado_em) AS mes\nFROM pedidos\nLIMIT 5;",
+  "checkpoints": [
+    {
+      "titulo": "Pedidos por mês",
+      "pergunta": "Mostre mes (use DATE_TRUNC('month', criado_em)) e qtd (quantidade de pedidos pagos) de cada mês.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT DATE_TRUNC('month', criado_em) AS mes, COUNT(*) AS qtd\nFROM pedidos\nWHERE status = 'pago'\nGROUP BY 1\nORDER BY 1;",
+      "xp": 30,
+      "dicas": [
+        "DATE_TRUNC('month', criado_em) vira uma \"data do mês\" (sempre dia 1). Todo pedido do mesmo mês cai no mesmo valor.",
+        "GROUP BY 1 agrupa pela primeira coluna do SELECT, sem repetir a expressão inteira."
+      ],
+      "explicacao": "DATE_TRUNC arredonda a data para o início do período pedido — aqui, o mês. Dois pedidos de dias diferentes do mesmo mês viram o mesmo valor de mes, e por isso caem no mesmo grupo."
+    },
+    {
+      "titulo": "Com a receita",
+      "pergunta": "Agora inclua a coluna receita, com a soma de valor_total de cada mês.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT DATE_TRUNC('month', criado_em) AS mes, COUNT(*) AS qtd, SUM(valor_total) AS receita\nFROM pedidos\nWHERE status = 'pago'\nGROUP BY 1\nORDER BY 1;",
+      "xp": 40,
+      "dicas": [
+        "É o mesmo GROUP BY do checkpoint anterior, só que com mais uma agregação no SELECT."
+      ],
+      "explicacao": "Qualquer quantidade de funções de agregação pode conviver no mesmo GROUP BY — cada uma resume o grupo (aqui, o mês) à sua maneira."
+    },
+    {
+      "titulo": "O melhor mês",
+      "pergunta": "Mostre só o mês (mes) com a maior receita entre os pagos, junto com a receita.",
+      "tipo": "query",
+      "tolerancia": 0.01,
+      "gabarito_sql": "SELECT DATE_TRUNC('month', criado_em) AS mes, SUM(valor_total) AS receita\nFROM pedidos\nWHERE status = 'pago'\nGROUP BY 1\nORDER BY receita DESC\nLIMIT 1;",
+      "xp": 40,
+      "dicas": [
+        "É o resumo mensal do checkpoint anterior (sem a coluna qtd), ordenado pela receita e cortado em 1 linha."
+      ],
+      "explicacao": "ORDER BY receita DESC LIMIT 1 funciona em cima de qualquer resultado agrupado, igual você já fez com rankings sem GROUP BY — a agregação só muda o que cada linha representa."
+    }
+  ]
+}

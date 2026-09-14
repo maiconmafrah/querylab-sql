@@ -5,7 +5,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import type { DuckDBConnection } from '@duckdb/node-api';
 import { compararResultados, type Celula } from '../src/lib/comparar.ts';
-import type { Checkpoint, SecaoReferencia, Simulado, Tema, Treinamento, Trilha } from '../src/tipos.ts';
+import type { Checkpoint, QuestaoMultipla, SecaoReferencia, Simulado, Tema, Treinamento, Trilha } from '../src/tipos.ts';
 import { executar, novaConexao } from './duckdb-node.ts';
 
 const PASTA = 'content';
@@ -140,6 +140,25 @@ const temas = lerJson<Tema[]>(join(PASTA, 'temas.json')) ?? [];
 const idsTemas = new Set(temas.map((tema) => tema.id));
 if (idsTemas.size !== temas.length) falha('temas.json', 'há ids de tema repetidos');
 console.log(`      ${temas.length} temas`);
+
+// ---------- Desafio diário ----------
+console.log('\nDesafio diário');
+const desafios = lerJson<QuestaoMultipla[]>(join(PASTA, 'desafios.json')) ?? [];
+const idsDesafios = new Set<string>();
+for (const [indice, desafio] of desafios.entries()) {
+  const onde = `desafios.json #${indice + 1}`;
+  exigirCampos(onde, desafio, { id: 'texto', tema: 'texto', enunciado: 'texto', explicacao: 'texto' });
+  if (idsDesafios.has(desafio.id)) falha(onde, `id "${desafio.id}" repetido`);
+  idsDesafios.add(desafio.id);
+  if (!idsTemas.has(desafio.tema)) falha(onde, `tema "${desafio.tema}" não existe em temas.json`);
+  if (desafio.tipo !== 'multipla') falha(onde, `tipo "${desafio.tipo}" inválido (o desafio diário só aceita "multipla")`);
+  const alternativas = desafio.alternativas ?? [];
+  if (alternativas.length < 2) falha(onde, 'precisa de pelo menos 2 alternativas');
+  if (!Number.isInteger(desafio.correta) || desafio.correta < 0 || desafio.correta >= alternativas.length) {
+    falha(onde, `"correta" deve ser um índice entre 0 e ${alternativas.length - 1}`);
+  }
+}
+console.log(`      ${desafios.length} desafios`);
 
 // ---------- Simulados ----------
 console.log('\nSimulados');

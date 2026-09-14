@@ -1,0 +1,59 @@
+{
+  "id": "quem-nunca-comprou",
+  "titulo": "Quem nunca comprou",
+  "resumo": "Depois da campanha do Sudeste, o marketing regional quer tentar reconquistar quem nunca chegou a comprar.",
+  "tema": "subqueries",
+  "dificuldade": "medio",
+  "duracao_min": 15,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-29",
+  "chamado": [
+    {
+      "autor": "Bianca",
+      "papel": "Marketing regional",
+      "texto": "Depois da campanha do Sudeste, quero fazer uma de \"reconquista\": clientes que se cadastraram mas nunca fizeram nenhum pedido. Ainda dá tempo de convencer esse pessoal."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "NOT EXISTS (SELECT 1 FROM outra_tabela WHERE condicao) é verdadeiro quando NENHUMA linha da outra tabela bate com a condição — ótimo pra achar quem não tem correspondência."
+    }
+  ],
+  "consulta_inicial": "-- Veja como fica um cliente COM pedido\nSELECT c.nome, p.pedido_id\nFROM clientes c\nJOIN pedidos p ON p.cliente_id = c.cliente_id\nLIMIT 5;",
+  "checkpoints": [
+    {
+      "titulo": "Quantos nunca compraram",
+      "pergunta": "Quantos clientes JAMAIS fizeram nenhum pedido (nem pago, pendente ou cancelado)?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM clientes c WHERE NOT EXISTS (SELECT 1 FROM pedidos p WHERE p.cliente_id = c.cliente_id)",
+      "xp": 30,
+      "dicas": [
+        "NOT EXISTS (SELECT 1 FROM pedidos p WHERE p.cliente_id = c.cliente_id) é verdadeiro quando esse cliente não aparece em nenhum pedido.",
+        "SELECT 1 dentro do NOT EXISTS é só uma convenção — o banco não olha pro valor, só se existe ou não alguma linha."
+      ],
+      "explicacao": "NOT EXISTS testa cliente por cliente: pra cada linha de clientes, ele verifica se existe ALGUMA linha em pedidos com o mesmo cliente_id. Se não existir nenhuma, o cliente entra na conta."
+    },
+    {
+      "titulo": "A lista de reconquista",
+      "pergunta": "Mostre nome e email dos clientes que nunca fizeram nenhum pedido.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, email\nFROM clientes c\nWHERE NOT EXISTS (\n  SELECT 1 FROM pedidos p WHERE p.cliente_id = c.cliente_id\n);",
+      "xp": 50,
+      "dicas": [
+        "É a mesma condição do checkpoint anterior, só trocando COUNT(*) por nome, email no SELECT."
+      ],
+      "explicacao": "NOT EXISTS funciona igual a qualquer outra condição do WHERE: filtra linha por linha. A diferença é que a condição dela mesma é outra consulta inteira."
+    },
+    {
+      "titulo": "E quem já comprou",
+      "pergunta": "Mostre nome e email dos clientes que JÁ fizeram pelo menos um pedido. Dica: é só trocar NOT EXISTS por EXISTS.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, email\nFROM clientes c\nWHERE EXISTS (\n  SELECT 1 FROM pedidos p WHERE p.cliente_id = c.cliente_id\n);",
+      "xp": 40,
+      "dicas": [
+        "Tire o NOT: EXISTS (...) é verdadeiro quando EXISTE pelo menos uma linha correspondente."
+      ],
+      "explicacao": "EXISTS e NOT EXISTS são opostos exatos, então juntos eles sempre dividem a tabela inteira em dois grupos que não se sobrepõem: quem tem correspondência e quem não tem."
+    }
+  ]
+}

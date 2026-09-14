@@ -1,0 +1,59 @@
+{
+  "id": "quem-comprou-o-que",
+  "titulo": "O que tinha na caixa",
+  "resumo": "O atendimento recebeu uma dúvida sobre um pedido específico, e a tabela de itens só tem IDs.",
+  "tema": "joins",
+  "dificuldade": "medio",
+  "duracao_min": 15,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-22",
+  "chamado": [
+    {
+      "autor": "Camila",
+      "papel": "Atendimento",
+      "texto": "O cliente do pedido 2 diz que faltou um item na caixa e eu preciso conferir o que foi comprado. O problema é que a tabela de itens só tem o ID do produto, não o nome — assim eu não consigo nem ler direito."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "itens_pedido guarda pedido_id, produto_id, quantidade e preco_unitario — mas o nome do produto está na tabela produtos, ligada por produto_id. Pra juntar as duas tabelas numa consulta só, use JOIN ... ON."
+    }
+  ],
+  "consulta_inicial": "-- Veja como fica sem o JOIN: só IDs\nSELECT *\nFROM itens_pedido\nWHERE pedido_id = 2;",
+  "checkpoints": [
+    {
+      "titulo": "O que a tabela de itens mostra",
+      "pergunta": "Mostre produto_id e quantidade dos itens do pedido de pedido_id = 2.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT produto_id, quantidade\nFROM itens_pedido\nWHERE pedido_id = 2;",
+      "xp": 30,
+      "dicas": [
+        "É um WHERE simples, igual você já fez antes, só que na tabela itens_pedido."
+      ],
+      "explicacao": "Sem JOIN, tudo que você tem é o produto_id — um número que não diz nada sozinho. É exatamente esse problema que o JOIN resolve."
+    },
+    {
+      "titulo": "Trazendo o nome do produto",
+      "pergunta": "Agora mostre o nome do produto e a quantidade de cada item do pedido 2, juntando itens_pedido com produtos.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT pr.nome, i.quantidade\nFROM itens_pedido i\nJOIN produtos pr ON pr.produto_id = i.produto_id\nWHERE i.pedido_id = 2;",
+      "xp": 50,
+      "dicas": [
+        "JOIN produtos pr ON pr.produto_id = i.produto_id liga cada item ao seu produto correspondente.",
+        "Dar um apelido pras tabelas (itens_pedido AS i, produtos AS pr) evita repetir o nome inteiro e deixa claro de qual tabela é cada coluna."
+      ],
+      "explicacao": "JOIN ... ON junta linhas de duas tabelas quando a condição depois do ON é verdadeira — aqui, quando o produto_id de um item bate com o produto_id de um produto. O resultado tem colunas das duas tabelas, como se fosse uma só."
+    },
+    {
+      "titulo": "Para vários pedidos",
+      "pergunta": "Mostre pedido_id, nome do produto e quantidade de todos os itens com pedido_id até 3 (pedido_id <= 3).",
+      "tipo": "query",
+      "gabarito_sql": "SELECT i.pedido_id, pr.nome, i.quantidade\nFROM itens_pedido i\nJOIN produtos pr ON pr.produto_id = i.produto_id\nWHERE i.pedido_id <= 3;",
+      "xp": 50,
+      "dicas": [
+        "É a mesma consulta do checkpoint anterior, só trocando o filtro de = 2 para <= 3 e incluindo i.pedido_id no SELECT."
+      ],
+      "explicacao": "O JOIN não muda: ele sempre liga item a produto pelo produto_id. O que muda é só o WHERE, que agora deixa passar itens de mais de um pedido — e por isso faz sentido mostrar pedido_id no resultado, pra saber de qual pedido é cada linha."
+    }
+  ]
+}

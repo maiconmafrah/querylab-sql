@@ -1,0 +1,60 @@
+{
+  "id": "clientes-de-sp",
+  "titulo": "O evento em São Paulo",
+  "resumo": "O time de eventos vai fazer uma retirada presencial em São Paulo e precisa filtrar só quem mora lá.",
+  "tema": "consultas-basicas",
+  "dificuldade": "facil",
+  "duracao_min": 10,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-15",
+  "chamado": [
+    {
+      "autor": "Débora",
+      "papel": "Eventos",
+      "texto": "Vamos fazer um evento de retirada em São Paulo semana que vem. Preciso saber quantos clientes são de lá e os contatos deles. Aproveita e separa uns produtos de Beleza pra gente levar de brinde."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "O estado do cliente fica na coluna uf da tabela clientes (sigla, ex.: 'SP'). A categoria do produto fica em produtos.categoria."
+    }
+  ],
+  "consulta_inicial": "-- Veja os valores possíveis de uf\nSELECT DISTINCT uf\nFROM clientes;",
+  "checkpoints": [
+    {
+      "titulo": "Quantos são de SP",
+      "pergunta": "Quantos clientes têm uf = 'SP'?",
+      "tipo": "valor",
+      "resposta_sql": "SELECT COUNT(*) FROM clientes WHERE uf = 'SP'",
+      "xp": 30,
+      "dicas": [
+        "WHERE uf = 'SP' filtra só as linhas de São Paulo antes de contar.",
+        "COUNT(*) conta quantas linhas passaram pelo filtro."
+      ],
+      "explicacao": "WHERE roda logo depois do FROM: o banco olha linha por linha e mantém só as que satisfazem a condição. Aqui, só as linhas com uf igual a 'SP'."
+    },
+    {
+      "titulo": "Os contatos",
+      "pergunta": "Mostre nome e email de todos os clientes de SP.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, email\nFROM clientes\nWHERE uf = 'SP';",
+      "xp": 40,
+      "dicas": [
+        "Combine o que você já sabe: escolher colunas (SELECT nome, email) e filtrar linhas (WHERE uf = 'SP').",
+        "Strings em SQL vão entre aspas simples: 'SP', não \"SP\"."
+      ],
+      "explicacao": "WHERE aceita comparar colunas de texto com = normalmente, desde que o valor esteja entre aspas simples. A ordem das cláusulas continua sendo SELECT, FROM, WHERE."
+    },
+    {
+      "titulo": "Os brindes",
+      "pergunta": "Mostre nome e preco dos produtos da categoria 'Beleza'.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, preco\nFROM produtos\nWHERE categoria = 'Beleza';",
+      "xp": 30,
+      "dicas": [
+        "É o mesmo WHERE de igualdade, só que na tabela produtos e comparando categoria."
+      ],
+      "explicacao": "O filtro WHERE coluna = 'valor' funciona do mesmo jeito em qualquer tabela e qualquer coluna de texto — o que muda é só qual coluna e qual valor você está comparando."
+    }
+  ]
+}

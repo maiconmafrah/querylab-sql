@@ -1,0 +1,62 @@
+{
+  "id": "o-prazo-e-a-distancia",
+  "titulo": "O prazo e a distância",
+  "resumo": "A logística precisa calcular prazos de entrega e medir há quanto tempo alguns pedidos foram feitos.",
+  "tema": "datas",
+  "dificuldade": "medio",
+  "duracao_min": 20,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-26",
+  "chamado": [
+    {
+      "autor": "Renato",
+      "papel": "Logística",
+      "texto": "Preciso calcular o prazo de entrega de cada pedido (sempre 7 dias depois da compra) e também saber há quantos dias alguns pedidos mais antigos foram feitos, pra um relatório de atraso."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "Some um período a uma data com + INTERVAL n DAY. Pra medir a distância entre duas datas, use DATE_DIFF('day', inicio, fim)."
+    }
+  ],
+  "consulta_inicial": "-- Somando um intervalo a uma data\nSELECT criado_em, criado_em + INTERVAL 7 DAY AS prazo\nFROM pedidos\nLIMIT 5;",
+  "checkpoints": [
+    {
+      "titulo": "O prazo de entrega",
+      "pergunta": "Para os 5 primeiros pedidos (pedido_id de 1 a 5), calcule o prazo de entrega (7 dias após o pedido). Mostre pedido_id, criado_em e prazo_entrega.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT pedido_id, criado_em, criado_em + INTERVAL 7 DAY AS prazo_entrega\nFROM pedidos\nWHERE pedido_id <= 5\nORDER BY pedido_id;",
+      "xp": 30,
+      "dicas": [
+        "coluna + INTERVAL 7 DAY soma 7 dias à data, mantendo hora e tudo."
+      ],
+      "explicacao": "INTERVAL cria um \"período\" que pode ser somado ou subtraído de uma data ou timestamp. O resultado continua sendo uma data/timestamp, só que deslocado."
+    },
+    {
+      "titulo": "Há quantos dias",
+      "pergunta": "Quantos dias se passaram entre 01/06/2026 e o pedido de pedido_id = 300? Use DATE_DIFF('day', ...).",
+      "tipo": "valor",
+      "resposta_sql": "SELECT DATE_DIFF('day', DATE '2026-06-01', criado_em) FROM pedidos WHERE pedido_id = 300",
+      "xp": 40,
+      "dicas": [
+        "DATE_DIFF('day', inicio, fim) devolve quantos dias existem entre as duas datas.",
+        "O primeiro argumento (depois de 'day') é a data mais antiga; o segundo é a mais recente."
+      ],
+      "explicacao": "DATE_DIFF calcula a distância entre duas datas na unidade que você escolher (aqui, dias). É o caminho inverso do INTERVAL: em vez de deslocar uma data, ele mede a diferença entre duas."
+    },
+    {
+      "titulo": "Os pedidos mais recentes",
+      "pergunta": "Mostre pedido_id, criado_em e dias_desde_inicio (a diferença em dias entre 01/06/2026 e o pedido) para os pedidos com pedido_id entre 596 e 600.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT pedido_id, criado_em, DATE_DIFF('day', DATE '2026-06-01', criado_em) AS dias_desde_inicio\nFROM pedidos\nWHERE pedido_id BETWEEN 596 AND 600\nORDER BY pedido_id;",
+      "xp": 50,
+      "dicas": [
+        "BETWEEN 596 AND 600 é um atalho pra pedido_id >= 596 AND pedido_id <= 600 — inclui as duas pontas.",
+        "É o mesmo DATE_DIFF do checkpoint anterior, só que agora aparece como coluna do resultado, não como resposta única."
+      ],
+      "explicacao": "BETWEEN inclui os dois extremos do intervalo. Quanto maior o dias_desde_inicio, mais recente é o pedido em relação ao começo dos dados — útil pra saber se um pedido está \"velho\" demais numa fila."
+    }
+  ]
+}

@@ -166,6 +166,30 @@
   box-shadow: 3px 3px 0 var(--traco);
 }
 
+.alternativa--certa,
+.alternativa--certa:hover {
+  background: var(--menta);
+  box-shadow: 3px 3px 0 var(--traco);
+}
+
+.alternativa--errada,
+.alternativa--errada:hover {
+  background: var(--coral);
+  box-shadow: 3px 3px 0 var(--traco);
+}
+
+.alternativa:disabled {
+  cursor: default;
+}
+
+.alternativa:disabled:hover {
+  transform: none;
+}
+
+.alternativas--compactas .alternativa {
+  padding: 10px 12px;
+}
+
 .alternativa__letra {
   display: grid;
   place-items: center;
@@ -233,14 +257,6 @@
 .questao-sql__resultado {
   overflow: hidden;
   box-shadow: none;
-}
-
-.erro-sql__mensagem {
-  margin: 6px 0 0;
-  font-family: var(--mono);
-  font-size: 12.5px;
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 
 /* ============ Lateral: mapa e resumo ============ */

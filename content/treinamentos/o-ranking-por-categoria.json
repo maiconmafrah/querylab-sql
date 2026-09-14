@@ -1,0 +1,62 @@
+{
+  "id": "o-ranking-por-categoria",
+  "titulo": "O ranking por categoria",
+  "resumo": "Precificação quer a posição de cada produto dentro da própria categoria, e um ranking geral de clientes.",
+  "tema": "window-functions",
+  "dificuldade": "medio",
+  "duracao_min": 20,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-30",
+  "chamado": [
+    {
+      "autor": "Simone",
+      "papel": "Precificação",
+      "texto": "Quero um ranking de preço DENTRO de cada categoria — não faz sentido comparar um tênis com um sabonete. E separado, um ranking geral dos clientes que mais fazem pedidos pagos."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "RANK() OVER (PARTITION BY coluna ORDER BY outra_coluna) numera as linhas dentro de cada grupo (partição), sem transformar o resultado numa linha por grupo como o GROUP BY faz — cada produto continua com sua própria linha."
+    }
+  ],
+  "consulta_inicial": "-- Window functions não agrupam: cada produto continua numa linha\nSELECT nome, categoria, preco\nFROM produtos\nLIMIT 5;",
+  "checkpoints": [
+    {
+      "titulo": "A posição de cada produto",
+      "pergunta": "Mostre nome, categoria, preco e posicao — o ranking do produto por preço DENTRO da própria categoria (o mais caro fica em posição 1). Use RANK().",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, categoria, preco,\n       RANK() OVER (PARTITION BY categoria ORDER BY preco DESC) AS posicao\nFROM produtos;",
+      "xp": 40,
+      "dicas": [
+        "PARTITION BY categoria reinicia a contagem a cada categoria nova — é como um GROUP BY que não junta as linhas.",
+        "ORDER BY preco DESC dentro do OVER define quem fica em primeiro: o mais caro."
+      ],
+      "explicacao": "Diferente do GROUP BY, a window function não reduz o número de linhas: cada produto continua aparecendo, só ganha uma coluna extra com sua posição dentro do grupo (aqui, a categoria)."
+    },
+    {
+      "titulo": "Só o líder de cada categoria",
+      "pergunta": "Agora mostre só o produto mais caro (posicao = 1) de cada categoria: nome, categoria e preco.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, categoria, preco\nFROM (\n  SELECT nome, categoria, preco,\n         RANK() OVER (PARTITION BY categoria ORDER BY preco DESC) AS posicao\n  FROM produtos\n) AS ranqueado\nWHERE posicao = 1;",
+      "xp": 50,
+      "dicas": [
+        "Você não pode usar posicao direto no WHERE da mesma consulta — window functions rodam DEPOIS do WHERE.",
+        "Envolva a consulta com RANK numa subquery (igual você fez na missão de subqueries) e filtre por fora, no WHERE da consulta de fora."
+      ],
+      "explicacao": "A ordem de execução do SQL calcula o WHERE antes das window functions, então elas ainda não existem nesse momento. A saída é tratar a consulta com RANK como uma tabela pronta (subquery no FROM) e só então filtrar por posicao."
+    },
+    {
+      "titulo": "Ranking geral de clientes",
+      "pergunta": "Agora um ranking geral (sem separar por categoria — não use PARTITION BY) dos clientes pelo número de pedidos pagos: cliente_id, pedidos_pagos e posicao.",
+      "tipo": "query",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT cliente_id,\n       COUNT(*) AS pedidos_pagos,\n       RANK() OVER (ORDER BY COUNT(*) DESC) AS posicao\nFROM pedidos\nWHERE status = 'pago'\nGROUP BY cliente_id\nORDER BY posicao;",
+      "xp": 50,
+      "dicas": [
+        "PARTITION BY é opcional. Sem ele, o RANK considera a tabela inteira como um grupo só.",
+        "Dá pra usar COUNT(*) tanto no SELECT quanto dentro do OVER (ORDER BY COUNT(*) DESC) — o banco calcula a agregação primeiro."
+      ],
+      "explicacao": "Quando você não escreve PARTITION BY, a janela é a tabela toda (depois do GROUP BY, nesse caso). É a mesma RANK() de sempre, só que sem dividir em grupos menores."
+    }
+  ]
+}

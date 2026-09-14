@@ -3,6 +3,19 @@
   "numero": 1,
   "titulo": "Fundamentos de SQL",
   "descricao": "SELECT, filtros, ordenação, agregações e o primeiro JOIN, atendendo pedidos reais do time comercial de uma loja on-line.",
-  "missoes": ["relatorio-de-ontem", "painel-de-status", "mais-vendidos"],
+  "missoes": [
+    "so-as-colunas-certas",
+    "clientes-de-sp",
+    "produtos-ate-100",
+    "produtos-mais-caros",
+    "clientes-sp-rj-recentes",
+    "emails-que-faltam",
+    "relatorio-de-ontem",
+    "vendas-sem-agrupar",
+    "pedidos-por-status",
+    "painel-de-status",
+    "quem-comprou-o-que",
+    "mais-vendidos"
+  ],
   "simulado_final": "sql-fundamentos"
 }

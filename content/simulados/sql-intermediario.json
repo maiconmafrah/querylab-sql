@@ -1,6 +1,6 @@
 {
   "id": "sql-intermediario",
-  "numero": 2,
+  "numero": 3,
   "titulo": "SQL Intermediário",
   "descricao": "Joins, NULLs, datas, CTEs e window functions. As três últimas questões são para escrever a consulta.",
   "dificuldade": "medio",
@@ -94,13 +94,19 @@
       "explicacao": "PARTITION BY reinicia a conta a cada cliente e ORDER BY faz a soma acumular na ordem das datas. Diferente do GROUP BY, a window function mantém todas as linhas."
     },
     {
-      "id": "cross-join",
+      "id": "date-diff",
       "tipo": "multipla",
-      "tema": "joins",
-      "enunciado": "A tabela A tem 3 linhas e a tabela B tem 4. Quantas linhas tem o resultado de A CROSS JOIN B?",
-      "alternativas": ["7", "12", "3", "4"],
-      "correta": 1,
-      "explicacao": "CROSS JOIN combina cada linha de A com cada linha de B: 3 × 4 = 12 linhas."
+      "tema": "datas",
+      "formato_alternativas": "codigo",
+      "enunciado": "Qual expressão calcula quantos dias existem entre duas datas, inicio e fim?",
+      "alternativas": [
+        "DATE_DIFF('day', inicio, fim)",
+        "EXTRACT(day FROM fim - inicio)",
+        "fim - inicio AS dias",
+        "DATE_TRUNC('day', fim - inicio)"
+      ],
+      "correta": 0,
+      "explicacao": "DATE_DIFF(unidade, inicio, fim) mede a distância entre duas datas na unidade escolhida. EXTRACT pega uma parte de UMA data, não a diferença entre duas; DATE_TRUNC arredonda, não subtrai."
     },
     {
       "id": "sql-nunca-compraram",

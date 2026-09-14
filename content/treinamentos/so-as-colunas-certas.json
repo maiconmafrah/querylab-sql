@@ -1,0 +1,61 @@
+{
+  "id": "so-as-colunas-certas",
+  "titulo": "Só as colunas certas",
+  "resumo": "Marina está montando uma carta para os clientes e não precisa da tabela inteira — só de duas ou três colunas.",
+  "tema": "consultas-basicas",
+  "dificuldade": "facil",
+  "duracao_min": 10,
+  "dataset": "loja.sql",
+  "publicado_em": "2026-09-14",
+  "chamado": [
+    {
+      "autor": "Marina",
+      "papel": "CRM",
+      "texto": "Oi! Vou imprimir uma carta pros clientes e preciso de uma planilha simples. Nada de coluna sobrando, só o que eu vou usar na etiqueta."
+    },
+    {
+      "autor": "Wiki do time de dados",
+      "papel": "documentação",
+      "texto": "A tabela clientes tem cliente_id, nome, email, cidade, uf e cadastrado_em. Pegue só o que for pedido — SELECT * traz tudo, e nem sempre é isso que você quer."
+    }
+  ],
+  "consulta_inicial": "-- Dê uma olhada em todas as colunas antes de decidir o que pedir\nSELECT *\nFROM clientes\nLIMIT 5;",
+  "checkpoints": [
+    {
+      "titulo": "Nome e cidade, só isso",
+      "pergunta": "Marina só precisa do nome e da cidade de cada cliente para a etiqueta. Mostre nome e cidade de todos os clientes.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, cidade\nFROM clientes;",
+      "xp": 30,
+      "dicas": [
+        "Depois do SELECT, liste só os nomes das colunas que você quer, separados por vírgula.",
+        "Não use SELECT * aqui — Marina só pediu duas colunas, não a tabela inteira."
+      ],
+      "explicacao": "SELECT define exatamente quais colunas aparecem no resultado. Pedir só o que você precisa deixa a consulta mais rápida e a resposta mais fácil de usar — um hábito que vale a pena desde a primeira consulta."
+    },
+    {
+      "titulo": "Uma prévia rápida",
+      "pergunta": "Antes de gerar tudo, ela quer ver uma prévia: nome, cidade e uf dos 5 primeiros clientes cadastrados no sistema.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, cidade, uf\nFROM clientes\nLIMIT 5;",
+      "xp": 40,
+      "dicas": [
+        "LIMIT 5 no final da consulta corta o resultado nas 5 primeiras linhas.",
+        "Você pode pedir quantas colunas quiser, na ordem que quiser, separadas por vírgula."
+      ],
+      "explicacao": "LIMIT controla quantas linhas voltam — não quais colunas. Mais pra frente você vai aprender a escolher exatamente quais linhas vêm primeiro com ORDER BY; por enquanto, LIMIT sozinho já corta o resultado."
+    },
+    {
+      "titulo": "O mesmo pedido, outra tabela",
+      "pergunta": "Ela também quer conferir o catálogo: mostre nome e preco dos 5 primeiros produtos.",
+      "tipo": "query",
+      "gabarito_sql": "SELECT nome, preco\nFROM produtos\nLIMIT 5;",
+      "xp": 30,
+      "dicas": [
+        "É a mesma ideia da tarefa anterior, só que na tabela produtos.",
+        "SELECT coluna1, coluna2 FROM tabela LIMIT n."
+      ],
+      "explicacao": "SELECT de colunas específicas e LIMIT funcionam do mesmo jeito em qualquer tabela. Essa dupla — escolher colunas e limitar linhas — é a base de praticamente toda consulta que você vai escrever daqui pra frente."
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { Catalogo } from './paginas/Catalogo.tsx';
 import { Inicio } from './paginas/Inicio.tsx';
 import { NaoEncontrado } from './paginas/NaoEncontrado.tsx';
 import { Progresso } from './paginas/Progresso.tsx';
+import { Ranking } from './paginas/Ranking.tsx';
 import { Referencia } from './paginas/Referencia.tsx';
 import { Resultado } from './paginas/Resultado.tsx';
 import { Simulados } from './paginas/Simulados.tsx';
@@ -67,6 +68,7 @@ export function App() {
             }
           />
           <Route path="referencia" element={<Referencia />} />
+          <Route path="ranking" element={<Ranking />} />
           <Route path="progresso" element={<Progresso />} />
           <Route path="*" element={<NaoEncontrado />} />
         </Route>
