@@ -69,6 +69,39 @@ export function calcularSequencia(dias: Iterable<string>, hoje: string): number 
   return sequencia;
 }
 
+/** Maior sequência de dias seguidos já alcançada (não precisa terminar hoje). */
+export function melhorSequencia(dias: Iterable<string>): number {
+  const ordenados = [...new Set(dias)].sort();
+  let melhor = 0;
+  let atual = 0;
+  let anterior: string | null = null;
+  for (const dia of ordenados) {
+    atual = anterior !== null && somarDias(anterior, 1) === dia ? atual + 1 : 1;
+    melhor = Math.max(melhor, atual);
+    anterior = dia;
+  }
+  return melhor;
+}
+
+export interface Conquista {
+  id: string;
+  nome: string;
+  dias: number;
+}
+
+/** Conquistas por sequência de dias estudados, tema "vida de uma estrela". */
+export const CONQUISTAS_SEQUENCIA: Conquista[] = [
+  { id: 'nebulosa', nome: 'Nebulosa', dias: 1 },
+  { id: 'protoestrela', nome: 'Protoestrela', dias: 3 },
+  { id: 'ana-vermelha', nome: 'Anã vermelha', dias: 7 },
+  { id: 'ana-amarela', nome: 'Anã amarela', dias: 15 },
+  { id: 'gigante-vermelha', nome: 'Gigante vermelha', dias: 25 },
+  { id: 'estrela-azul', nome: 'Estrela azul', dias: 40 },
+  { id: 'supergigante-azul', nome: 'Supergigante azul', dias: 60 },
+  { id: 'supernova', nome: 'Supernova', dias: 80 },
+  { id: 'pulsar', nome: 'Pulsar', dias: 100 },
+];
+
 export function ultimosDias(hoje: string, quantidade = 7): string[] {
   return Array.from({ length: quantidade }, (_, i) => somarDias(hoje, i - quantidade + 1));
 }

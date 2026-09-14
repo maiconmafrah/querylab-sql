@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent } from 'react';
+import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { BarraProgresso } from '../componentes/comum.tsx';
 import { Icone, type NomeIcone } from '../componentes/Icone.tsx';
@@ -11,10 +11,12 @@ import {
   exportarProgresso,
   importarProgresso,
   useProgresso,
+  type Progresso as ProgressoEstado,
 } from '../estado/progresso.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
 import { formatarData, formatarNumero } from '../lib/formato.ts';
-import { calcularSequencia, dataLocal, infoNivel, TITULOS_NIVEL } from '../lib/niveis.ts';
+import { calcularSequencia, dataLocal, infoNivel, melhorSequencia, TITULOS_NIVEL, CONQUISTAS_SEQUENCIA } from '../lib/niveis.ts';
+import { contarAtividadesPorDia, gradeAtividade, totalPulsos } from '../lib/atividade.ts';
 
 export function Progresso() {
   useTitulo('Progresso');
@@ -98,6 +100,9 @@ export function Progresso() {
         />
         <Estatistica icone="grafico" valor={progresso.dias.length} rotulo={progresso.dias.length === 1 ? 'dia de estudo no total' : 'dias de estudo no total'} />
       </div>
+
+      <Conquistas progresso={progresso} concluidas={concluidas.length} totalMissoes={treinamentos.length} />
+      <AtividadeHeatmap progresso={progresso} />
 
       <div className="progresso__colunas">
         <section>
@@ -256,5 +261,99 @@ function Estatistica({ icone, valor, rotulo }: { icone: NomeIcone; valor: string
       <strong className="estatistica__valor">{valor}</strong>
       <span className="estatistica__rotulo">{rotulo}</span>
     </article>
+  );
+}
+
+function Conquistas({ progresso, concluidas, totalMissoes }: { progresso: ProgressoEstado; concluidas: number; totalMissoes: number }) {
+  const hoje = dataLocal();
+  const atual = calcularSequencia(progresso.dias, hoje);
+  const melhor = melhorSequencia(progresso.dias);
+  const proxima = CONQUISTAS_SEQUENCIA.find((c) => melhor < c.dias);
+  const secretaDesbloqueada = totalMissoes > 0 && concluidas === totalMissoes;
+  const desbloqueadas = CONQUISTAS_SEQUENCIA.filter((c) => melhor >= c.dias).length + (secretaDesbloqueada ? 1 : 0);
+
+  return (
+    <section className="secao-conquistas">
+      <div className="cabecalho-secao">
+        <h2 className="titulo-secao">Conquistas</h2>
+        <span className="mono">
+          {desbloqueadas} de {CONQUISTAS_SEQUENCIA.length + 1}
+          {proxima && ` · faltam ${Math.max(0, proxima.dias - atual)} dias para ${proxima.nome}`}
+        </span>
+      </div>
+      <div className="conquistas__grade">
+        {CONQUISTAS_SEQUENCIA.map((c) => {
+          const desbloqueada = melhor >= c.dias;
+          const ehProxima = !desbloqueada && c.id === proxima?.id;
+          return (
+            <article
+              key={c.id}
+              className={`conquista${desbloqueada ? ' conquista--desbloqueada' : ''}${ehProxima ? ' conquista--atual' : ''}`}
+            >
+              <span className={`circulo${desbloqueada ? ' circulo--lilas' : ' circulo--bloqueado'}`}>{c.dias}</span>
+              <span className="conquista__nome">{c.nome}</span>
+              <span className="conquista__legenda mono">
+                {c.dias === 1 ? 'primeiro dia' : `${c.dias} dias`}
+                {ehProxima && ` · faltam ${Math.max(0, c.dias - atual)}`}
+              </span>
+            </article>
+          );
+        })}
+        <article className={`conquista${secretaDesbloqueada ? ' conquista--desbloqueada' : ''}`}>
+          <span className={`circulo${secretaDesbloqueada ? ' circulo--lilas' : ' circulo--bloqueado'}`}>?</span>
+          <span className="conquista__nome">{secretaDesbloqueada ? 'Buraco negro' : '???'}</span>
+          <span className="conquista__legenda mono">{secretaDesbloqueada ? 'todas as missões concluídas' : 'secreta'}</span>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function AtividadeHeatmap({ progresso }: { progresso: ProgressoEstado }) {
+  const hoje = dataLocal();
+  const contagem = useMemo(() => contarAtividadesPorDia(progresso), [progresso]);
+  const semanas = useMemo(() => gradeAtividade(hoje, contagem, 53), [hoje, contagem]);
+  const inicio = semanas[0]!.dias[0]!.iso;
+  const pulsos = useMemo(() => totalPulsos(contagem, inicio), [contagem, inicio]);
+
+  return (
+    <section className="secao-atividade">
+      <div className="cabecalho-secao">
+        <h2 className="titulo-secao">Atividade</h2>
+        <span className="mono">
+          {pulsos} {pulsos === 1 ? 'pulso' : 'pulsos'} nos últimos 12 meses
+        </span>
+      </div>
+      <div className="cartao atividade">
+        <div className="atividade__rolagem">
+          <div className="atividade__grade" role="img" aria-label={`Mapa de atividade: ${pulsos} pulsos nos últimos 12 meses`}>
+            {semanas.map((semana, i) => (
+              <div key={i} className="atividade__semana">
+                <span className="atividade__mes">{semana.rotuloMes ?? ''}</span>
+                {semana.dias.map((dia) =>
+                  dia.foraDoPeriodo ? (
+                    <span key={dia.iso} className="atividade__dia atividade__dia--vazio" aria-hidden="true" />
+                  ) : (
+                    <span
+                      key={dia.iso}
+                      className={`atividade__dia atividade__dia--${dia.nivel}`}
+                      title={`${formatarData(dia.iso)} · ${dia.contagem} ${dia.contagem === 1 ? 'pulso' : 'pulsos'}`}
+                    />
+                  ),
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="atividade__legenda mono">
+          <span>menos</span>
+          <span className="atividade__dia atividade__dia--0" aria-hidden="true" />
+          <span className="atividade__dia atividade__dia--1" aria-hidden="true" />
+          <span className="atividade__dia atividade__dia--2" aria-hidden="true" />
+          <span className="atividade__dia atividade__dia--3" aria-hidden="true" />
+          <span>mais</span>
+        </div>
+      </div>
+    </section>
   );
 }
