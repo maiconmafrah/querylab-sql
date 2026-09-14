@@ -182,6 +182,60 @@
   font-size: 12px;
 }
 
+/* ============ Conta (login com Google) ============ */
+.conta-login .btn {
+  width: 100%;
+}
+
+.conta-login__erro {
+  margin-top: 6px;
+  color: #a3321a;
+  font-size: 12px;
+}
+
+[data-tema='escuro'] .conta-login__erro {
+  color: #ff8f6b;
+}
+
+.conta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: var(--borda);
+  border-radius: 12px;
+  background: var(--cartao);
+}
+
+.conta__foto {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.conta__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.conta__nome {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conta__status {
+  font-size: 11px;
+  color: var(--mudo);
+  font-family: var(--mono);
+}
+
 /* ============ Cartão de nível ============ */
 .cartao-nivel {
   display: flex;

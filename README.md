@@ -47,6 +47,19 @@ Abra o endereço que aparecer no terminal (normalmente http://localhost:5173).
 | `npm run build` | Gera a versão final em `dist/` |
 | `npm run preview` | Serve a pasta `dist/` localmente para conferir o build |
 
+## Login com Google (progresso na nuvem)
+
+Sem configurar nada, o progresso continua salvo só neste navegador (como sempre foi). Para permitir "Entrar com Google" e acessar o mesmo progresso de qualquer aparelho, é preciso um projeto Firebase gratuito (Authentication + Firestore):
+
+1. Crie um projeto em [console.firebase.google.com](https://console.firebase.google.com).
+2. **Authentication** → aba "Sign-in method" → ative o provedor **Google**.
+3. **Firestore Database** → criar banco → modo produção (as regras de segurança já vêm prontas, veja `firestore.rules` neste repositório — cole o conteúdo dele em Firestore → Regras).
+4. **Configurações do projeto** → "Seus apps" → app da Web (ícone `</>`) → copie o objeto `firebaseConfig`.
+5. Copie `.env.example` para `.env.local` e preencha as seis chaves com os valores do passo 4.
+6. Rode `npm run dev` de novo: o botão "Entrar com Google" aparece no menu lateral.
+
+Essas chaves não são segredo (o Firebase é protegido pelas regras do Firestore, não por elas ficarem escondidas), mas para publicar no GitHub Pages via Actions (`.github/workflows/deploy.yml`) é preciso cadastrá-las como **Secrets** do repositório: `Settings → Secrets and variables → Actions → New repository secret`, uma para cada `VITE_FIREBASE_*` do `.env.example`.
+
 ## Estrutura
 
 ```

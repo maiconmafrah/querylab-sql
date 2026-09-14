@@ -6,8 +6,11 @@ import { useProgresso, type Progresso } from '../estado/progresso.ts';
 import { calcularSequencia, dataLocal, infoNivel } from '../lib/niveis.ts';
 import { formatarNumero } from '../lib/formato.ts';
 import { useTema } from '../hooks/useTema.ts';
+import { entrarComGoogle, sair, useAutenticacao } from '../estado/autenticacao.ts';
+import { useSincronizarProgresso } from '../estado/sincronizacao.ts';
+import { firebaseDisponivel } from '../lib/firebase.ts';
 import { BarraProgresso } from './comum.tsx';
-import { Icone, type NomeIcone } from './Icone.tsx';
+import { Icone, IconeGoogle, type NomeIcone } from './Icone.tsx';
 
 const CHAVE_MENU = 'querylab:menu-aberto';
 const GRUPOS_ABERTOS_PADRAO = ['treinamentos', 'trilhas'];
@@ -129,6 +132,56 @@ function BotaoTema() {
     >
       <Icone nome={escuro ? 'sol' : 'lua'} tamanho={17} />
     </button>
+  );
+}
+
+function ContaWidget() {
+  const { carregando, usuario } = useAutenticacao();
+  const status = useSincronizarProgresso();
+  const [erro, setErro] = useState<string | null>(null);
+
+  if (!firebaseDisponivel || carregando) return null;
+
+  if (!usuario) {
+    return (
+      <div className="conta-login">
+        <button
+          type="button"
+          className="btn btn--sm"
+          onClick={() => {
+            setErro(null);
+            entrarComGoogle().catch((erro: unknown) => {
+              const codigo = (erro as { code?: string } | undefined)?.code;
+              if (codigo === 'auth/popup-closed-by-user' || codigo === 'auth/cancelled-popup-request') return;
+              setErro('Não deu para entrar. Tente de novo.');
+            });
+          }}
+        >
+          <IconeGoogle />
+          Entrar com Google
+        </button>
+        {erro && <p className="conta-login__erro">{erro}</p>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="conta">
+      {usuario.photoURL ? (
+        <img src={usuario.photoURL} alt="" className="conta__foto" referrerPolicy="no-referrer" />
+      ) : (
+        <span className="avatar conta__foto">{(usuario.displayName ?? usuario.email ?? '?').slice(0, 1).toUpperCase()}</span>
+      )}
+      <span className="conta__info">
+        <span className="conta__nome">{usuario.displayName ?? usuario.email}</span>
+        <span className="conta__status">
+          {status === 'sincronizando' ? 'sincronizando…' : status === 'erro' ? 'erro ao sincronizar' : 'progresso salvo na nuvem'}
+        </span>
+      </span>
+      <button type="button" className="btn btn--sm btn--icone" aria-label="Sair da conta" title="Sair" onClick={() => void sair()}>
+        <Icone nome="x" tamanho={15} />
+      </button>
+    </div>
   );
 }
 
@@ -274,6 +327,7 @@ export function Shell() {
           })}
         </nav>
 
+        <ContaWidget />
         <CartaoNivel progresso={progresso} />
       </aside>
 

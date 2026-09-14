@@ -98,6 +98,9 @@ function assinar(ouvinte: () => void) {
   return () => ouvintes.delete(ouvinte);
 }
 
+/** Para quem precisa reagir a qualquer mudança fora de componentes React (ex.: sincronização). */
+export const assinarProgresso = assinar;
+
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (evento) => {
     if (evento.key === CHAVE) {
