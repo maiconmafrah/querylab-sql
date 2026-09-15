@@ -970,6 +970,107 @@
   text-decoration: none;
 }
 
+/* ============ Tabela periódica do SQL (índice visual) ============ */
+.tabela-periodica {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 34px;
+}
+
+.tabela-periodica__linha {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tabela-periodica__rotulo {
+  flex-shrink: 0;
+  width: 150px;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1.5px dashed var(--traco);
+  border-radius: var(--raio-sm);
+  background: var(--cor);
+}
+
+.tabela-periodica__rotulo b {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.elemento-sql {
+  width: clamp(52px, 7vw, 64px);
+  height: clamp(52px, 7vw, 64px);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 5px 3px 4px;
+  border: var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--cor);
+  color: var(--tinta);
+  text-decoration: none;
+  box-shadow: var(--sombra-sm);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.elemento-sql:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--traco);
+}
+
+.elemento-sql:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.elemento-sql__sim {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(14px, 2vw, 17px);
+  line-height: 1;
+}
+
+.elemento-sql__nome {
+  font-size: 6.5px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.05;
+  opacity: 0.75;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entrada-ref--destaque {
+  animation: destacar-entrada 1.6s ease;
+}
+
+@keyframes destacar-entrada {
+  0%,
+  100% {
+    box-shadow: var(--sombra);
+  }
+  15%,
+  55% {
+    box-shadow: var(--sombra), 0 0 0 3px var(--amarelo);
+  }
+}
+
+@media (max-width: 720px) {
+  .tabela-periodica__rotulo {
+    width: 100%;
+  }
+}
+
 .referencia__secao {
   margin-bottom: 40px;
   scroll-margin-top: 24px;
@@ -992,6 +1093,7 @@
   align-items: flex-start;
   gap: 10px;
   padding: 20px;
+  scroll-margin-top: 24px;
 }
 
 .entrada-ref > h3 {
@@ -1019,7 +1121,8 @@
 }
 
 @media (max-width: 960px) {
-  .referencia__secao {
+  .referencia__secao,
+  .entrada-ref {
     scroll-margin-top: 80px;
   }
 

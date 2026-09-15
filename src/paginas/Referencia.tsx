@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CodigoSql } from '../componentes/CodigoSql.tsx';
 import { Icone } from '../componentes/Icone.tsx';
+import { TabelaPeriodica } from '../componentes/TabelaPeriodica.tsx';
 import { referencia } from '../conteudo/index.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
 import { normalizarBusca } from '../lib/formato.ts';
@@ -14,7 +15,15 @@ export function Referencia() {
 
   useEffect(() => {
     if (!localizacao.hash) return;
-    document.getElementById(decodeURIComponent(localizacao.hash.slice(1)))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const alvo = document.getElementById(decodeURIComponent(localizacao.hash.slice(1)));
+    if (!alvo) return;
+    alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (alvo.classList.contains('entrada-ref')) {
+      alvo.classList.remove('entrada-ref--destaque');
+      // Força o navegador a "esquecer" a animação anterior antes de reaplicar a classe.
+      void alvo.offsetWidth;
+      alvo.classList.add('entrada-ref--destaque');
+    }
   }, [localizacao.hash]);
 
   const termo = normalizarBusca(busca);
@@ -50,6 +59,8 @@ export function Referencia() {
         </label>
       </div>
 
+      <TabelaPeriodica />
+
       <nav className="chips referencia__indice" aria-label="Seções da referência">
         {referencia.map((secao) => (
           <Link key={secao.id} to={`/referencia#${secao.id}`} className="chip">
@@ -72,7 +83,7 @@ export function Referencia() {
           </h2>
           <div className="referencia__grade">
             {secao.entradas.map((entrada) => (
-              <article key={entrada.id} className="cartao entrada-ref">
+              <article key={entrada.id} id={`${secao.id}-${entrada.id}`} className="cartao entrada-ref">
                 <h3>{entrada.titulo}</h3>
                 <p>{entrada.descricao}</p>
                 <span className="rotulo">Sintaxe</span>

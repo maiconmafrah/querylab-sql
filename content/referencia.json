@@ -47,6 +47,42 @@
         "descricao": "Cria valores condicionais, como um se/senão dentro da consulta.",
         "sintaxe": "CASE WHEN condicao THEN valor\n     WHEN outra THEN outro\n     ELSE padrao END",
         "exemplo": "SELECT pedido_id,\n       valor_total,\n       CASE WHEN valor_total >= 1000 THEN 'grande'\n            WHEN valor_total >= 300 THEN 'médio'\n            ELSE 'pequeno' END AS porte\nFROM pedidos\nLIMIT 10;"
+      },
+      {
+        "id": "as",
+        "titulo": "AS (apelido)",
+        "descricao": "Renomeia uma coluna ou tabela no resultado.",
+        "sintaxe": "SELECT coluna AS apelido\nFROM tabela;",
+        "exemplo": "SELECT COUNT(*) AS total_clientes\nFROM clientes;"
+      },
+      {
+        "id": "comparadores",
+        "titulo": "Operadores de comparação",
+        "descricao": "Compara um valor com uma coluna: =, <>, >, <, >=, <=.",
+        "sintaxe": "WHERE coluna >= valor",
+        "exemplo": "SELECT nome, preco\nFROM produtos\nWHERE preco >= 200;"
+      },
+      {
+        "id": "and-or",
+        "titulo": "AND, OR e NOT",
+        "descricao": "Combina ou nega condições dentro do WHERE.",
+        "sintaxe": "WHERE condicao1 AND condicao2",
+        "exemplo": "SELECT *\nFROM pedidos\nWHERE status = 'pago' AND valor_total > 500;",
+        "dica": "AND tem prioridade sobre OR. Na dúvida, use parênteses."
+      },
+      {
+        "id": "cast",
+        "titulo": "CAST (conversão de tipo)",
+        "descricao": "Converte um valor de um tipo para outro.",
+        "sintaxe": "CAST(coluna AS tipo)",
+        "exemplo": "SELECT CAST(preco AS INTEGER) AS preco_inteiro\nFROM produtos\nLIMIT 5;"
+      },
+      {
+        "id": "funcoes-texto",
+        "titulo": "Funções de texto",
+        "descricao": "CONCAT, SUBSTRING, TRIM, UPPER e LOWER tratam e formatam texto.",
+        "sintaxe": "UPPER(TRIM(coluna))",
+        "exemplo": "SELECT UPPER(TRIM(nome)) AS nome_padronizado\nFROM clientes\nLIMIT 5;"
       }
     ]
   },
@@ -84,6 +120,27 @@
         "sintaxe": "COUNT(*) FILTER (WHERE condicao)",
         "exemplo": "SELECT COUNT(*) FILTER (WHERE status = 'pago') AS pagos,\n       COUNT(*) FILTER (WHERE status = 'cancelado') AS cancelados\nFROM pedidos;",
         "dica": "Em bancos sem FILTER, use SUM(CASE WHEN condicao THEN 1 ELSE 0 END)."
+      },
+      {
+        "id": "string-agg",
+        "titulo": "STRING_AGG",
+        "descricao": "Junta os valores de um grupo numa única string, separados por um caractere.",
+        "sintaxe": "STRING_AGG(coluna, ', ')",
+        "exemplo": "SELECT categoria, STRING_AGG(nome, ', ') AS produtos\nFROM produtos\nGROUP BY categoria;"
+      },
+      {
+        "id": "pivot",
+        "titulo": "Pivot com CASE WHEN",
+        "descricao": "Transforma valores de uma coluna em colunas separadas, combinando CASE WHEN com uma agregação.",
+        "sintaxe": "SUM(CASE WHEN coluna = 'x' THEN valor END) AS x",
+        "exemplo": "SELECT\n  SUM(CASE WHEN status = 'pago' THEN valor_total END) AS pago,\n  SUM(CASE WHEN status = 'pendente' THEN valor_total END) AS pendente\nFROM pedidos;"
+      },
+      {
+        "id": "rollup",
+        "titulo": "ROLLUP",
+        "descricao": "Adiciona linhas de subtotal e total geral ao GROUP BY, automaticamente.",
+        "sintaxe": "GROUP BY ROLLUP (coluna1, coluna2)",
+        "exemplo": "SELECT categoria, COUNT(*) AS qtd\nFROM produtos\nGROUP BY ROLLUP (categoria)\nORDER BY categoria;"
       }
     ]
   },
@@ -121,6 +178,42 @@
         "sintaxe": "SELECT colunas FROM tabela_a\nUNION ALL\nSELECT colunas FROM tabela_b;",
         "exemplo": "SELECT nome, 'cliente' AS tipo FROM clientes WHERE uf = 'PE'\nUNION ALL\nSELECT nome, 'produto' FROM produtos WHERE categoria = 'Livros';",
         "dica": "UNION remove linhas duplicadas; UNION ALL mantém tudo e é mais rápido."
+      },
+      {
+        "id": "right-join",
+        "titulo": "RIGHT JOIN",
+        "descricao": "O inverso do LEFT JOIN: mantém tudo da tabela da direita.",
+        "sintaxe": "SELECT a.coluna, b.coluna\nFROM tabela_a a\nRIGHT JOIN tabela_b b ON b.chave = a.chave;",
+        "exemplo": "SELECT p.pedido_id, c.nome\nFROM pedidos p\nRIGHT JOIN clientes c ON c.cliente_id = p.cliente_id\nLIMIT 10;"
+      },
+      {
+        "id": "full-outer-join",
+        "titulo": "FULL OUTER JOIN",
+        "descricao": "Mantém tudo das duas tabelas, casando onde der.",
+        "sintaxe": "SELECT a.coluna, b.coluna\nFROM tabela_a a\nFULL OUTER JOIN tabela_b b ON b.chave = a.chave;",
+        "exemplo": "SELECT c.nome, p.pedido_id\nFROM clientes c\nFULL OUTER JOIN pedidos p ON p.cliente_id = c.cliente_id\nLIMIT 10;"
+      },
+      {
+        "id": "self-join",
+        "titulo": "SELF JOIN",
+        "descricao": "Uma tabela se junta com ela mesma — útil para comparar linhas da mesma tabela entre si.",
+        "sintaxe": "SELECT a.coluna, b.coluna\nFROM tabela a\nJOIN tabela b ON a.chave = b.outra_chave;",
+        "exemplo": "SELECT a.nome, b.nome\nFROM clientes a\nJOIN clientes b ON a.cidade = b.cidade AND a.cliente_id < b.cliente_id\nLIMIT 5;",
+        "dica": "O a.cliente_id < b.cliente_id evita comparar um cliente com ele mesmo e não repetir o mesmo par ao contrário."
+      },
+      {
+        "id": "cross-join",
+        "titulo": "CROSS JOIN",
+        "descricao": "Produto cartesiano: combina cada linha de uma tabela com cada linha da outra. Raro no dia a dia — útil pra montar uma grade completa antes de preencher lacunas com zero.",
+        "sintaxe": "SELECT a.coluna, b.coluna\nFROM tabela_a a\nCROSS JOIN tabela_b b;",
+        "exemplo": "SELECT u.uf, cat.categoria\nFROM (SELECT DISTINCT uf FROM clientes) u\nCROSS JOIN (SELECT DISTINCT categoria FROM produtos) cat\nLIMIT 10;"
+      },
+      {
+        "id": "intersect-except",
+        "titulo": "INTERSECT e EXCEPT",
+        "descricao": "INTERSECT mantém só quem aparece nas duas consultas; EXCEPT mantém quem só aparece na primeira.",
+        "sintaxe": "SELECT coluna FROM tabela_a\nEXCEPT\nSELECT coluna FROM tabela_b;",
+        "exemplo": "SELECT categoria FROM produtos WHERE preco > 200\nEXCEPT\nSELECT categoria FROM produtos WHERE preco < 50;"
       }
     ]
   },
@@ -218,6 +311,14 @@
         "descricao": "Dá nome a um passo intermediário. Deixa consultas longas legíveis.",
         "sintaxe": "WITH passo AS (\n  SELECT ...\n)\nSELECT ... FROM passo;",
         "exemplo": "WITH receita_cliente AS (\n  SELECT cliente_id, SUM(valor_total) AS receita\n  FROM pedidos\n  WHERE status = 'pago'\n  GROUP BY cliente_id\n)\nSELECT c.nome, r.receita\nFROM receita_cliente r\nJOIN clientes c ON c.cliente_id = r.cliente_id\nORDER BY r.receita DESC\nLIMIT 5;"
+      },
+      {
+        "id": "with-recursive",
+        "titulo": "WITH RECURSIVE",
+        "descricao": "Uma CTE que se referencia — percorre hierarquias (como funcionário até o topo da empresa) ou gera sequências.",
+        "sintaxe": "WITH RECURSIVE nome AS (\n  SELECT ...              -- caso base\n  UNION ALL\n  SELECT ... FROM nome WHERE ...  -- passo recursivo\n)\nSELECT * FROM nome;",
+        "exemplo": "WITH RECURSIVE numeros AS (\n  SELECT 1 AS n\n  UNION ALL\n  SELECT n + 1 FROM numeros WHERE n < 5\n)\nSELECT * FROM numeros;",
+        "dica": "O caso base começa a recursão; o passo recursivo se refere ao próprio nome da CTE até a condição parar de bater."
       }
     ]
   },
@@ -254,6 +355,79 @@
         "sintaxe": "SELECT ...\nFROM tabela\nQUALIFY ROW_NUMBER() OVER (...) = 1;",
         "exemplo": "SELECT categoria, nome, preco\nFROM produtos\nQUALIFY ROW_NUMBER() OVER (PARTITION BY categoria ORDER BY preco DESC) = 1;",
         "dica": "QUALIFY existe no DuckDB, no Snowflake e no BigQuery. Em outros bancos, calcule a janela numa CTE e filtre na consulta de fora."
+      },
+      {
+        "id": "rows-between",
+        "titulo": "ROWS BETWEEN",
+        "descricao": "Define a janela de linhas usada pela window function — essencial para médias e somas móveis.",
+        "sintaxe": "SUM(coluna) OVER (\n  ORDER BY data\n  ROWS BETWEEN n PRECEDING AND CURRENT ROW\n)",
+        "exemplo": "SELECT CAST(criado_em AS DATE) AS dia,\n       SUM(valor_total) AS receita,\n       AVG(SUM(valor_total)) OVER (\n         ORDER BY CAST(criado_em AS DATE)\n         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW\n       ) AS media_movel_7d\nFROM pedidos\nWHERE status = 'pago'\nGROUP BY 1\nORDER BY 1;",
+        "dica": "ROWS BETWEEN 6 PRECEDING AND CURRENT ROW olha a linha atual mais as 6 anteriores — uma janela de 7."
+      },
+      {
+        "id": "first-last-value",
+        "titulo": "FIRST_VALUE e LAST_VALUE",
+        "descricao": "Pega o primeiro ou o último valor dentro da janela — ótimo para comparar com o início ou fim do período.",
+        "sintaxe": "FIRST_VALUE(coluna) OVER (PARTITION BY grupo ORDER BY ordem)",
+        "exemplo": "SELECT categoria, nome, preco,\n       FIRST_VALUE(nome) OVER (PARTITION BY categoria ORDER BY preco DESC) AS mais_caro_da_categoria\nFROM produtos;"
+      }
+    ]
+  },
+  {
+    "id": "manipulacao",
+    "titulo": "Manipulação de dados",
+    "entradas": [
+      {
+        "id": "insert",
+        "titulo": "INSERT INTO",
+        "descricao": "Insere uma ou mais linhas numa tabela.",
+        "sintaxe": "INSERT INTO tabela (coluna1, coluna2)\nVALUES (valor1, valor2);",
+        "exemplo": "INSERT INTO clientes (cliente_id, nome, email, cidade, uf, cadastrado_em)\nVALUES (999, 'Cliente Teste', 'teste@email.com', 'São Paulo', 'SP', DATE '2026-01-01');"
+      },
+      {
+        "id": "update",
+        "titulo": "UPDATE ... SET",
+        "descricao": "Atualiza valores de linhas existentes.",
+        "sintaxe": "UPDATE tabela\nSET coluna = valor\nWHERE condicao;",
+        "exemplo": "UPDATE clientes\nSET cidade = 'Campinas'\nWHERE cliente_id = 999;",
+        "dica": "Sem WHERE, o UPDATE muda a tabela inteira — confira o filtro antes de rodar."
+      },
+      {
+        "id": "delete",
+        "titulo": "DELETE FROM",
+        "descricao": "Remove linhas de uma tabela.",
+        "sintaxe": "DELETE FROM tabela\nWHERE condicao;",
+        "exemplo": "DELETE FROM clientes\nWHERE cliente_id = 999;",
+        "dica": "Sem WHERE, o DELETE apaga a tabela inteira — mesmo cuidado do UPDATE."
+      },
+      {
+        "id": "create-table",
+        "titulo": "CREATE TABLE",
+        "descricao": "Cria uma tabela nova, definindo colunas e tipos.",
+        "sintaxe": "CREATE TABLE tabela (\n  coluna1 TIPO PRIMARY KEY,\n  coluna2 TIPO\n);",
+        "exemplo": "CREATE TABLE fornecedores (\n  id INTEGER PRIMARY KEY,\n  nome VARCHAR NOT NULL\n);"
+      },
+      {
+        "id": "alter-table",
+        "titulo": "ALTER TABLE",
+        "descricao": "Modifica a estrutura de uma tabela existente.",
+        "sintaxe": "ALTER TABLE tabela\nADD COLUMN coluna TIPO;",
+        "exemplo": "ALTER TABLE fornecedores\nADD COLUMN telefone VARCHAR;"
+      },
+      {
+        "id": "chaves",
+        "titulo": "PRIMARY KEY e FOREIGN KEY",
+        "descricao": "Restrições que garantem identidade única numa tabela e o relacionamento entre tabelas.",
+        "sintaxe": "coluna TIPO PRIMARY KEY\ncoluna TIPO REFERENCES outra_tabela(coluna)",
+        "exemplo": "CREATE TABLE pedidos_exemplo (\n  id INTEGER PRIMARY KEY,\n  cliente_id INTEGER REFERENCES clientes(cliente_id)\n);",
+        "dica": "PRIMARY KEY garante que o valor não se repete. FOREIGN KEY garante que o valor existe na tabela referenciada."
+      },
+      {
+        "id": "create-view",
+        "titulo": "CREATE VIEW",
+        "descricao": "Salva uma consulta como uma “tabela virtual” reutilizável, sem duplicar dados.",
+        "sintaxe": "CREATE VIEW nome AS\nSELECT ...;",
+        "exemplo": "CREATE VIEW receita_por_uf AS\nSELECT c.uf, SUM(p.valor_total) AS receita\nFROM pedidos p\nJOIN clientes c ON c.cliente_id = p.cliente_id\nWHERE p.status = 'pago'\nGROUP BY c.uf;"
       }
     ]
   }
