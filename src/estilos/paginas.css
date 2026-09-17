@@ -1494,11 +1494,16 @@
 }
 
 .linha-ranking {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 12px 4px;
   border-bottom: var(--borda);
+}
+
+.linha-ranking:has(.linha-ranking__link):hover {
+  background: var(--papel);
 }
 
 .linha-ranking:last-child {
@@ -1537,6 +1542,27 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.linha-ranking__link {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+}
+
+.linha-ranking__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.linha-ranking__link:focus-visible {
+  box-shadow: none;
+}
+
+.linha-ranking__link:focus-visible::after {
+  border-radius: var(--raio);
+  box-shadow: var(--foco);
 }
 
 .linha-ranking__xp {

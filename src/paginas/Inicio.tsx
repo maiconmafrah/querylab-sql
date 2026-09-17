@@ -278,6 +278,8 @@ function CartaoRankingResumo() {
 
       {!firebaseDisponivel || estado.fase === 'indisponivel' || estado.fase === 'erro' ? (
         <p className="ranking-resumo__vazio">Ranking indisponível no momento.</p>
+      ) : estado.fase === 'requer-login' ? (
+        <p className="ranking-resumo__vazio">Entre com Google pra ver o ranking.</p>
       ) : estado.fase === 'carregando' ? (
         <p className="ranking-resumo__vazio">Carregando…</p>
       ) : estado.linhas.length === 0 ? (

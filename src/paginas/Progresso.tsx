@@ -1,32 +1,51 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { CampoApelido } from '../componentes/Apelido.tsx';
-import { BarraProgresso } from '../componentes/comum.tsx';
-import { Icone, type NomeIcone } from '../componentes/Icone.tsx';
+import { BarraProgresso, Carregando, PedirLogin } from '../componentes/comum.tsx';
+import { Icone } from '../componentes/Icone.tsx';
 import { Modal } from '../componentes/Modal.tsx';
+import { AtividadeHeatmap, CartaoNivelGrande, Conquistas, Estatistica } from '../componentes/PainelProgresso.tsx';
 import { nomeTema, simulados, treinamentos } from '../conteudo/index.ts';
 import { simuladoAprovado, tentativasSimulado, xpGanhoMissao } from '../conteudo/status.ts';
 import { useAutenticacao } from '../estado/autenticacao.ts';
-import {
-  apagarProgresso,
-  definirModoLivre,
-  exportarProgresso,
-  importarProgresso,
-  useProgresso,
-  type Progresso as ProgressoEstado,
-} from '../estado/progresso.ts';
+import { apagarProgresso, definirModoLivre, exportarProgresso, importarProgresso, useProgresso } from '../estado/progresso.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
-import { formatarData, formatarNumero } from '../lib/formato.ts';
-import { calcularSequencia, dataLocal, infoNivel, melhorSequencia, TITULOS_NIVEL, CONQUISTAS_SEQUENCIA } from '../lib/niveis.ts';
-import { contarAtividadesPorDia, gradeAtividade, totalPulsos } from '../lib/atividade.ts';
+import { formatarData } from '../lib/formato.ts';
+import { firebaseDisponivel } from '../lib/firebase.ts';
+import { calcularSequencia, dataLocal, infoNivel, melhorSequencia } from '../lib/niveis.ts';
+import { contarAtividadesPorDia } from '../lib/atividade.ts';
 
 export function Progresso() {
   useTitulo('Progresso');
+  const { usuario, carregando } = useAutenticacao();
+
+  if (firebaseDisponivel && carregando) return <Carregando texto="Carregando…" />;
+
+  if (firebaseDisponivel && !usuario) {
+    return (
+      <div className="pagina">
+        <div className="cabecalho-pagina">
+          <div>
+            <h1 className="titulo-pagina">Seu progresso</h1>
+            <p className="subtitulo-pagina">O progresso só existe depois que você entra com o Google — assim ele fica seguro na sua conta.</p>
+          </div>
+        </div>
+        <PedirLogin titulo="Faça login para criar seu progresso" texto="Entre com o Google pra começar a ganhar XP, subir de nível e aparecer no ranking." />
+      </div>
+    );
+  }
+
+  return <ProgressoConteudo />;
+}
+
+function ProgressoConteudo() {
   const progresso = useProgresso();
   const { usuario } = useAutenticacao();
   const nivel = infoNivel(progresso.xp);
   const hoje = dataLocal();
   const sequencia = calcularSequencia(progresso.dias, hoje);
+  const melhor = melhorSequencia(progresso.dias);
+  const contagemAtividade = useMemo(() => contarAtividadesPorDia(progresso), [progresso]);
   const [confirmarApagar, setConfirmarApagar] = useState(false);
   const [aviso, setAviso] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null);
   const seletorArquivo = useRef<HTMLInputElement>(null);
@@ -80,20 +99,7 @@ export function Progresso() {
       </div>
 
       <div className="progresso__grade">
-        <article className="cartao cartao--lilas cartao--destaque nivel-grande">
-          <span className="rotulo">Nível atual</span>
-          <div className="nivel-grande__linha">
-            <span className="nivel-grande__numero">{nivel.nivel}</span>
-            <div>
-              <strong className="nivel-grande__titulo">{nivel.titulo}</strong>
-              <span className="mono">
-                {formatarNumero(progresso.xp)} XP · faltam {formatarNumero(nivel.xpProximo - progresso.xp)} para o nível {nivel.nivel + 1}
-              </span>
-            </div>
-          </div>
-          <BarraProgresso valor={nivel.progresso} rotulo="Progresso até o próximo nível" />
-          <span className="mono">próximo título: {TITULOS_NIVEL[Math.min(nivel.nivel, TITULOS_NIVEL.length - 1)]}</span>
-        </article>
+        <CartaoNivelGrande nivel={nivel} xp={progresso.xp} />
         <Estatistica icone="chama" valor={sequencia} rotulo={sequencia === 1 ? 'dia seguido estudando' : 'dias seguidos estudando'} />
         <Estatistica icone="bandeira" valor={`${concluidas.length}/${treinamentos.length}`} rotulo="missões concluídas" />
         <Estatistica
@@ -104,8 +110,12 @@ export function Progresso() {
         <Estatistica icone="grafico" valor={progresso.dias.length} rotulo={progresso.dias.length === 1 ? 'dia de estudo no total' : 'dias de estudo no total'} />
       </div>
 
-      <Conquistas progresso={progresso} concluidas={concluidas.length} totalMissoes={treinamentos.length} />
-      <AtividadeHeatmap progresso={progresso} />
+      <Conquistas
+        atual={sequencia}
+        melhor={melhor}
+        secretaDesbloqueada={treinamentos.length > 0 && concluidas.length === treinamentos.length}
+      />
+      <AtividadeHeatmap contagem={contagemAtividade} />
 
       <div className="progresso__colunas">
         <section>
@@ -266,111 +276,5 @@ export function Progresso() {
         <p>Isso não tem volta. Se quiser guardar uma cópia, exporte um backup antes.</p>
       </Modal>
     </div>
-  );
-}
-
-function Estatistica({ icone, valor, rotulo }: { icone: NomeIcone; valor: string | number; rotulo: string }) {
-  return (
-    <article className="cartao estatistica">
-      <span className="avatar avatar--quadrado" aria-hidden="true">
-        <Icone nome={icone} tamanho={17} />
-      </span>
-      <strong className="estatistica__valor">{valor}</strong>
-      <span className="estatistica__rotulo">{rotulo}</span>
-    </article>
-  );
-}
-
-function Conquistas({ progresso, concluidas, totalMissoes }: { progresso: ProgressoEstado; concluidas: number; totalMissoes: number }) {
-  const hoje = dataLocal();
-  const atual = calcularSequencia(progresso.dias, hoje);
-  const melhor = melhorSequencia(progresso.dias);
-  const proxima = CONQUISTAS_SEQUENCIA.find((c) => melhor < c.dias);
-  const secretaDesbloqueada = totalMissoes > 0 && concluidas === totalMissoes;
-  const desbloqueadas = CONQUISTAS_SEQUENCIA.filter((c) => melhor >= c.dias).length + (secretaDesbloqueada ? 1 : 0);
-
-  return (
-    <section className="secao-conquistas">
-      <div className="cabecalho-secao">
-        <h2 className="titulo-secao">Conquistas</h2>
-        <span className="mono">
-          {desbloqueadas} de {CONQUISTAS_SEQUENCIA.length + 1}
-          {proxima && ` · faltam ${Math.max(0, proxima.dias - atual)} dias para ${proxima.nome}`}
-        </span>
-      </div>
-      <div className="conquistas__grade">
-        {CONQUISTAS_SEQUENCIA.map((c) => {
-          const desbloqueada = melhor >= c.dias;
-          const ehProxima = !desbloqueada && c.id === proxima?.id;
-          return (
-            <article
-              key={c.id}
-              className={`conquista${desbloqueada ? ' conquista--desbloqueada' : ''}${ehProxima ? ' conquista--atual' : ''}`}
-            >
-              <span className={`circulo${desbloqueada ? ' circulo--lilas' : ' circulo--bloqueado'}`}>{c.dias}</span>
-              <span className="conquista__nome">{c.nome}</span>
-              <span className="conquista__legenda mono">
-                {c.dias === 1 ? 'primeiro dia' : `${c.dias} dias`}
-                {ehProxima && ` · faltam ${Math.max(0, c.dias - atual)}`}
-              </span>
-            </article>
-          );
-        })}
-        <article className={`conquista${secretaDesbloqueada ? ' conquista--desbloqueada' : ''}`}>
-          <span className={`circulo${secretaDesbloqueada ? ' circulo--lilas' : ' circulo--bloqueado'}`}>?</span>
-          <span className="conquista__nome">{secretaDesbloqueada ? 'Buraco negro' : '???'}</span>
-          <span className="conquista__legenda mono">{secretaDesbloqueada ? 'todas as missões concluídas' : 'secreta'}</span>
-        </article>
-      </div>
-    </section>
-  );
-}
-
-function AtividadeHeatmap({ progresso }: { progresso: ProgressoEstado }) {
-  const hoje = dataLocal();
-  const contagem = useMemo(() => contarAtividadesPorDia(progresso), [progresso]);
-  const semanas = useMemo(() => gradeAtividade(hoje, contagem, 53), [hoje, contagem]);
-  const inicio = semanas[0]!.dias[0]!.iso;
-  const pulsos = useMemo(() => totalPulsos(contagem, inicio), [contagem, inicio]);
-
-  return (
-    <section className="secao-atividade">
-      <div className="cabecalho-secao">
-        <h2 className="titulo-secao">Atividade</h2>
-        <span className="mono">
-          {pulsos} {pulsos === 1 ? 'pulso' : 'pulsos'} nos últimos 12 meses
-        </span>
-      </div>
-      <div className="cartao atividade">
-        <div className="atividade__rolagem">
-          <div className="atividade__grade" role="img" aria-label={`Mapa de atividade: ${pulsos} pulsos nos últimos 12 meses`}>
-            {semanas.map((semana, i) => (
-              <div key={i} className="atividade__semana">
-                <span className="atividade__mes">{semana.rotuloMes ?? ''}</span>
-                {semana.dias.map((dia) =>
-                  dia.foraDoPeriodo ? (
-                    <span key={dia.iso} className="atividade__dia atividade__dia--vazio" aria-hidden="true" />
-                  ) : (
-                    <span
-                      key={dia.iso}
-                      className={`atividade__dia atividade__dia--${dia.nivel}`}
-                      title={`${formatarData(dia.iso)} · ${dia.contagem} ${dia.contagem === 1 ? 'pulso' : 'pulsos'}`}
-                    />
-                  ),
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="atividade__legenda mono">
-          <span>menos</span>
-          <span className="atividade__dia atividade__dia--0" aria-hidden="true" />
-          <span className="atividade__dia atividade__dia--1" aria-hidden="true" />
-          <span className="atividade__dia atividade__dia--2" aria-hidden="true" />
-          <span className="atividade__dia atividade__dia--3" aria-hidden="true" />
-          <span>mais</span>
-        </div>
-      </div>
-    </section>
   );
 }

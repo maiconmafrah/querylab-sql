@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { carregarFirebase, firebaseDisponivel } from '../lib/firebase.ts';
 import { useAutenticacao } from './autenticacao.ts';
-import { assinarProgresso, exportarProgresso, importarProgresso, obterProgresso } from './progresso.ts';
+import { assinarProgresso, exportarProgresso, importarProgresso, obterProgresso, type Progresso } from './progresso.ts';
 
 const ATRASO_ENVIO_MS = 1500;
 
@@ -11,14 +11,18 @@ export type StatusSincronizacao = 'ocioso' | 'sincronizando' | 'sincronizado' | 
 
 async function enviar(uid: string) {
   const kit = await carregarFirebase();
-  const progresso = JSON.parse(exportarProgresso()) as { xp: number; apelido?: string };
+  const progresso = JSON.parse(exportarProgresso()) as Progresso;
   await kit.firestoreApi.setDoc(kit.firestoreApi.doc(kit.db, 'progressos', uid), progresso);
 
-  // Ranking público: só existe pra quem já escolheu um apelido.
+  // Ranking e perfil público: só existe pra quem já escolheu um apelido. Só expõe o essencial
+  // (XP, dias estudados e quantas missões foram concluídas) — nunca respostas, notas ou SQL salvo.
   if (progresso.apelido) {
+    const missoesConcluidas = Object.values(progresso.missoes).filter((m) => m.concluidaEm).length;
     await kit.firestoreApi.setDoc(kit.firestoreApi.doc(kit.db, 'rankings', uid), {
       apelido: progresso.apelido,
       xp: progresso.xp,
+      dias: progresso.dias,
+      missoesConcluidas,
       atualizadoEm: new Date().toISOString(),
     });
   }

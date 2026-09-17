@@ -7,17 +7,21 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 
-    // Ranking público: qualquer um lê, só o dono escreve o próprio apelido e XP.
+    // Ranking público: qualquer um logado lê (a página exige login pra exibir), só o dono escreve o próprio perfil.
     match /rankings/{uid} {
-      allow read: if true;
+      allow read: if request.auth != null;
       allow write: if request.auth != null
         && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['apelido', 'xp', 'atualizadoEm'])
+        && request.resource.data.keys().hasOnly(['apelido', 'xp', 'dias', 'missoesConcluidas', 'atualizadoEm'])
         && request.resource.data.apelido is string
         && request.resource.data.apelido.size() >= 2
         && request.resource.data.apelido.size() <= 24
         && request.resource.data.xp is int
-        && request.resource.data.xp >= 0;
+        && request.resource.data.xp >= 0
+        && request.resource.data.dias is list
+        && request.resource.data.dias.size() <= 400
+        && request.resource.data.missoesConcluidas is int
+        && request.resource.data.missoesConcluidas >= 0;
     }
   }
 }

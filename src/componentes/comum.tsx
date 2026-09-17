@@ -1,13 +1,43 @@
+import { useState } from 'react';
 import { NOMES_DIFICULDADE } from '../conteudo/index.ts';
+import { entrarComGoogle } from '../estado/autenticacao.ts';
 import { explicarErro } from '../lib/sql.ts';
 import type { Dificuldade } from '../tipos.ts';
-import { Icone } from './Icone.tsx';
+import { Icone, IconeGoogle } from './Icone.tsx';
 
 export function Carregando({ texto }: { texto: string }) {
   return (
     <div className="estado-painel" role="status">
       <span className="girando" aria-hidden="true" />
       <span>{texto}</span>
+    </div>
+  );
+}
+
+/** Bloqueio de login: usado onde o conteúdo só existe pra quem entrou com Google. */
+export function PedirLogin({ titulo, texto }: { titulo: string; texto: string }) {
+  const [erro, setErro] = useState<string | null>(null);
+  return (
+    <div className="vazio">
+      <strong>{titulo}</strong>
+      <span>{texto}</span>
+      <button
+        type="button"
+        className="btn btn--amarelo"
+        onClick={() => {
+          setErro(null);
+          entrarComGoogle().catch((erro: unknown) => {
+            const codigo = (erro as { code?: string } | undefined)?.code;
+            if (codigo === 'auth/popup-closed-by-user' || codigo === 'auth/cancelled-popup-request') return;
+            console.error('Falha no login com Google:', erro);
+            setErro(codigo ? `Não deu para entrar (${codigo}).` : 'Não deu para entrar. Tente de novo.');
+          });
+        }}
+      >
+        <IconeGoogle />
+        Entrar com Google
+      </button>
+      {erro && <p className="conta-login__erro">{erro}</p>}
     </div>
   );
 }

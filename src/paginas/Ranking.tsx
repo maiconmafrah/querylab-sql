@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Carregando } from '../componentes/comum.tsx';
+import { Carregando, PedirLogin } from '../componentes/comum.tsx';
 import { Icone } from '../componentes/Icone.tsx';
 import { useAutenticacao } from '../estado/autenticacao.ts';
 import { useProgresso } from '../estado/progresso.ts';
@@ -36,20 +36,13 @@ export function Ranking() {
         </div>
       )}
 
-      {!usuario && firebaseDisponivel && (
-        <div className="aviso aviso--info" role="status">
-          <Icone nome="info" />
-          <div>
-            <strong>Entre com Google e defina um apelido</strong> pra aparecer aqui com seu XP.
-          </div>
-        </div>
-      )}
-
       {!firebaseDisponivel || estado.fase === 'indisponivel' ? (
         <div className="vazio">
           <strong>Ranking indisponível.</strong>
           <span>Este site não está com o login configurado.</span>
         </div>
+      ) : estado.fase === 'requer-login' ? (
+        <PedirLogin titulo="Faça login para ver o ranking" texto="O ranking só fica visível pra quem entrou com Google." />
       ) : estado.fase === 'carregando' ? (
         <Carregando texto="Carregando o ranking…" />
       ) : estado.fase === 'erro' ? (
@@ -69,7 +62,9 @@ export function Ranking() {
               <li key={linha.uid} className={linha.uid === usuario?.uid ? 'linha-ranking linha-ranking--voce' : 'linha-ranking'}>
                 <span className={`linha-ranking__posicao${i < 3 ? ` linha-ranking__posicao--${i + 1}` : ''}`}>{i + 1}</span>
                 <span className="linha-ranking__apelido">
-                  {linha.apelido}
+                  <Link to={`/ranking/${linha.uid}`} className="linha-ranking__link">
+                    {linha.apelido}
+                  </Link>
                   {linha.uid === usuario?.uid && <span className="tag tag--escuro">você</span>}
                 </span>
                 <span className="mono linha-ranking__xp">{formatarNumero(linha.xp)} XP</span>
