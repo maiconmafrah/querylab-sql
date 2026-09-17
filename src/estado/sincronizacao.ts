@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { carregarFirebase, firebaseDisponivel } from '../lib/firebase.ts';
 import { useAutenticacao } from './autenticacao.ts';
-import { assinarProgresso, exportarProgresso, importarProgresso } from './progresso.ts';
+import { assinarProgresso, exportarProgresso, importarProgresso, obterProgresso } from './progresso.ts';
 
 const ATRASO_ENVIO_MS = 1500;
 
@@ -51,8 +51,17 @@ export function useSincronizarProgresso(): StatusSincronizacao {
           (instantaneo) => {
             if (cancelado) return;
             if (instantaneo.exists()) {
-              ignorarProximaMudanca.current = true;
-              importarProgresso(JSON.stringify(instantaneo.data()));
+              // Só aplica o snapshot se ele não for mais velho que a última mudança feita aqui:
+              // sem isso, um snapshot atrasado da nuvem pode chegar bem na hora em que acabamos de
+              // salvar algo localmente (ex.: terminar um simulado) e apagar essa mudança antes do
+              // envio (que é adiado por ATRASO_ENVIO_MS) terminar.
+              const dadosNuvem = instantaneo.data() as Partial<{ atualizadoEm: string }>;
+              const localAtual = obterProgresso();
+              const podeAplicar = !dadosNuvem.atualizadoEm || dadosNuvem.atualizadoEm > localAtual.atualizadoEm;
+              if (podeAplicar) {
+                ignorarProximaMudanca.current = true;
+                importarProgresso(JSON.stringify(dadosNuvem));
+              }
               setStatus('sincronizado');
             } else if (primeiraLeitura) {
               enviar(usuario.uid)

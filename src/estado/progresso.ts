@@ -69,10 +69,18 @@ export interface Progresso {
   apelido?: string;
   /** Chave: data (AAAA-MM-DD) do desafio. */
   desafios: Record<string, ProgressoDesafio>;
+  /**
+   * Quando este progresso mudou pela última vez NESTE aparelho. Usado só pra decidir se um
+   * snapshot que chega da nuvem é mais novo que o que já está na tela — nunca é mostrado.
+   */
+  atualizadoEm: string;
 }
 
+/** Sentinela "nunca atualizado": qualquer dado real da nuvem é sempre mais novo que isso. */
+const NUNCA_ATUALIZADO = '1970-01-01T00:00:00.000Z';
+
 function progressoVazio(): Progresso {
-  return { versao: 1, xp: 0, dias: [], missoes: {}, simulados: {}, modoLivre: false, desafios: {} };
+  return { versao: 1, xp: 0, dias: [], missoes: {}, simulados: {}, modoLivre: false, desafios: {}, atualizadoEm: NUNCA_ATUALIZADO };
 }
 
 function lerArmazenado(): Progresso {
@@ -101,7 +109,7 @@ function publicar(novo: Progresso) {
 }
 
 function atualizar(alteracao: (atual: Progresso) => Progresso) {
-  publicar(alteracao(estado));
+  publicar({ ...alteracao(estado), atualizadoEm: new Date().toISOString() });
 }
 
 function assinar(ouvinte: () => void) {

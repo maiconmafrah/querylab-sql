@@ -5,8 +5,10 @@ import { BarraProgresso } from '../componentes/comum.tsx';
 import { Icone } from '../componentes/Icone.tsx';
 import { buscarSimulado, nomeTema } from '../conteudo/index.ts';
 import { useProgresso } from '../estado/progresso.ts';
+import { useAutenticacao } from '../estado/autenticacao.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
 import { formatarDataHora, formatarDuracao } from '../lib/formato.ts';
+import type { Simulado } from '../tipos.ts';
 import { NaoEncontrado } from './NaoEncontrado.tsx';
 
 export function Resultado() {
@@ -17,7 +19,8 @@ export function Resultado() {
   useTitulo(simulado ? `Resultado · ${simulado.titulo}` : 'Resultado');
   const [soErros, setSoErros] = useState(false);
 
-  if (!simulado || !tentativa) return <NaoEncontrado />;
+  if (!simulado) return <NaoEncontrado />;
+  if (!tentativa) return <ResultadoNaoEncontrado simulado={simulado} />;
 
   const aprovado = tentativa.nota >= simulado.nota_minima;
   const porTema = new Map<string, { acertos: number; total: number }>();
@@ -169,6 +172,37 @@ export function Resultado() {
           })}
         </div>
       </section>
+    </div>
+  );
+}
+
+/** Quando o simulado existe mas essa tentativa não está salva neste aparelho — não é um link quebrado. */
+function ResultadoNaoEncontrado({ simulado }: { simulado: Simulado }) {
+  useTitulo('Resultado não encontrado');
+  const { usuario } = useAutenticacao();
+  return (
+    <div className="pagina">
+      <div className="cartao nao-encontrado">
+        <span className="circulo circulo--amarelo">
+          <Icone nome="relogio" />
+        </span>
+        <h1 className="titulo-pagina">Essa tentativa não está aqui.</h1>
+        <p className="subtitulo-pagina">
+          O simulado <strong>{simulado.titulo}</strong> existe, mas esse resultado específico não está salvo neste navegador
+          {usuario ? ' — pode ser que a sincronização com a nuvem ainda esteja em andamento. Espere alguns segundos e recarregue a página.' : '.'}{' '}
+          Se você acabou de terminar a prova, veja se ela aparece no histórico.
+        </p>
+        <div className="lista-tags">
+          <Link to="/simulados?aba=historico" className="btn btn--amarelo">
+            <Icone nome="prancheta" />
+            Ver histórico de simulados
+          </Link>
+          <Link to={`/simulados?iniciar=${simulado.id}`} className="btn">
+            <Icone nome="restaurar" />
+            Refazer simulado
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
