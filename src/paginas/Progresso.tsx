@@ -8,7 +8,14 @@ import { AtividadeHeatmap, CartaoNivelGrande, Conquistas, Estatistica } from '..
 import { nomeTema, simulados, treinamentos } from '../conteudo/index.ts';
 import { simuladoAprovado, tentativasSimulado, xpGanhoMissao } from '../conteudo/status.ts';
 import { useAutenticacao } from '../estado/autenticacao.ts';
-import { apagarProgresso, definirModoLivre, exportarProgresso, importarProgresso, useProgresso } from '../estado/progresso.ts';
+import {
+  apagarProgresso,
+  definirLembreteSequencia,
+  definirModoLivre,
+  exportarProgresso,
+  importarProgresso,
+  useProgresso,
+} from '../estado/progresso.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
 import { formatarData } from '../lib/formato.ts';
 import { firebaseDisponivel } from '../lib/firebase.ts';
@@ -17,23 +24,9 @@ import { contarAtividadesPorDia } from '../lib/atividade.ts';
 
 export function Progresso() {
   useTitulo('Progresso');
-  const { usuario, carregando } = useAutenticacao();
+  const { carregando } = useAutenticacao();
 
   if (firebaseDisponivel && carregando) return <Carregando texto="Carregando…" />;
-
-  if (firebaseDisponivel && !usuario) {
-    return (
-      <div className="pagina">
-        <div className="cabecalho-pagina">
-          <div>
-            <h1 className="titulo-pagina">Seu progresso</h1>
-            <p className="subtitulo-pagina">O progresso só existe depois que você entra com o Google — assim ele fica seguro na sua conta.</p>
-          </div>
-        </div>
-        <PedirLogin titulo="Faça login para criar seu progresso" texto="Entre com o Google pra começar a ganhar XP, subir de nível e aparecer no ranking." />
-      </div>
-    );
-  }
 
   return <ProgressoConteudo />;
 }
@@ -97,6 +90,13 @@ function ProgressoConteudo() {
           <p className="subtitulo-pagina">Tudo fica salvo neste navegador. Se for trocar de computador, exporte um backup.</p>
         </div>
       </div>
+
+      {firebaseDisponivel && !usuario && (
+        <PedirLogin
+          titulo="Sincronize seu progresso"
+          texto="Esse progresso já está salvo neste navegador. Entre com Google pra levar ele pra outros aparelhos e aparecer no ranking."
+        />
+      )}
 
       <div className="progresso__grade">
         <CartaoNivelGrande nivel={nivel} xp={progresso.xp} />
@@ -199,6 +199,23 @@ function ProgressoConteudo() {
             </div>
             <CampoApelido atual={progresso.apelido} />
           </div>
+        )}
+
+        {usuario && (
+          <label className="interruptor">
+            <input
+              type="checkbox"
+              checked={progresso.lembreteSequencia !== false}
+              onChange={(evento) => definirLembreteSequencia(evento.target.checked)}
+            />
+            <span className="interruptor__trilho" aria-hidden="true">
+              <span />
+            </span>
+            <span className="configuracoes__texto">
+              <strong>Lembrete por e-mail</strong>
+              <span>Avisa no seu e-mail do Google quando sua sequência de dias estiver prestes a quebrar.</span>
+            </span>
+          </label>
         )}
 
         <label className="interruptor">
