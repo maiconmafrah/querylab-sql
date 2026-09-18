@@ -23,5 +23,11 @@ service cloud.firestore {
         && request.resource.data.missoesConcluidas is int
         && request.resource.data.missoesConcluidas >= 0;
     }
+
+    // Fila de e-mails da extensão "Trigger Email": só a Cloud Function (Admin SDK, que ignora
+    // estas regras) escreve aqui. Bloqueado pro cliente de propósito.
+    match /mail/{id} {
+      allow read, write: if false;
+    }
   }
 }

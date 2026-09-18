@@ -60,6 +60,18 @@ Sem configurar nada, o progresso continua salvo só neste navegador (como sempre
 
 Essas chaves não são segredo (o Firebase é protegido pelas regras do Firestore, não por elas ficarem escondidas), mas para publicar no GitHub Pages via Actions (`.github/workflows/deploy.yml`) é preciso cadastrá-las como **Secrets** do repositório: `Settings → Secrets and variables → Actions → New repository secret`, uma para cada `VITE_FIREBASE_*` do `.env.example`.
 
+## Lembrete por e-mail de sequência
+
+Opcional. Todo dia às 20h (horário de Brasília), uma Cloud Function (`functions/`) confere quem está com uma sequência de dias ativa mas ainda não estudou hoje e enfileira um e-mail de lembrete. Precisa de:
+
+1. **Upgrade do projeto Firebase para o plano Blaze** (pago por uso — Cloud Functions não roda no plano gratuito Spark). Nesse volume de uso, o custo real fica dentro da cota grátis do Blaze, mas é preciso cadastrar um cartão.
+2. Instalar a extensão oficial **[Trigger Email from Firestore](https://extensions.dev/extensions/firebase/firestore-send-email)** (Firebase Console → Extensions → procure "Trigger Email") e configurar com as credenciais SMTP de um provedor (ex.: [SendGrid](https://sendgrid.com), tem plano grátis). Aponte a extensão para a coleção `mail` — é nela que a function escreve.
+3. Rodar `npm install` dentro de `functions/` e depois `npm run deploy` (ou `firebase deploy --only functions` na raiz).
+
+Se o site estiver publicado em outro endereço além do padrão do GitHub Pages deste repositório, copie `functions/.env.example` para `functions/.env` e ajuste `SITE_URL` antes do deploy.
+
+Cada pessoa pode desativar esse aviso a qualquer momento em Progresso → Configurações → "Lembrete por e-mail".
+
 ## Estrutura
 
 ```
