@@ -67,10 +67,11 @@ Opcional. Todo dia às 20h (horário de Brasília), uma Cloud Function (`functio
 1. **Upgrade do projeto Firebase para o plano Blaze** (pago por uso — Cloud Functions não roda no plano gratuito Spark). Nesse volume de uso, o custo real fica dentro da cota grátis do Blaze, mas é preciso cadastrar um cartão.
 2. Instalar a extensão oficial **[Trigger Email from Firestore](https://extensions.dev/extensions/firebase/firestore-send-email)** (Firebase Console → Extensions → procure "Trigger Email") e configurar com as credenciais SMTP de um provedor (ex.: [SendGrid](https://sendgrid.com), tem plano grátis). Aponte a extensão para a coleção `mail` — é nela que a function escreve.
 3. Rodar `npm install` dentro de `functions/` e depois `npm run deploy` (ou `firebase deploy --only functions` na raiz).
+4. Em `src/paginas/Progresso.tsx`, trocar `LEMBRETE_POR_EMAIL_PUBLICADO` para `true` e publicar o site: só aí o botão "Lembrete por e-mail" aparece pra quem está logado (até isso, ele fica escondido pra não prometer um e-mail que não sai).
 
 Se o site estiver publicado em outro endereço além do padrão do GitHub Pages deste repositório, copie `functions/.env.example` para `functions/.env` e ajuste `SITE_URL` antes do deploy.
 
-Cada pessoa pode desativar esse aviso a qualquer momento em Progresso → Configurações → "Lembrete por e-mail".
+Depois de ligado, cada pessoa pode desativar esse aviso a qualquer momento em Progresso → Configurações → "Lembrete por e-mail".
 
 ## Estrutura
 

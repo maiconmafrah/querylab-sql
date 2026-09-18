@@ -22,6 +22,9 @@ import { firebaseDisponivel } from '../lib/firebase.ts';
 import { calcularSequencia, dataLocal, infoNivel, melhorSequencia } from '../lib/niveis.ts';
 import { contarAtividadesPorDia } from '../lib/atividade.ts';
 
+// O e-mail só sai depois que a Cloud Function de functions/ for publicada (ver README); até lá o botão fica escondido.
+const LEMBRETE_POR_EMAIL_PUBLICADO = false;
+
 export function Progresso() {
   useTitulo('Progresso');
   const { carregando } = useAutenticacao();
@@ -201,7 +204,7 @@ function ProgressoConteudo() {
           </div>
         )}
 
-        {usuario && (
+        {usuario && LEMBRETE_POR_EMAIL_PUBLICADO && (
           <label className="interruptor">
             <input
               type="checkbox"
