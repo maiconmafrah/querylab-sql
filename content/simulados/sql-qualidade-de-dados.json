@@ -61,7 +61,7 @@
         "SELECT c.*, p.*\nFROM clientes c, pedidos p\nWHERE p.pedido_id IS NULL;"
       ],
       "correta": 1,
-      "explicacao": "O INNER JOIN da alternativa A já descarta quem não tem pedido, então o WHERE nunca encontra nada. O LEFT JOIN mantém todo cliente, e quem não tem par em pedidos fica com p.pedido_id NULL — é esse que o WHERE captura."
+      "explicacao": "A versão com JOIN simples (INNER) já descarta quem não tem pedido, então o WHERE nunca encontra nada. O LEFT JOIN mantém todo cliente, e quem não tem par em pedidos fica com p.pedido_id NULL — é esse que o WHERE captura."
     },
     {
       "id": "duplicados-having",

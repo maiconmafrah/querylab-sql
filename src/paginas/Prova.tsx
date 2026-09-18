@@ -6,12 +6,13 @@ import { EditorSql } from '../componentes/EditorSql.tsx';
 import { Icone } from '../componentes/Icone.tsx';
 import { Modal } from '../componentes/Modal.tsx';
 import { TabelaResultado } from '../componentes/TabelaResultado.tsx';
-import { buscarSimulado, nomeTema } from '../conteudo/index.ts';
+import { buscarSimulado, nomeTema, origemDoSimulado } from '../conteudo/index.ts';
 import {
   alternarMarcada,
   atualizarProva,
   iniciarProva,
   obterProgresso,
+  provaAtualOuNova,
   registrarTentativa,
   responderQuestao,
   useProgresso,
@@ -20,6 +21,7 @@ import {
 import { erroParaExecucao, useAmbiente, type EstadoExecucao } from '../hooks/useAmbiente.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
 import { compararResultados } from '../lib/comparar.ts';
+import { ordemAlternativas } from '../lib/embaralhar.ts';
 import { doisDigitos, formatarCronometro } from '../lib/formato.ts';
 import type { Questao, QuestaoMultipla, QuestaoSql, Simulado } from '../tipos.ts';
 import type { Ambiente } from '../db/ambiente.ts';
@@ -50,7 +52,7 @@ function Prova({ simulado }: { simulado: Simulado }) {
   useTitulo(`Prova · ${simulado.titulo}`);
   const navegar = useNavigate();
   const progresso = useProgresso();
-  const [provaInicial] = useState(() => iniciarProva(simulado.id));
+  const [provaInicial] = useState(() => provaAtualOuNova(simulado.id));
   const prova = progresso.simulados[simulado.id]?.emAndamento ?? provaInicial;
 
   const temSql = simulado.questoes.some((q) => q.tipo === 'sql');
@@ -63,6 +65,7 @@ function Prova({ simulado }: { simulado: Simulado }) {
   const questao = simulado.questoes[indice];
   const resposta = prova.respostas[questao.id];
   const marcada = prova.marcadas.includes(questao.id);
+  const ordem = questao.tipo === 'multipla' ? ordemAlternativas(questao.alternativas.length, `${prova.iniciadaEm}:${questao.id}`) : [];
 
   const fim = Date.parse(prova.iniciadaEm) + simulado.tempo_min * 60_000;
   const [agora, setAgora] = useState(() => Date.now());
@@ -72,6 +75,10 @@ function Prova({ simulado }: { simulado: Simulado }) {
   const [confirmarEntrega, setConfirmarEntrega] = useState(false);
   const [entregando, setEntregando] = useState(false);
   const entregue = useRef(false);
+
+  useEffect(() => {
+    if (!entregue.current) iniciarProva(simulado.id, provaInicial);
+  }, [simulado.id, provaInicial]);
 
   const qtdRespondidas = simulado.questoes.filter((q) => respondida(q, prova.respostas[q.id])).length;
   const irPara = (posicao: number) => atualizarProva(simulado.id, { atual: Math.min(Math.max(posicao, 0), total - 1) });
@@ -128,7 +135,7 @@ function Prova({ simulado }: { simulado: Simulado }) {
       else if (evento.key === 'ArrowLeft') irPara(indice - 1);
       else if (questao.tipo === 'multipla' && evento.key.length === 1) {
         const posicao = evento.key.toLowerCase().charCodeAt(0) - 97;
-        if (posicao >= 0 && posicao < questao.alternativas.length) responderQuestao(simulado.id, questao.id, posicao);
+        if (posicao >= 0 && posicao < ordem.length) responderQuestao(simulado.id, questao.id, ordem[posicao]!);
       }
     };
     window.addEventListener('keydown', aoTeclar);
@@ -143,7 +150,12 @@ function Prova({ simulado }: { simulado: Simulado }) {
         <Link to="/" className="marca__icone" aria-label="Sair da prova e ir para o início">
           <Icone nome="banco" tamanho={18} espessura={2.25} />
         </Link>
-        <Link to="/simulados" className="btn btn--sm btn--icone prova__sair" aria-label="Sair da prova (o tempo continua correndo)" title="Sair (o tempo continua correndo)">
+        <Link
+          to={origemDoSimulado(simulado).lista}
+          className="btn btn--sm btn--icone prova__sair"
+          aria-label="Sair da prova (o tempo continua correndo)"
+          title="Sair (o tempo continua correndo)"
+        >
           <Icone nome="seta-esquerda" tamanho={16} espessura={2.5} />
         </Link>
       </aside>
@@ -151,7 +163,9 @@ function Prova({ simulado }: { simulado: Simulado }) {
       <div className="prova__principal">
         <header className="prova__topo">
           <div className="prova__identificacao">
-            <span className="tag tag--escuro">SIMULADO {doisDigitos(simulado.numero)} · MODO PROVA</span>
+            <span className="tag tag--escuro">
+              {simulado.categoria === 'entrevista' ? 'TESTE DE ENTREVISTA' : `SIMULADO ${doisDigitos(simulado.numero)}`} · MODO PROVA
+            </span>
             <span className="prova__titulo">{simulado.titulo}</span>
           </div>
           <div className="prova__progresso">
@@ -161,6 +175,14 @@ function Prova({ simulado }: { simulado: Simulado }) {
             <BarraProgresso valor={qtdRespondidas / total} rotulo="Questões respondidas" />
           </div>
           <div className="prova__acoes">
+            <Link
+              to={origemDoSimulado(simulado).lista}
+              className="btn btn--icone prova__sair-movel"
+              aria-label="Sair da prova (o tempo continua correndo)"
+              title="Sair (o tempo continua correndo)"
+            >
+              <Icone nome="seta-esquerda" tamanho={16} espessura={2.5} />
+            </Link>
             <span className={`cronometro${restante < 5 * 60_000 ? ' cronometro--alerta' : ''}`} role="timer" aria-label="Tempo restante">
               <Icone nome="relogio" tamanho={18} espessura={2.25} />
               {formatarCronometro(restante)}
@@ -184,7 +206,7 @@ function Prova({ simulado }: { simulado: Simulado }) {
             {questao.codigo && <CodigoSql codigo={questao.codigo} />}
 
             {questao.tipo === 'multipla' ? (
-              <Alternativas questao={questao} resposta={resposta} aoResponder={responder} />
+              <Alternativas questao={questao} ordem={ordem} resposta={resposta} aoResponder={responder} />
             ) : (
               <QuestaoDeSql
                 key={questao.id}
@@ -356,16 +378,19 @@ async function corrigir(questao: Questao, resposta: RespostaQuestao | undefined,
 
 function Alternativas({
   questao,
+  ordem,
   resposta,
   aoResponder,
 }: {
   questao: QuestaoMultipla;
+  ordem: number[];
   resposta: RespostaQuestao | undefined;
   aoResponder: (valor: number) => void;
 }) {
   return (
     <div className="alternativas" role="radiogroup" aria-labelledby="enunciado">
-      {questao.alternativas.map((alternativa, i) => {
+      {ordem.map((i, posicao) => {
+        const alternativa = questao.alternativas[i]!;
         const escolhida = resposta === i;
         return (
           <button
@@ -376,7 +401,7 @@ function Alternativas({
             className={`alternativa${escolhida ? ' alternativa--escolhida' : ''}`}
             onClick={() => aoResponder(i)}
           >
-            <span className="alternativa__letra">{String.fromCharCode(65 + i)}</span>
+            <span className="alternativa__letra">{String.fromCharCode(65 + posicao)}</span>
             {questao.formato_alternativas === 'codigo' ? (
               <CodigoSql codigo={alternativa} className="alternativa__codigo" />
             ) : (

@@ -59,7 +59,7 @@
     {
       "id": "indice-rapido",
       "tipo": "multipla",
-      "tema": "qualidade-de-dados",
+      "tema": "conceitos",
       "enunciado": "Pra que serve um índice (INDEX) numa tabela, resumindo em uma frase?",
       "alternativas": [
         "Acelera buscas e filtros, em troca de espaço extra e escrita um pouco mais lenta",

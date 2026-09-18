@@ -81,6 +81,10 @@
   gap: 12px;
 }
 
+.prova__sair-movel {
+  display: none;
+}
+
 .cronometro {
   display: inline-flex;
   align-items: center;
@@ -414,6 +418,12 @@
     grid-column: 1 / -1;
     justify-content: space-between;
     flex-wrap: wrap;
+  }
+
+  .prova__sair-movel {
+    display: inline-flex;
+    width: 46px;
+    height: 46px;
   }
 
   .prova__progresso {

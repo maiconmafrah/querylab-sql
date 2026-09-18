@@ -6,5 +6,6 @@
   { "id": "qualidade-de-dados", "nome": "Qualidade de dados" },
   { "id": "datas", "nome": "Datas e horas" },
   { "id": "subqueries", "nome": "Subqueries e CTEs" },
-  { "id": "window-functions", "nome": "Window functions" }
+  { "id": "window-functions", "nome": "Window functions" },
+  { "id": "conceitos", "nome": "Conceitos de banco" }
 ]

@@ -5,7 +5,7 @@ import { BarraProgresso, Carregando, PedirLogin } from '../componentes/comum.tsx
 import { Icone } from '../componentes/Icone.tsx';
 import { Modal } from '../componentes/Modal.tsx';
 import { AtividadeHeatmap, CartaoNivelGrande, Conquistas, Estatistica } from '../componentes/PainelProgresso.tsx';
-import { nomeTema, simulados, treinamentos } from '../conteudo/index.ts';
+import { nomeTema, simulados, simuladosDaTrilha, treinamentos } from '../conteudo/index.ts';
 import { simuladoAprovado, tentativasSimulado, xpGanhoMissao } from '../conteudo/status.ts';
 import { useAutenticacao } from '../estado/autenticacao.ts';
 import {
@@ -46,8 +46,8 @@ function ProgressoConteudo() {
   const concluidas = treinamentos
     .filter((t) => progresso.missoes[t.id]?.concluidaEm)
     .sort((a, b) => progresso.missoes[b.id]!.concluidaEm!.localeCompare(progresso.missoes[a.id]!.concluidaEm!));
-  const totalTentativas = simulados.reduce((soma, s) => soma + tentativasSimulado(s.id, progresso).length, 0);
-  const aprovados = simulados.filter((s) => simuladoAprovado(s, progresso)).length;
+  const totalTentativas = simuladosDaTrilha.reduce((soma, s) => soma + tentativasSimulado(s.id, progresso).length, 0);
+  const aprovados = simuladosDaTrilha.filter((s) => simuladoAprovado(s, progresso)).length;
 
   // Desempenho por tema na tentativa mais recente de cada simulado.
   const porTema = new Map<string, { acertos: number; total: number }>();
@@ -104,7 +104,7 @@ function ProgressoConteudo() {
         <Estatistica icone="bandeira" valor={`${concluidas.length}/${treinamentos.length}`} rotulo="missões concluídas" />
         <Estatistica
           icone="prancheta"
-          valor={`${aprovados}/${simulados.length}`}
+          valor={`${aprovados}/${simuladosDaTrilha.length}`}
           rotulo={`simulados aprovados · ${totalTentativas} ${totalTentativas === 1 ? 'tentativa' : 'tentativas'}`}
         />
         <Estatistica icone="grafico" valor={progresso.dias.length} rotulo={progresso.dias.length === 1 ? 'dia de estudo no total' : 'dias de estudo no total'} />

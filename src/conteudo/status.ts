@@ -2,7 +2,7 @@
 import type { Progresso, TentativaSimulado } from '../estado/progresso.ts';
 import { dataLocal, somarDias } from '../lib/niveis.ts';
 import type { Simulado, Treinamento, Trilha } from '../tipos.ts';
-import { buscarSimulado, buscarTreinamento, simulados, treinamentos, trilhaDaMissao } from './index.ts';
+import { buscarSimulado, buscarTreinamento, simuladosDaTrilha, treinamentos, trilhaDaMissao } from './index.ts';
 
 export type StatusMissao = 'concluida' | 'andamento' | 'disponivel' | 'bloqueada';
 
@@ -81,10 +81,9 @@ export function simuladoAprovado(simulado: Simulado, progresso: Progresso): bool
 
 /** Primeiro simulado com prova em andamento; senão o primeiro ainda não aprovado. Não conta os de entrevista. */
 export function proximoSimulado(progresso: Progresso): Simulado | undefined {
-  const candidatos = simulados.filter((s) => s.categoria !== 'entrevista');
   return (
-    candidatos.find((s) => progresso.simulados[s.id]?.emAndamento) ??
-    candidatos.find((s) => !simuladoAprovado(s, progresso))
+    simuladosDaTrilha.find((s) => progresso.simulados[s.id]?.emAndamento) ??
+    simuladosDaTrilha.find((s) => !simuladoAprovado(s, progresso))
   );
 }
 

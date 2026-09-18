@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { desafios, nomeTema } from '../conteudo/index.ts';
 import { responderDesafio, useProgresso } from '../estado/progresso.ts';
 import { desafioDoDia, XP_DESAFIO_DIARIO } from '../lib/desafio.ts';
+import { ordemAlternativas } from '../lib/embaralhar.ts';
 import { dataLocal } from '../lib/niveis.ts';
 import { CodigoSql } from './CodigoSql.tsx';
 import { Icone } from './Icone.tsx';
@@ -37,7 +38,8 @@ export function CartaoDesafio() {
       <p className="desafio-diario__enunciado">{questao.enunciado}</p>
 
       <div className="alternativas alternativas--compactas" role="radiogroup" aria-label={questao.enunciado}>
-        {questao.alternativas.map((alternativa, i) => {
+        {ordemAlternativas(questao.alternativas.length, `${hoje}:${questao.id}`).map((i, posicao) => {
+          const alternativa = questao.alternativas[i]!;
           const ehEscolhida = indiceEscolhido === i;
           const revelar = indiceEscolhido !== null;
           const classe = revelar
@@ -57,7 +59,7 @@ export function CartaoDesafio() {
               disabled={revelar}
               onClick={() => escolher(i)}
             >
-              <span className="alternativa__letra">{String.fromCharCode(65 + i)}</span>
+              <span className="alternativa__letra">{String.fromCharCode(65 + posicao)}</span>
               {questao.formato_alternativas === 'codigo' ? (
                 <CodigoSql codigo={alternativa} className="alternativa__codigo" />
               ) : (

@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { TagDificuldade } from '../componentes/comum.tsx';
 import { Icone } from '../componentes/Icone.tsx';
 import { Modal } from '../componentes/Modal.tsx';
-import { buscarSimulado, simulados } from '../conteudo/index.ts';
+import { buscarSimulado, simuladosDaTrilha } from '../conteudo/index.ts';
 import { ehNovo, melhorTentativa, simuladoAprovado, tentativasSimulado } from '../conteudo/status.ts';
 import { useProgresso } from '../estado/progresso.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
@@ -30,7 +30,6 @@ export function Simulados() {
     else setConfirmar(simulado);
   }, [idIniciar, navegar, parametros, progresso.simulados, setParametros]);
 
-  const simuladosDaTrilha = simulados.filter((s) => s.categoria !== 'entrevista');
   const tentativas = simuladosDaTrilha
     .flatMap((simulado) => tentativasSimulado(simulado.id, progresso).map((tentativa) => ({ simulado, tentativa })))
     .sort((a, b) => b.tentativa.entregueEm.localeCompare(a.tentativa.entregueEm));

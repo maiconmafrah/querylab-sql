@@ -24,6 +24,15 @@ export const desafios: QuestaoMultipla[] = desafiosJson as QuestaoMultipla[];
 
 export const trilhas: Trilha[] = Object.values(modulosTrilhas).sort((a, b) => a.numero - b.numero);
 export const simulados: Simulado[] = Object.values(modulosSimulados).sort((a, b) => a.numero - b.numero);
+export const simuladosDaTrilha = simulados.filter((s) => s.categoria !== 'entrevista');
+export const provasDeEntrevista = simulados.filter((s) => s.categoria === 'entrevista');
+
+/** Onde o simulado mora no site: as provas de entrevista têm aba própria e não aparecem no histórico de Simulados. */
+export function origemDoSimulado(simulado: Simulado) {
+  return simulado.categoria === 'entrevista'
+    ? { lista: '/entrevista', historico: '/entrevista', rotuloHistorico: 'Teste de Entrevista', rotuloOutros: 'Outras provas' }
+    : { lista: '/simulados', historico: '/simulados?aba=historico', rotuloHistorico: 'Histórico de simulados', rotuloOutros: 'Outros simulados' };
+}
 
 const posicaoNaTrilha = new Map<string, number>();
 trilhas.forEach((trilha, t) => trilha.missoes.forEach((id, m) => posicaoNaTrilha.set(id, t * 1000 + m)));

@@ -640,3 +640,53 @@ select.campo {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Os fundos pastel são claros nos dois temas: no escuro, o que fica em cima deles volta à tinta do tema claro. */
+:where(:root[data-tema='escuro'])
+  :where(
+    .btn--amarelo, .btn--lilas, .btn--menta, .btn--perigo,
+    .tag--amarelo, .tag--lilas, .tag--menta, .tag--coral,
+    .cartao--amarelo, .cartao--lilas, .cartao-nivel,
+    .aviso--ok, .aviso--erro, .aviso--info, .dica, .xp-ganho, .modal-trofeu,
+    .circulo--lilas, .circulo--amarelo, .avatar, .marca__icone,
+    .nav__item--ativo, .nav__subitem--ativo, .aba[aria-selected='true'],
+    .passo--feito, .passo--atual, .checkpoints-mini .feito, .sequencia__dias .estudado .sequencia__quadrado,
+    .ranking-resumo__linha--voce, .linha-ranking--voce, .conquista--atual,
+    .cartao-trilha__numero, .cartao-simulado__numero, .placar__nota, .nivel-grande__numero,
+    .alternativa--escolhida, .alternativa--certa, .alternativa--errada, .alternativas-corrigidas li.correta, .alternativas-corrigidas li.errada,
+    .cronometro--alerta, .celula--respondida, .celula--marcada,
+    .elemento-sql, .tabela-periodica__rotulo
+  )[class] {
+  --papel: #f6f4ee;
+  --cartao: #fffdf7;
+  --tinta: #121212;
+  --tinta-2: #2e2c28;
+  --texto-2: #45423b;
+  --mudo: #5f5b52;
+  --mudo-2: #8a8579;
+  --linha-suave: #e3dfd4;
+  --violeta: #5b3fd6;
+  color: var(--tinta);
+}
+
+:root[data-tema='escuro'] .tag--escuro {
+  background: #121212;
+}
+
+:root[data-tema='escuro'] .cm-tooltip-autocomplete li[aria-selected] {
+  --tinta: #121212;
+}
+
+:root[data-tema='escuro'] ::selection {
+  color: #121212;
+}
+
+:root[data-tema='escuro']
+  :is(.alternativa--escolhida, .alternativa--certa, .alternativa--errada, .alternativas-corrigidas li.correta, .alternativas-corrigidas li.errada)
+  .alternativa__codigo {
+  --sql-chave: #5b3fd6;
+  --sql-funcao: #121212;
+  --sql-texto: #1d7a4b;
+  --sql-numero: #b3452b;
+  --sql-comentario: #7a756b;
+}

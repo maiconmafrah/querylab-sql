@@ -23,7 +23,7 @@
         "SELECT c.nome FROM clientes c\nLEFT JOIN pedidos p ON p.cliente_id = c.cliente_id\n                   AND p.pedido_id IS NULL;"
       ],
       "correta": 1,
-      "explicacao": "Com um NULL na subconsulta, NOT IN nunca é verdadeiro e a alternativa A volta vazia. A C usa INNER JOIN, que já descarta quem não tem pedido. A D põe o filtro no ON e devolve todos os clientes. O LEFT JOIN com WHERE p.pedido_id IS NULL é o anti-join correto."
+      "explicacao": "Com um NULL na subconsulta, NOT IN nunca é verdadeiro e a versão com NOT IN volta vazia. A versão com JOIN simples (INNER) já descarta quem não tem pedido. A que põe p.pedido_id IS NULL dentro do ON devolve todos os clientes. O LEFT JOIN com WHERE p.pedido_id IS NULL é o anti-join correto."
     },
     {
       "id": "row-number-rank",

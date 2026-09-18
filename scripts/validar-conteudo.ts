@@ -141,6 +141,15 @@ const idsTemas = new Set(temas.map((tema) => tema.id));
 if (idsTemas.size !== temas.length) falha('temas.json', 'há ids de tema repetidos');
 console.log(`      ${temas.length} temas`);
 
+// O site embaralha as alternativas na hora de mostrar, então a letra citada no texto não bate com a da tela.
+function exigirSemLetraDeAlternativa(onde: string, questao: QuestaoMultipla) {
+  const citacoes = [/\b[Aa]lternativas? [A-D]\b|\b[Ll]etra [A-D]\b|\b[Oo]pção [A-D]\b/, /\b(?:todas|nenhuma) das anteriores\b/i];
+  for (const texto of [questao.enunciado, questao.explicacao, ...(questao.alternativas ?? [])]) {
+    const achado = citacoes.map((citacao) => citacao.exec(texto ?? '')).find(Boolean);
+    if (achado) falha(onde, `"${achado[0]}": as alternativas aparecem embaralhadas, descreva a alternativa pelo conteúdo, não pela posição`);
+  }
+}
+
 // ---------- Desafio diário ----------
 console.log('\nDesafio diário');
 const desafios = lerJson<QuestaoMultipla[]>(join(PASTA, 'desafios.json')) ?? [];
@@ -157,6 +166,7 @@ for (const [indice, desafio] of desafios.entries()) {
   if (!Number.isInteger(desafio.correta) || desafio.correta < 0 || desafio.correta >= alternativas.length) {
     falha(onde, `"correta" deve ser um índice entre 0 e ${alternativas.length - 1}`);
   }
+  exigirSemLetraDeAlternativa(onde, desafio);
 }
 console.log(`      ${desafios.length} desafios`);
 
@@ -205,6 +215,7 @@ for (const { arquivo, dados: simulado } of simulados) {
         falha(onde, `"correta" deve ser um índice entre 0 e ${alternativas.length - 1}`);
       }
       if (new Set(alternativas).size !== alternativas.length) aviso(onde, 'há alternativas repetidas');
+      exigirSemLetraDeAlternativa(onde, questao);
     } else if (questao.tipo === 'sql') {
       if (conexao) await validarGabarito(conexao, onde, questao.id, questao.gabarito_sql, questao.ordem_importa, questao.tolerancia);
     } else {

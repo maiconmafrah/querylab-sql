@@ -14,7 +14,7 @@
     {
       "id": "segundo-maior-salario-distinto",
       "tipo": "multipla",
-      "tema": "window-functions",
+      "tema": "consultas-basicas",
       "formato_alternativas": "codigo",
       "enunciado": "Qual consulta encontra corretamente o segundo maior salário da empresa, mesmo se dois funcionários empatarem no primeiro lugar?",
       "alternativas": [
@@ -39,7 +39,7 @@
         "SELECT nome FROM funcionarios ORDER BY salario DESC;"
       ],
       "correta": 0,
-      "explicacao": "É um self join: a tabela se junta com ela mesma — uma cópia (f) representa o funcionário, a outra (g) representa o gerente dele, ligadas por f.gerente_id = g.funcionario_id. A alternativa C esquece essa condição e compara todo mundo com todo mundo (produto cartesiano)."
+      "explicacao": "É um self join: a tabela se junta com ela mesma — uma cópia (f) representa o funcionário, a outra (g) representa o gerente dele, ligadas por f.gerente_id = g.funcionario_id. A versão com FROM funcionarios f, funcionarios g esquece essa condição e compara todo mundo com todo mundo (produto cartesiano)."
     },
     {
       "id": "departamento-maior-media",
@@ -74,20 +74,20 @@
         "SELECT nome, COUNT(*) FROM funcionarios\nWHERE COUNT(*) > 1\nGROUP BY nome;"
       ],
       "correta": 0,
-      "explicacao": "GROUP BY nome junta as linhas com o mesmo nome; HAVING COUNT(*) > 1 mantém só os grupos com mais de uma ocorrência. A alternativa D tenta usar COUNT(*) no WHERE, que roda antes do agrupamento — daria erro."
+      "explicacao": "GROUP BY nome junta as linhas com o mesmo nome; HAVING COUNT(*) > 1 mantém só os grupos com mais de uma ocorrência. Colocar COUNT(*) no WHERE daria erro: o WHERE roda antes do agrupamento, quando a contagem ainda não existe."
     },
     {
       "id": "rank-por-departamento",
       "tipo": "sql",
       "tema": "window-functions",
-      "enunciado": "Para cada funcionário, mostre nome, cargo, departamento_id, salario e a posicao dele por salário DENTRO do próprio departamento (1 = maior salário do departamento).",
+      "enunciado": "Para cada funcionário, mostre nome, cargo, departamento_id, salario e a posicao dele por salário DENTRO do próprio departamento (1 = maior salário do departamento). Quem empata divide a mesma posição, e a seguinte pula os empatados (1, 1, 3).",
       "gabarito_sql": "SELECT nome, cargo, departamento_id, salario,\n       RANK() OVER (PARTITION BY departamento_id ORDER BY salario DESC) AS posicao\nFROM funcionarios;",
-      "explicacao": "PARTITION BY departamento_id reinicia o ranking a cada departamento, sem reduzir as linhas do resultado como um GROUP BY faria."
+      "explicacao": "PARTITION BY departamento_id reinicia o ranking a cada departamento, sem reduzir as linhas do resultado como um GROUP BY faria. O RANK() dá a mesma posição pra empates e pula as seguintes (1, 1, 3); o DENSE_RANK() não pula (1, 1, 2) e o ROW_NUMBER() desempata na marra (1, 2, 3) — saber essa diferença é pergunta clássica de entrevista."
     },
     {
       "id": "delete-truncate-drop",
       "tipo": "multipla",
-      "tema": "qualidade-de-dados",
+      "tema": "conceitos",
       "enunciado": "Clássica de entrevista, mais teórica: qual a diferença entre DELETE, TRUNCATE e DROP?",
       "alternativas": [
         "DELETE remove linhas (aceita WHERE); TRUNCATE esvazia a tabela inteira de uma vez, sem condição; DROP apaga a tabela inteira, estrutura incluída.",
@@ -103,7 +103,6 @@
       "tipo": "sql",
       "tema": "agregacoes",
       "enunciado": "Mostre gerente_id e qtd_subordinados: quantos funcionários cada gerente supervisiona diretamente (considere só quem tem pelo menos 1 subordinado direto).",
-      "ordem_importa": true,
       "gabarito_sql": "SELECT gerente_id, COUNT(*) AS qtd_subordinados\nFROM funcionarios\nWHERE gerente_id IS NOT NULL\nGROUP BY gerente_id\nORDER BY gerente_id;",
       "explicacao": "WHERE gerente_id IS NOT NULL tira o CEO da conta (ele não é subordinado de ninguém). GROUP BY gerente_id agrupa por chefe e COUNT(*) soma quantos subordinados diretos cada um tem."
     },
@@ -111,7 +110,8 @@
       "id": "where-vs-having-entrevista",
       "tipo": "multipla",
       "tema": "agregacoes",
-      "enunciado": "Numa entrevista, pedem pra explicar por que esta consulta dá erro: SELECT departamento_id FROM funcionarios WHERE COUNT(*) > 5 GROUP BY departamento_id;. Qual é a explicação certa?",
+      "enunciado": "Numa entrevista, pedem pra explicar por que esta consulta dá erro. Qual é a explicação certa?",
+      "codigo": "SELECT departamento_id\nFROM funcionarios\nWHERE COUNT(*) > 5\nGROUP BY departamento_id;",
       "alternativas": [
         "Funções de agregação como COUNT(*) não existem no momento em que o WHERE roda — ele é avaliado antes do GROUP BY. O filtro sobre a contagem precisa ir no HAVING.",
         "COUNT(*) só pode ser usado dentro do SELECT, nunca em cláusulas de filtro.",
@@ -147,7 +147,7 @@
     {
       "id": "indice-para-que-serve",
       "tipo": "multipla",
-      "tema": "qualidade-de-dados",
+      "tema": "conceitos",
       "enunciado": "Outra clássica teórica: para que serve um índice (INDEX) numa tabela?",
       "alternativas": [
         "Acelera buscas e filtros em colunas específicas, em troca de mais espaço em disco e escrita um pouco mais lenta.",

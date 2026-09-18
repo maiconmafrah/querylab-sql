@@ -3,7 +3,7 @@ import { CartaoDesafio } from '../componentes/CartaoDesafio.tsx';
 import { CartaoMissao } from '../componentes/CartaoMissao.tsx';
 import { BarraProgresso } from '../componentes/comum.tsx';
 import { Icone } from '../componentes/Icone.tsx';
-import { simulados, treinamentos, trilhaDaMissao, trilhas } from '../conteudo/index.ts';
+import { simuladosDaTrilha, treinamentos, trilhaDaMissao, trilhas } from '../conteudo/index.ts';
 import {
   checkpointsConcluidos,
   ehNovo,
@@ -26,7 +26,7 @@ export function Inicio() {
   useTitulo('');
   const progresso = useProgresso();
   const missao = proximaMissao(progresso);
-  const simulado = proximoSimulado(progresso) ?? simulados[0];
+  const simulado = proximoSimulado(progresso) ?? simuladosDaTrilha[0];
   const comecou = progresso.xp > 0 || Object.keys(progresso.missoes).length > 0;
 
   // Sugestões: missões ainda não concluídas, com as liberadas antes das bloqueadas.

@@ -741,7 +741,7 @@
 }
 
 .no-mapa__texto {
-  color: #cfcbc0;
+  color: color-mix(in srgb, var(--cartao) 78%, var(--tinta));
   font-size: 14px;
 }
 

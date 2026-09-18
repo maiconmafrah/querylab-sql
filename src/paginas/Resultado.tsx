@@ -3,10 +3,11 @@ import { Link, useParams } from 'react-router-dom';
 import { CodigoSql } from '../componentes/CodigoSql.tsx';
 import { BarraProgresso } from '../componentes/comum.tsx';
 import { Icone } from '../componentes/Icone.tsx';
-import { buscarSimulado, nomeTema } from '../conteudo/index.ts';
+import { buscarSimulado, nomeTema, origemDoSimulado } from '../conteudo/index.ts';
 import { useProgresso } from '../estado/progresso.ts';
 import { useAutenticacao } from '../estado/autenticacao.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
+import { ordemAlternativas } from '../lib/embaralhar.ts';
 import { formatarDataHora, formatarDuracao } from '../lib/formato.ts';
 import type { Simulado } from '../tipos.ts';
 import { NaoEncontrado } from './NaoEncontrado.tsx';
@@ -22,6 +23,7 @@ export function Resultado() {
   if (!simulado) return <NaoEncontrado />;
   if (!tentativa) return <ResultadoNaoEncontrado simulado={simulado} />;
 
+  const origem = origemDoSimulado(simulado);
   const aprovado = tentativa.nota >= simulado.nota_minima;
   const porTema = new Map<string, { acertos: number; total: number }>();
   for (const questao of simulado.questoes) {
@@ -36,9 +38,9 @@ export function Resultado() {
 
   return (
     <div className="pagina">
-      <Link to="/simulados?aba=historico" className="voltar link-forte">
+      <Link to={origem.historico} className="voltar link-forte">
         <Icone nome="seta-esquerda" tamanho={16} espessura={2.5} />
-        Histórico de simulados
+        {origem.rotuloHistorico}
       </Link>
 
       <section className={`cartao cartao--destaque placar${aprovado ? ' cartao--lilas' : ''}`}>
@@ -67,12 +69,12 @@ export function Resultado() {
           )}
         </div>
         <div className="placar__acoes">
-          <Link to={`/simulados?iniciar=${simulado.id}`} className="btn btn--amarelo">
+          <Link to={`${origem.lista}?iniciar=${simulado.id}`} className="btn btn--amarelo">
             <Icone nome="restaurar" />
-            Refazer simulado
+            {simulado.categoria === 'entrevista' ? 'Refazer prova' : 'Refazer simulado'}
           </Link>
-          <Link to="/simulados" className="btn">
-            Outros simulados
+          <Link to={origem.lista} className="btn">
+            {origem.rotuloOutros}
           </Link>
         </div>
       </section>
@@ -131,12 +133,13 @@ export function Resultado() {
 
                 {questao.tipo === 'multipla' ? (
                   <ul className="alternativas-corrigidas">
-                    {questao.alternativas.map((alternativa, j) => {
+                    {ordemAlternativas(questao.alternativas.length, `${tentativa.iniciadaEm}:${questao.id}`).map((j, posicao) => {
+                      const alternativa = questao.alternativas[j]!;
                       const correta = j === questao.correta;
                       const escolhida = j === resposta;
                       return (
                         <li key={j} className={correta ? 'correta' : escolhida ? 'errada' : undefined}>
-                          <span className="alternativa__letra">{String.fromCharCode(65 + j)}</span>
+                          <span className="alternativa__letra">{String.fromCharCode(65 + posicao)}</span>
                           <div className="alternativas-corrigidas__texto">
                             {questao.formato_alternativas === 'codigo' ? (
                               <CodigoSql codigo={alternativa} className="alternativa__codigo" />
@@ -180,6 +183,7 @@ export function Resultado() {
 function ResultadoNaoEncontrado({ simulado }: { simulado: Simulado }) {
   useTitulo('Resultado não encontrado');
   const { usuario } = useAutenticacao();
+  const origem = origemDoSimulado(simulado);
   return (
     <div className="pagina">
       <div className="cartao nao-encontrado">
@@ -190,14 +194,14 @@ function ResultadoNaoEncontrado({ simulado }: { simulado: Simulado }) {
         <p className="subtitulo-pagina">
           O simulado <strong>{simulado.titulo}</strong> existe, mas esse resultado específico não está salvo neste navegador
           {usuario ? ' — pode ser que a sincronização com a nuvem ainda esteja em andamento. Espere alguns segundos e recarregue a página.' : '.'}{' '}
-          Se você acabou de terminar a prova, veja se ela aparece no histórico.
+          Se você acabou de terminar a prova, veja se ela aparece em {origem.rotuloHistorico}.
         </p>
         <div className="lista-tags">
-          <Link to="/simulados?aba=historico" className="btn btn--amarelo">
+          <Link to={origem.historico} className="btn btn--amarelo">
             <Icone nome="prancheta" />
-            Ver histórico de simulados
+            Ver {origem.rotuloHistorico.toLowerCase()}
           </Link>
-          <Link to={`/simulados?iniciar=${simulado.id}`} className="btn">
+          <Link to={`${origem.lista}?iniciar=${simulado.id}`} className="btn">
             <Icone nome="restaurar" />
             Refazer simulado
           </Link>

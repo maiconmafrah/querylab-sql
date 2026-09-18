@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { TagDificuldade } from '../componentes/comum.tsx';
 import { Icone } from '../componentes/Icone.tsx';
 import { Modal } from '../componentes/Modal.tsx';
-import { buscarSimulado, simulados } from '../conteudo/index.ts';
+import { buscarSimulado, provasDeEntrevista } from '../conteudo/index.ts';
 import { melhorTentativa, tentativasSimulado } from '../conteudo/status.ts';
 import { useProgresso } from '../estado/progresso.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
@@ -22,8 +22,6 @@ export function Entrevista() {
   const navegar = useNavigate();
   const [confirmar, setConfirmar] = useState<Simulado | null>(null);
   const idIniciar = parametros.get('iniciar');
-
-  const provas = simulados.filter((s) => s.categoria === 'entrevista').sort((a, b) => a.numero - b.numero);
 
   useEffect(() => {
     if (!idIniciar) return;
@@ -54,7 +52,7 @@ export function Entrevista() {
       </div>
 
       <div className="lista-simulados">
-        {provas.map((simulado) => {
+        {provasDeEntrevista.map((simulado) => {
           const emAndamento = Boolean(progresso.simulados[simulado.id]?.emAndamento);
           const melhor = melhorTentativa(simulado.id, progresso);
           const feitas = tentativasSimulado(simulado.id, progresso).length;

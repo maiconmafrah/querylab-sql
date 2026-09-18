@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { referencia, simulados, treinamentos, trilhas } from '../conteudo/index.ts';
+import { buscarSimulado, provasDeEntrevista, referencia, simuladosDaTrilha, treinamentos, trilhas } from '../conteudo/index.ts';
 import { ehNovo, resumoTrilha, statusMissao } from '../conteudo/status.ts';
 import { useProgresso, type Progresso } from '../estado/progresso.ts';
 import { calcularSequencia, dataLocal, infoNivel } from '../lib/niveis.ts';
@@ -12,6 +12,7 @@ import { firebaseDisponivel } from '../lib/firebase.ts';
 import { ModalApelido } from './Apelido.tsx';
 import { BarraProgresso } from './comum.tsx';
 import { Icone, IconeGoogle, type NomeIcone } from './Icone.tsx';
+import type { Simulado } from '../tipos.ts';
 
 const CHAVE_MENU = 'querylab:menu-aberto';
 const GRUPOS_ABERTOS_PADRAO = ['treinamentos', 'trilhas'];
@@ -45,12 +46,12 @@ function lerGruposAbertos(): string[] {
 function montarMenu(caminho: string, busca: URLSearchParams, hash: string, progresso: Progresso): ItemMenu[] {
   const status = busca.get('status');
   const contarStatus = (alvo: string) => treinamentos.filter((t) => statusMissao(t, progresso) === alvo).length;
-  const simuladoNovo = simulados.some(
-    (s) => s.categoria !== 'entrevista' && ehNovo(s.publicado_em) && !progresso.simulados[s.id]?.tentativas.length,
-  );
-  const entrevistaNova = simulados.some(
-    (s) => s.categoria === 'entrevista' && ehNovo(s.publicado_em) && !progresso.simulados[s.id]?.tentativas.length,
-  );
+  const novoSemTentativa = (s: Simulado) => ehNovo(s.publicado_em) && !progresso.simulados[s.id]?.tentativas.length;
+  const simuladoNovo = simuladosDaTrilha.some(novoSemTentativa);
+  const entrevistaNova = provasDeEntrevista.some(novoSemTentativa);
+  // O resultado de uma prova de entrevista mora em /simulados/:id/resultado, mas pertence à aba de entrevista.
+  const idNaRota = /^\/simulados\/([^/]+)/.exec(caminho)?.[1];
+  const naEntrevista = caminho === '/entrevista' || (idNaRota !== undefined && buscarSimulado(idNaRota)?.categoria === 'entrevista');
 
   return [
     { id: 'inicio', rotulo: 'Início', icone: 'inicio', para: '/', ativo: caminho === '/' },
@@ -84,7 +85,7 @@ function montarMenu(caminho: string, busca: URLSearchParams, hash: string, progr
       id: 'simulados',
       rotulo: 'Simulados',
       icone: 'prancheta',
-      ativo: caminho.startsWith('/simulados'),
+      ativo: caminho.startsWith('/simulados') && !naEntrevista,
       etiqueta: simuladoNovo ? 'novo' : undefined,
       filhos: [
         { rotulo: 'Disponíveis', para: '/simulados', ativo: caminho === '/simulados' && busca.get('aba') !== 'historico' },
@@ -96,7 +97,7 @@ function montarMenu(caminho: string, busca: URLSearchParams, hash: string, progr
       rotulo: 'Teste de Entrevista',
       icone: 'maleta',
       para: '/entrevista',
-      ativo: caminho === '/entrevista',
+      ativo: naEntrevista,
       etiqueta: entrevistaNova ? 'novo' : undefined,
     },
     {

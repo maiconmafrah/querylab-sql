@@ -211,15 +211,18 @@ export function salvarConsulta(id: string, sql: string) {
 
 // ---------- Simulados ----------
 
-export function iniciarProva(id: string): ProvaEmAndamento {
-  const existente = estado.simulados[id]?.emAndamento;
-  if (existente) return existente;
-  const prova: ProvaEmAndamento = { iniciadaEm: agora(), respostas: {}, marcadas: [], atual: 0 };
+/** A prova em andamento desse simulado ou uma nova, sem gravar nada (pode ser chamada durante o render). */
+export function provaAtualOuNova(id: string): ProvaEmAndamento {
+  return estado.simulados[id]?.emAndamento ?? { iniciadaEm: agora(), respostas: {}, marcadas: [], atual: 0 };
+}
+
+/** Grava a prova como em andamento, se ainda não houver uma. */
+export function iniciarProva(id: string, prova: ProvaEmAndamento) {
+  if (estado.simulados[id]?.emAndamento) return;
   atualizar((p) => {
     const simulado = p.simulados[id] ?? { tentativas: [] };
     return { ...p, simulados: { ...p.simulados, [id]: { ...simulado, emAndamento: prova } } };
   });
-  return prova;
 }
 
 export function atualizarProva(id: string, alteracao: Partial<ProvaEmAndamento>) {
