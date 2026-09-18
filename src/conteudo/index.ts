@@ -27,10 +27,10 @@ export const simulados: Simulado[] = Object.values(modulosSimulados).sort((a, b)
 export const simuladosDaTrilha = simulados.filter((s) => s.categoria !== 'entrevista');
 export const provasDeEntrevista = simulados.filter((s) => s.categoria === 'entrevista');
 
-/** Onde o simulado mora no site: as provas de entrevista têm aba própria e não aparecem no histórico de Simulados. */
+/** Onde o simulado mora no site: as provas de entrevista têm aba e histórico próprios, separados dos Simulados. */
 export function origemDoSimulado(simulado: Simulado) {
   return simulado.categoria === 'entrevista'
-    ? { lista: '/entrevista', historico: '/entrevista', rotuloHistorico: 'Teste de Entrevista', rotuloOutros: 'Outras provas' }
+    ? { lista: '/entrevista', historico: '/entrevista?aba=historico', rotuloHistorico: 'Histórico de entrevista', rotuloOutros: 'Outras provas' }
     : { lista: '/simulados', historico: '/simulados?aba=historico', rotuloHistorico: 'Histórico de simulados', rotuloOutros: 'Outros simulados' };
 }
 

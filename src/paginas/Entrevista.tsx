@@ -3,9 +3,10 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { TagDificuldade } from '../componentes/comum.tsx';
 import { Icone } from '../componentes/Icone.tsx';
 import { Modal } from '../componentes/Modal.tsx';
+import { TabelaTentativas } from '../componentes/TabelaTentativas.tsx';
 import { buscarSimulado, provasDeEntrevista } from '../conteudo/index.ts';
-import { melhorTentativa, tentativasSimulado } from '../conteudo/status.ts';
-import { useProgresso } from '../estado/progresso.ts';
+import { melhorTentativa, tentativasRecentes, tentativasSimulado } from '../conteudo/status.ts';
+import { useProgresso, type Progresso } from '../estado/progresso.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
 import type { Simulado } from '../tipos.ts';
 
@@ -16,8 +17,9 @@ const DICAS_ENTREVISTA = [
 ] as const;
 
 export function Entrevista() {
-  useTitulo('Teste de Entrevista');
   const [parametros, setParametros] = useSearchParams();
+  const aba = parametros.get('aba') === 'historico' ? 'historico' : 'provas';
+  useTitulo(aba === 'historico' ? 'Histórico de entrevista' : 'Teste de Entrevista');
   const progresso = useProgresso();
   const navegar = useNavigate();
   const [confirmar, setConfirmar] = useState<Simulado | null>(null);
@@ -33,6 +35,8 @@ export function Entrevista() {
     if (progresso.simulados[simulado.id]?.emAndamento) navegar(`/simulados/${simulado.id}/prova`);
     else setConfirmar(simulado);
   }, [idIniciar, navegar, parametros, progresso.simulados, setParametros]);
+
+  const tentativas = tentativasRecentes(provasDeEntrevista, progresso);
 
   return (
     <div className="pagina">
@@ -51,72 +55,28 @@ export function Entrevista() {
         </div>
       </div>
 
-      <div className="lista-simulados">
-        {provasDeEntrevista.map((simulado) => {
-          const emAndamento = Boolean(progresso.simulados[simulado.id]?.emAndamento);
-          const melhor = melhorTentativa(simulado.id, progresso);
-          const feitas = tentativasSimulado(simulado.id, progresso).length;
-          const sqls = simulado.questoes.filter((q) => q.tipo === 'sql').length;
-          return (
-            <article
-              key={simulado.id}
-              className={`cartao cartao-simulado cartao-simulado--entrevista${emAndamento ? ' cartao--amarelo cartao--destaque' : ''}`}
-            >
-              <div className="cartao-simulado__numero">
-                <Icone nome="maleta" tamanho={20} espessura={2} />
-              </div>
-              <div className="cartao-simulado__conteudo">
-                <div className="lista-tags">
-                  <span className="tag tag--escuro">Entrevista</span>
-                  <TagDificuldade dificuldade={simulado.dificuldade} />
-                  <span className="tag">{simulado.questoes.length} questões</span>
-                  {sqls > 0 && <span className="tag">{sqls} de SQL</span>}
-                  <span className="tag">{simulado.tempo_min} min</span>
-                  <span className="tag">mínimo {simulado.nota_minima}%</span>
-                </div>
-                <h2 className="cartao-simulado__titulo">{simulado.titulo}</h2>
-                <p className="cartao-simulado__descricao">{simulado.descricao}</p>
-                {melhor && (
-                  <p className="mono cartao-simulado__historico">
-                    melhor nota {melhor.nota}% · {feitas} {feitas === 1 ? 'tentativa' : 'tentativas'}
-                    {melhor.nota >= simulado.nota_minima ? ' · aprovado' : ''}
-                  </p>
-                )}
-              </div>
-              <div className="cartao-simulado__acoes">
-                {emAndamento ? (
-                  <Link to={`/simulados/${simulado.id}/prova`} className="btn btn--escuro">
-                    Continuar prova
-                    <Icone nome="seta-direita" espessura={2.5} />
-                  </Link>
-                ) : (
-                  <button type="button" className="btn btn--amarelo" onClick={() => setConfirmar(simulado)}>
-                    <Icone nome="play" tamanho={14} />
-                    {melhor ? 'Tentar de novo' : 'Começar'}
-                  </button>
-                )}
-                {melhor && (
-                  <Link to={`/simulados/${simulado.id}/resultado/${melhor.id}`} className="link-forte">
-                    ver melhor correção
-                  </Link>
-                )}
-              </div>
-            </article>
-          );
-        })}
+      <div className="abas abas--pagina" role="tablist" aria-label="Teste de Entrevista">
+        <Link to="/entrevista" role="tab" className="aba" aria-selected={aba === 'provas'}>
+          Provas
+        </Link>
+        <Link to="/entrevista?aba=historico" role="tab" className="aba" aria-selected={aba === 'historico'}>
+          Histórico{tentativas.length > 0 ? ` (${tentativas.length})` : ''}
+        </Link>
       </div>
 
-      <section className="cartao entrevista-dicas">
-        <h2 className="titulo-secao">Antes de começar</h2>
-        <ul className="entrevista-dicas__lista">
-          {DICAS_ENTREVISTA.map((dica) => (
-            <li key={dica.texto}>
-              <Icone nome={dica.icone} tamanho={17} />
-              <span>{dica.texto}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {aba === 'provas' ? (
+        <ListaProvas progresso={progresso} aoComecar={setConfirmar} />
+      ) : tentativas.length === 0 ? (
+        <div className="vazio">
+          <strong>Nenhuma prova de entrevista entregue ainda.</strong>
+          <span>Cada tentativa fica guardada aqui com a nota e a correção — e vai junto pra nuvem se você entrar com Google.</span>
+          <Link to="/entrevista" className="btn btn--sm">
+            Ver provas
+          </Link>
+        </div>
+      ) : (
+        <TabelaTentativas tentativas={tentativas} rotuloProva="Prova" />
+      )}
 
       <Modal
         aberto={confirmar !== null}
@@ -158,5 +118,78 @@ export function Entrevista() {
         )}
       </Modal>
     </div>
+  );
+}
+
+function ListaProvas({ progresso, aoComecar }: { progresso: Progresso; aoComecar: (simulado: Simulado) => void }) {
+  return (
+    <>
+      <div className="lista-simulados">
+        {provasDeEntrevista.map((simulado) => {
+          const emAndamento = Boolean(progresso.simulados[simulado.id]?.emAndamento);
+          const melhor = melhorTentativa(simulado.id, progresso);
+          const feitas = tentativasSimulado(simulado.id, progresso).length;
+          const sqls = simulado.questoes.filter((q) => q.tipo === 'sql').length;
+          return (
+            <article
+              key={simulado.id}
+              className={`cartao cartao-simulado cartao-simulado--entrevista${emAndamento ? ' cartao--amarelo cartao--destaque' : ''}`}
+            >
+              <div className="cartao-simulado__numero">
+                <Icone nome="maleta" tamanho={20} espessura={2} />
+              </div>
+              <div className="cartao-simulado__conteudo">
+                <div className="lista-tags">
+                  <span className="tag tag--escuro">Entrevista</span>
+                  <TagDificuldade dificuldade={simulado.dificuldade} />
+                  <span className="tag">{simulado.questoes.length} questões</span>
+                  {sqls > 0 && <span className="tag">{sqls} de SQL</span>}
+                  <span className="tag">{simulado.tempo_min} min</span>
+                  <span className="tag">mínimo {simulado.nota_minima}%</span>
+                </div>
+                <h2 className="cartao-simulado__titulo">{simulado.titulo}</h2>
+                <p className="cartao-simulado__descricao">{simulado.descricao}</p>
+                {melhor && (
+                  <p className="mono cartao-simulado__historico">
+                    melhor nota {melhor.nota}% · {feitas} {feitas === 1 ? 'tentativa' : 'tentativas'}
+                    {melhor.nota >= simulado.nota_minima ? ' · aprovado' : ''}
+                  </p>
+                )}
+              </div>
+              <div className="cartao-simulado__acoes">
+                {emAndamento ? (
+                  <Link to={`/simulados/${simulado.id}/prova`} className="btn btn--escuro">
+                    Continuar prova
+                    <Icone nome="seta-direita" espessura={2.5} />
+                  </Link>
+                ) : (
+                  <button type="button" className="btn btn--amarelo" onClick={() => aoComecar(simulado)}>
+                    <Icone nome="play" tamanho={14} />
+                    {melhor ? 'Tentar de novo' : 'Começar'}
+                  </button>
+                )}
+                {melhor && (
+                  <Link to={`/simulados/${simulado.id}/resultado/${melhor.id}`} className="link-forte">
+                    ver melhor correção
+                  </Link>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <section className="cartao entrevista-dicas">
+        <h2 className="titulo-secao">Antes de começar</h2>
+        <ul className="entrevista-dicas__lista">
+          {DICAS_ENTREVISTA.map((dica) => (
+            <li key={dica.texto}>
+              <Icone nome={dica.icone} tamanho={17} />
+              <span>{dica.texto}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </>
   );
 }

@@ -68,6 +68,13 @@ export function tentativasSimulado(id: string, progresso: Progresso): TentativaS
   return progresso.simulados[id]?.tentativas ?? [];
 }
 
+/** Todas as tentativas desses simulados, da mais recente para a mais antiga. */
+export function tentativasRecentes(lista: Simulado[], progresso: Progresso): { simulado: Simulado; tentativa: TentativaSimulado }[] {
+  return lista
+    .flatMap((simulado) => tentativasSimulado(simulado.id, progresso).map((tentativa) => ({ simulado, tentativa })))
+    .sort((a, b) => b.tentativa.entregueEm.localeCompare(a.tentativa.entregueEm));
+}
+
 export function melhorTentativa(id: string, progresso: Progresso): TentativaSimulado | undefined {
   return tentativasSimulado(id, progresso).reduce<TentativaSimulado | undefined>(
     (melhor, t) => (!melhor || t.nota > melhor.nota ? t : melhor),

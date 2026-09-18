@@ -96,9 +96,12 @@ function montarMenu(caminho: string, busca: URLSearchParams, hash: string, progr
       id: 'entrevista',
       rotulo: 'Teste de Entrevista',
       icone: 'maleta',
-      para: '/entrevista',
       ativo: naEntrevista,
       etiqueta: entrevistaNova ? 'novo' : undefined,
+      filhos: [
+        { rotulo: 'Provas', para: '/entrevista', ativo: caminho === '/entrevista' && busca.get('aba') !== 'historico' },
+        { rotulo: 'Histórico', para: '/entrevista?aba=historico', ativo: caminho === '/entrevista' && busca.get('aba') === 'historico' },
+      ],
     },
     {
       id: 'trilhas',

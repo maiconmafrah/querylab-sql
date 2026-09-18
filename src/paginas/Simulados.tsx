@@ -4,10 +4,11 @@ import { TagDificuldade } from '../componentes/comum.tsx';
 import { Icone } from '../componentes/Icone.tsx';
 import { Modal } from '../componentes/Modal.tsx';
 import { buscarSimulado, simuladosDaTrilha } from '../conteudo/index.ts';
-import { ehNovo, melhorTentativa, simuladoAprovado, tentativasSimulado } from '../conteudo/status.ts';
+import { TabelaTentativas } from '../componentes/TabelaTentativas.tsx';
+import { ehNovo, melhorTentativa, simuladoAprovado, tentativasRecentes, tentativasSimulado } from '../conteudo/status.ts';
 import { useProgresso } from '../estado/progresso.ts';
 import { useTitulo } from '../hooks/useTitulo.ts';
-import { doisDigitos, formatarDataHora, formatarDuracao } from '../lib/formato.ts';
+import { doisDigitos } from '../lib/formato.ts';
 import type { Simulado } from '../tipos.ts';
 
 export function Simulados() {
@@ -30,9 +31,7 @@ export function Simulados() {
     else setConfirmar(simulado);
   }, [idIniciar, navegar, parametros, progresso.simulados, setParametros]);
 
-  const tentativas = simuladosDaTrilha
-    .flatMap((simulado) => tentativasSimulado(simulado.id, progresso).map((tentativa) => ({ simulado, tentativa })))
-    .sort((a, b) => b.tentativa.entregueEm.localeCompare(a.tentativa.entregueEm));
+  const tentativas = tentativasRecentes(simuladosDaTrilha, progresso);
 
   return (
     <div className="pagina">
@@ -116,44 +115,7 @@ export function Simulados() {
           </Link>
         </div>
       ) : (
-        <div className="cartao tabela-historico-rolagem">
-          <table className="tabela-historico">
-            <thead>
-              <tr>
-                <th scope="col">Simulado</th>
-                <th scope="col">Entregue</th>
-                <th scope="col">Acertos</th>
-                <th scope="col">Nota</th>
-                <th scope="col">Duração</th>
-                <th scope="col">
-                  <span className="sr-only">Ações</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tentativas.map(({ simulado, tentativa }) => (
-                <tr key={tentativa.id}>
-                  <td>
-                    <strong>{simulado.titulo}</strong>
-                  </td>
-                  <td className="mono">{formatarDataHora(tentativa.entregueEm)}</td>
-                  <td className="mono">
-                    {tentativa.acertos}/{tentativa.total}
-                  </td>
-                  <td>
-                    <span className={`tag ${tentativa.nota >= simulado.nota_minima ? 'tag--menta' : 'tag--coral'}`}>{tentativa.nota}%</span>
-                  </td>
-                  <td className="mono">{formatarDuracao(tentativa.duracaoS)}</td>
-                  <td>
-                    <Link to={`/simulados/${simulado.id}/resultado/${tentativa.id}`} className="link-forte">
-                      ver correção
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <TabelaTentativas tentativas={tentativas} rotuloProva="Simulado" />
       )}
 
       <Modal
