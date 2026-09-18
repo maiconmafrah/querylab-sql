@@ -1,0 +1,162 @@
+{
+  "id": "entrevista-classicas",
+  "numero": 1,
+  "titulo": "As Perguntas Clássicas",
+  "descricao": "As perguntas que mais caem em entrevista técnica de SQL: segundo maior salário, quem ganha mais que o chefe, duplicatas, ranking por departamento — com uma empresa fictícia pra treinar de verdade.",
+  "dificuldade": "dificil",
+  "tempo_min": 35,
+  "nota_minima": 70,
+  "xp_por_acerto": 20,
+  "dataset": "funcionarios.sql",
+  "publicado_em": "2026-09-18",
+  "categoria": "entrevista",
+  "questoes": [
+    {
+      "id": "segundo-maior-salario-distinto",
+      "tipo": "multipla",
+      "tema": "window-functions",
+      "formato_alternativas": "codigo",
+      "enunciado": "Qual consulta encontra corretamente o segundo maior salário da empresa, mesmo se dois funcionários empatarem no primeiro lugar?",
+      "alternativas": [
+        "SELECT salario\nFROM funcionarios\nORDER BY salario DESC\nLIMIT 1 OFFSET 1;",
+        "SELECT DISTINCT salario\nFROM funcionarios\nORDER BY salario DESC\nLIMIT 1 OFFSET 1;",
+        "SELECT MIN(salario) FROM funcionarios;",
+        "SELECT salario\nFROM funcionarios\nGROUP BY salario\nORDER BY salario ASC\nLIMIT 1;"
+      ],
+      "correta": 1,
+      "explicacao": "Sem DISTINCT, um empate no primeiro lugar faz o OFFSET 1 devolver o MESMO salário máximo de novo, não o segundo valor diferente. DISTINCT elimina as repetições antes de contar as posições."
+    },
+    {
+      "id": "ganha-mais-que-gerente",
+      "tipo": "multipla",
+      "tema": "joins",
+      "formato_alternativas": "codigo",
+      "enunciado": "A tabela funcionarios tem uma coluna gerente_id que aponta pro funcionario_id do próprio chefe. Qual consulta lista quem ganha mais que o próprio gerente?",
+      "alternativas": [
+        "SELECT f.nome\nFROM funcionarios f\nJOIN funcionarios g ON f.gerente_id = g.funcionario_id\nWHERE f.salario > g.salario;",
+        "SELECT nome FROM funcionarios\nWHERE salario > (SELECT MAX(salario) FROM funcionarios);",
+        "SELECT f.nome\nFROM funcionarios f, funcionarios g\nWHERE f.salario > g.salario;",
+        "SELECT nome FROM funcionarios ORDER BY salario DESC;"
+      ],
+      "correta": 0,
+      "explicacao": "É um self join: a tabela se junta com ela mesma — uma cópia (f) representa o funcionário, a outra (g) representa o gerente dele, ligadas por f.gerente_id = g.funcionario_id. A alternativa C esquece essa condição e compara todo mundo com todo mundo (produto cartesiano)."
+    },
+    {
+      "id": "departamento-maior-media",
+      "tipo": "sql",
+      "tema": "agregacoes",
+      "enunciado": "Mostre nome (do departamento) e media_salario de cada departamento, do maior pro menor.",
+      "ordem_importa": true,
+      "tolerancia": 0.01,
+      "gabarito_sql": "SELECT d.nome, ROUND(AVG(f.salario), 2) AS media_salario\nFROM funcionarios f\nJOIN departamentos d ON d.departamento_id = f.departamento_id\nGROUP BY d.nome\nORDER BY media_salario DESC;",
+      "explicacao": "GROUP BY d.nome resume os salários por departamento; ORDER BY media_salario DESC ordena do maior pro menor. JOIN + GROUP BY + ORDER BY é praticamente o combo mais cobrado em entrevista."
+    },
+    {
+      "id": "quem-nao-tem-gerente",
+      "tipo": "multipla",
+      "tema": "nulls",
+      "formato_alternativas": "codigo",
+      "enunciado": "Como encontrar quem está no topo da hierarquia (sem gerente cadastrado)?",
+      "alternativas": ["WHERE gerente_id IS NULL", "WHERE gerente_id = NULL", "WHERE gerente_id = 0", "WHERE gerente_id = ''"],
+      "correta": 0,
+      "explicacao": "gerente_id fica NULL pra quem não tem chefe — o CEO, nesse caso. Comparação com = NULL nunca é verdadeira; o operador certo é IS NULL."
+    },
+    {
+      "id": "duplicatas-classico",
+      "tipo": "multipla",
+      "tema": "qualidade-de-dados",
+      "formato_alternativas": "codigo",
+      "enunciado": "Provavelmente a pergunta mais repetida de entrevista de SQL: como encontrar nomes cadastrados mais de uma vez na tabela funcionarios?",
+      "alternativas": [
+        "SELECT nome FROM funcionarios\nGROUP BY nome\nHAVING COUNT(*) > 1;",
+        "SELECT DISTINCT nome FROM funcionarios;",
+        "SELECT nome FROM funcionarios\nWHERE nome IN (SELECT nome FROM funcionarios);",
+        "SELECT nome, COUNT(*) FROM funcionarios\nWHERE COUNT(*) > 1\nGROUP BY nome;"
+      ],
+      "correta": 0,
+      "explicacao": "GROUP BY nome junta as linhas com o mesmo nome; HAVING COUNT(*) > 1 mantém só os grupos com mais de uma ocorrência. A alternativa D tenta usar COUNT(*) no WHERE, que roda antes do agrupamento — daria erro."
+    },
+    {
+      "id": "rank-por-departamento",
+      "tipo": "sql",
+      "tema": "window-functions",
+      "enunciado": "Para cada funcionário, mostre nome, cargo, departamento_id, salario e a posicao dele por salário DENTRO do próprio departamento (1 = maior salário do departamento).",
+      "gabarito_sql": "SELECT nome, cargo, departamento_id, salario,\n       RANK() OVER (PARTITION BY departamento_id ORDER BY salario DESC) AS posicao\nFROM funcionarios;",
+      "explicacao": "PARTITION BY departamento_id reinicia o ranking a cada departamento, sem reduzir as linhas do resultado como um GROUP BY faria."
+    },
+    {
+      "id": "delete-truncate-drop",
+      "tipo": "multipla",
+      "tema": "qualidade-de-dados",
+      "enunciado": "Clássica de entrevista, mais teórica: qual a diferença entre DELETE, TRUNCATE e DROP?",
+      "alternativas": [
+        "DELETE remove linhas (aceita WHERE); TRUNCATE esvazia a tabela inteira de uma vez, sem condição; DROP apaga a tabela inteira, estrutura incluída.",
+        "Os três fazem exatamente a mesma coisa, só mudam de nome entre bancos diferentes.",
+        "DELETE apaga a tabela inteira; TRUNCATE remove só uma linha; DROP remove uma coluna.",
+        "TRUNCATE e DROP só existem no SQL Server, não em outros bancos."
+      ],
+      "correta": 0,
+      "explicacao": "DELETE é o mais granular (linha a linha, com WHERE). TRUNCATE esvazia tudo de uma vez, sem filtro, normalmente mais rápido. DROP vai além de esvaziar: apaga a tabela em si, colunas e tudo."
+    },
+    {
+      "id": "quantos-cada-gerente",
+      "tipo": "sql",
+      "tema": "agregacoes",
+      "enunciado": "Mostre gerente_id e qtd_subordinados: quantos funcionários cada gerente supervisiona diretamente (considere só quem tem pelo menos 1 subordinado direto).",
+      "ordem_importa": true,
+      "gabarito_sql": "SELECT gerente_id, COUNT(*) AS qtd_subordinados\nFROM funcionarios\nWHERE gerente_id IS NOT NULL\nGROUP BY gerente_id\nORDER BY gerente_id;",
+      "explicacao": "WHERE gerente_id IS NOT NULL tira o CEO da conta (ele não é subordinado de ninguém). GROUP BY gerente_id agrupa por chefe e COUNT(*) soma quantos subordinados diretos cada um tem."
+    },
+    {
+      "id": "where-vs-having-entrevista",
+      "tipo": "multipla",
+      "tema": "agregacoes",
+      "enunciado": "Numa entrevista, pedem pra explicar por que esta consulta dá erro: SELECT departamento_id FROM funcionarios WHERE COUNT(*) > 5 GROUP BY departamento_id;. Qual é a explicação certa?",
+      "alternativas": [
+        "Funções de agregação como COUNT(*) não existem no momento em que o WHERE roda — ele é avaliado antes do GROUP BY. O filtro sobre a contagem precisa ir no HAVING.",
+        "COUNT(*) só pode ser usado dentro do SELECT, nunca em cláusulas de filtro.",
+        "Falta um JOIN na consulta.",
+        "GROUP BY só aceita uma coluna por vez."
+      ],
+      "correta": 0,
+      "explicacao": "A ordem de execução lógica é FROM → WHERE → GROUP BY → HAVING → SELECT. Como o WHERE roda antes do agrupamento, ele não enxerga o resultado de COUNT(*) — só o HAVING enxerga."
+    },
+    {
+      "id": "diferenca-salario-media-departamento",
+      "tipo": "sql",
+      "tema": "window-functions",
+      "enunciado": "Mostre nome, departamento_id, salario e a diferença entre o salário do funcionário e a média salarial do próprio departamento (coluna diferenca_da_media).",
+      "tolerancia": 0.01,
+      "gabarito_sql": "SELECT nome, departamento_id, salario,\n       ROUND(salario - AVG(salario) OVER (PARTITION BY departamento_id), 2) AS diferenca_da_media\nFROM funcionarios;",
+      "explicacao": "AVG(salario) OVER (PARTITION BY departamento_id) calcula a média do departamento sem colapsar as linhas — cada funcionário continua na própria linha, só que com a média do grupo ao lado pra comparar."
+    },
+    {
+      "id": "ordem-execucao-logica",
+      "tipo": "multipla",
+      "tema": "consultas-basicas",
+      "enunciado": "Pergunta clássica de entrevista: qual é a ordem de execução LÓGICA de uma consulta SQL (não a ordem que você escreve)?",
+      "alternativas": [
+        "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT",
+        "SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY → LIMIT",
+        "FROM → SELECT → WHERE → ORDER BY → GROUP BY → HAVING → LIMIT",
+        "WHERE → FROM → SELECT → GROUP BY → HAVING → ORDER BY → LIMIT"
+      ],
+      "correta": 0,
+      "explicacao": "Mesmo escrevendo SELECT primeiro no texto, o banco resolve o FROM e o WHERE antes — por isso o HAVING enxerga agregações e o WHERE não, e por isso dá pra usar um apelido do SELECT no ORDER BY, mas não no WHERE."
+    },
+    {
+      "id": "indice-para-que-serve",
+      "tipo": "multipla",
+      "tema": "qualidade-de-dados",
+      "enunciado": "Outra clássica teórica: para que serve um índice (INDEX) numa tabela?",
+      "alternativas": [
+        "Acelera buscas e filtros em colunas específicas, em troca de mais espaço em disco e escrita um pouco mais lenta.",
+        "Impede que a coluna aceite valores duplicados.",
+        "Ordena fisicamente a tabela inteira em disco, pra sempre.",
+        "Faz a consulta rodar em paralelo automaticamente."
+      ],
+      "correta": 0,
+      "explicacao": "Um índice é como o índice de um livro: acelera achar linhas por uma coluna (WHERE, JOIN, ORDER BY), mas custa espaço extra e deixa a escrita (INSERT/UPDATE/DELETE) um pouco mais lenta, porque o índice também precisa ser atualizado. É diferente de UNIQUE, que é uma restrição de dado, não uma otimização de busca."
+    }
+  ]
+}

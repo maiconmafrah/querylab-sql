@@ -30,7 +30,8 @@ export function Simulados() {
     else setConfirmar(simulado);
   }, [idIniciar, navegar, parametros, progresso.simulados, setParametros]);
 
-  const tentativas = simulados
+  const simuladosDaTrilha = simulados.filter((s) => s.categoria !== 'entrevista');
+  const tentativas = simuladosDaTrilha
     .flatMap((simulado) => tentativasSimulado(simulado.id, progresso).map((tentativa) => ({ simulado, tentativa })))
     .sort((a, b) => b.tentativa.entregueEm.localeCompare(a.tentativa.entregueEm));
 
@@ -56,7 +57,7 @@ export function Simulados() {
 
       {aba === 'disponiveis' ? (
         <div className="lista-simulados">
-          {simulados.map((simulado) => {
+          {simuladosDaTrilha.map((simulado) => {
             const emAndamento = Boolean(progresso.simulados[simulado.id]?.emAndamento);
             const melhor = melhorTentativa(simulado.id, progresso);
             const feitas = tentativasSimulado(simulado.id, progresso).length;

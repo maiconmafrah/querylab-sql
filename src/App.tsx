@@ -3,6 +3,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Carregando } from './componentes/comum.tsx';
 import { Shell } from './componentes/Shell.tsx';
 import { Catalogo } from './paginas/Catalogo.tsx';
+import { Entrevista } from './paginas/Entrevista.tsx';
 import { Inicio } from './paginas/Inicio.tsx';
 import { NaoEncontrado } from './paginas/NaoEncontrado.tsx';
 import { Perfil } from './paginas/Perfil.tsx';
@@ -60,6 +61,7 @@ export function App() {
           <Route path="trilhas/:id" element={<PaginaTrilha />} />
           <Route path="simulados" element={<Simulados />} />
           <Route path="simulados/:id/resultado/:tentativa" element={<Resultado />} />
+          <Route path="entrevista" element={<Entrevista />} />
           <Route
             path="playground"
             element={

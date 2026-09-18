@@ -110,6 +110,8 @@ export interface Simulado {
   dataset?: string;
   publicado_em: string;
   questoes: Questao[];
+  /** Marca os simulados da aba "Teste de Entrevista" — não entram na lista normal de Simulados. */
+  categoria?: 'entrevista';
 }
 
 export interface EntradaReferencia {

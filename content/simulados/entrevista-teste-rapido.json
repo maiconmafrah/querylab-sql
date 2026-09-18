@@ -1,0 +1,88 @@
+{
+  "id": "entrevista-teste-rapido",
+  "numero": 2,
+  "titulo": "Teste Rápido",
+  "descricao": "Um aquecimento antes da entrevista de verdade: 6 perguntas rápidas de fundamentos, sem escrever nenhuma consulta.",
+  "dificuldade": "medio",
+  "tempo_min": 8,
+  "nota_minima": 70,
+  "xp_por_acerto": 10,
+  "publicado_em": "2026-09-18",
+  "categoria": "entrevista",
+  "questoes": [
+    {
+      "id": "ordem-execucao-rapido",
+      "tipo": "multipla",
+      "tema": "consultas-basicas",
+      "enunciado": "Qual cláusula roda primeiro, na ordem lógica de execução de uma consulta?",
+      "alternativas": ["SELECT", "WHERE", "FROM", "ORDER BY"],
+      "correta": 2,
+      "explicacao": "A ordem lógica começa no FROM (de onde vêm os dados), não no SELECT — mesmo o SELECT aparecendo primeiro no texto da consulta."
+    },
+    {
+      "id": "join-completo",
+      "tipo": "multipla",
+      "tema": "joins",
+      "enunciado": "Qual JOIN garante que TODAS as linhas das duas tabelas apareçam no resultado, com ou sem correspondência?",
+      "alternativas": ["INNER JOIN", "LEFT JOIN", "FULL OUTER JOIN", "CROSS JOIN"],
+      "correta": 2,
+      "explicacao": "FULL OUTER JOIN é o único que nunca descarta uma linha de nenhum dos dois lados — sem par, as colunas do outro lado vêm NULL."
+    },
+    {
+      "id": "pk-vs-unique",
+      "tipo": "multipla",
+      "tema": "qualidade-de-dados",
+      "enunciado": "O que PRIMARY KEY garante que uma restrição UNIQUE sozinha não garante?",
+      "alternativas": [
+        "Que a coluna também não aceita valores NULL, além de ser única",
+        "Que a coluna aceita texto e número ao mesmo tempo",
+        "Que a tabela terá índice automático em todas as colunas",
+        "Nada — PRIMARY KEY e UNIQUE são exatamente a mesma coisa"
+      ],
+      "correta": 0,
+      "explicacao": "UNIQUE permite valor NULL (às vezes mais de um, dependendo do banco). PRIMARY KEY combina unicidade com NOT NULL — nenhuma linha pode ficar sem identificador."
+    },
+    {
+      "id": "count-null-rapido",
+      "tipo": "multipla",
+      "tema": "agregacoes",
+      "enunciado": "Por que COUNT(coluna) às vezes devolve um número menor que COUNT(*) na mesma tabela?",
+      "alternativas": [
+        "Porque COUNT(coluna) ignora as linhas onde aquela coluna está NULL",
+        "Porque COUNT(coluna) só conta números, nunca texto",
+        "Porque COUNT(*) sempre soma 1 a mais por engano",
+        "Não existe diferença nenhuma entre os dois"
+      ],
+      "correta": 0,
+      "explicacao": "COUNT(*) conta todas as linhas. COUNT(coluna) conta só as linhas onde aquela coluna específica tem um valor não nulo."
+    },
+    {
+      "id": "indice-rapido",
+      "tipo": "multipla",
+      "tema": "qualidade-de-dados",
+      "enunciado": "Pra que serve um índice (INDEX) numa tabela, resumindo em uma frase?",
+      "alternativas": [
+        "Acelera buscas e filtros, em troca de espaço extra e escrita um pouco mais lenta",
+        "Faz a tabela ocupar menos espaço em disco",
+        "Impede duplicatas automaticamente em qualquer coluna",
+        "É obrigatório em toda tabela, senão o banco recusa criar"
+      ],
+      "correta": 0,
+      "explicacao": "Mesma lógica do índice de um livro: acelera achar informação, mas custa espaço e um pouco de velocidade de escrita."
+    },
+    {
+      "id": "window-vs-group-rapido",
+      "tipo": "multipla",
+      "tema": "window-functions",
+      "enunciado": "O que uma window function faz que um GROUP BY não faz?",
+      "alternativas": [
+        "Mantém todas as linhas originais no resultado, em vez de resumir cada grupo numa linha só",
+        "Sempre roda mais rápido que GROUP BY",
+        "Não permite usar PARTITION BY",
+        "Só funciona com a função COUNT()"
+      ],
+      "correta": 0,
+      "explicacao": "GROUP BY colapsa cada grupo numa única linha de resultado. Uma window function (com OVER) calcula o mesmo tipo de agregação, mas mantém cada linha original — ótimo pra comparar uma linha com o resumo do grupo dela."
+    }
+  ]
+}

@@ -79,11 +79,12 @@ export function simuladoAprovado(simulado: Simulado, progresso: Progresso): bool
   return tentativasSimulado(simulado.id, progresso).some((t) => t.nota >= simulado.nota_minima);
 }
 
-/** Primeiro simulado com prova em andamento; senão o primeiro ainda não aprovado. */
+/** Primeiro simulado com prova em andamento; senão o primeiro ainda não aprovado. Não conta os de entrevista. */
 export function proximoSimulado(progresso: Progresso): Simulado | undefined {
+  const candidatos = simulados.filter((s) => s.categoria !== 'entrevista');
   return (
-    simulados.find((s) => progresso.simulados[s.id]?.emAndamento) ??
-    simulados.find((s) => !simuladoAprovado(s, progresso))
+    candidatos.find((s) => progresso.simulados[s.id]?.emAndamento) ??
+    candidatos.find((s) => !simuladoAprovado(s, progresso))
   );
 }
 

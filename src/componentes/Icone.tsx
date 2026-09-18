@@ -98,6 +98,13 @@ const DESENHOS = {
   'chevron-baixo': <path d="m6 9 6 6 6-6" />,
   play: <path d="M7 5v14l11-7z" fill="currentColor" />,
   marcador: <path d="M6 3h12v18l-6-4-6 4z" />,
+  maleta: (
+    <>
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <path d="M3 13h18" />
+    </>
+  ),
   trofeu: (
     <>
       <path d="M8 4h8v5a4 4 0 0 1-8 0z" />

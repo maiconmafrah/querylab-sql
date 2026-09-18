@@ -45,7 +45,12 @@ function lerGruposAbertos(): string[] {
 function montarMenu(caminho: string, busca: URLSearchParams, hash: string, progresso: Progresso): ItemMenu[] {
   const status = busca.get('status');
   const contarStatus = (alvo: string) => treinamentos.filter((t) => statusMissao(t, progresso) === alvo).length;
-  const simuladoNovo = simulados.some((s) => ehNovo(s.publicado_em) && !progresso.simulados[s.id]?.tentativas.length);
+  const simuladoNovo = simulados.some(
+    (s) => s.categoria !== 'entrevista' && ehNovo(s.publicado_em) && !progresso.simulados[s.id]?.tentativas.length,
+  );
+  const entrevistaNova = simulados.some(
+    (s) => s.categoria === 'entrevista' && ehNovo(s.publicado_em) && !progresso.simulados[s.id]?.tentativas.length,
+  );
 
   return [
     { id: 'inicio', rotulo: 'Início', icone: 'inicio', para: '/', ativo: caminho === '/' },
@@ -85,6 +90,14 @@ function montarMenu(caminho: string, busca: URLSearchParams, hash: string, progr
         { rotulo: 'Disponíveis', para: '/simulados', ativo: caminho === '/simulados' && busca.get('aba') !== 'historico' },
         { rotulo: 'Histórico', para: '/simulados?aba=historico', ativo: caminho === '/simulados' && busca.get('aba') === 'historico' },
       ],
+    },
+    {
+      id: 'entrevista',
+      rotulo: 'Teste de Entrevista',
+      icone: 'maleta',
+      para: '/entrevista',
+      ativo: caminho === '/entrevista',
+      etiqueta: entrevistaNova ? 'novo' : undefined,
     },
     {
       id: 'trilhas',
