@@ -14,19 +14,22 @@ async function enviar(uid: string) {
   const kit = await carregarFirebase();
   const progresso = JSON.parse(exportarProgresso()) as Progresso;
   await kit.firestoreApi.setDoc(kit.firestoreApi.doc(kit.db, 'progressos', uid), progresso);
+  await enviarRanking(uid, progresso);
+}
 
-  // Ranking e perfil público: só existe pra quem já escolheu um apelido. Só expõe o essencial
-  // (XP, dias estudados e quantas missões foram concluídas) — nunca respostas, notas ou SQL salvo.
-  if (progresso.apelido) {
-    const missoesConcluidas = Object.values(progresso.missoes).filter((m) => m.concluidaEm).length;
-    await kit.firestoreApi.setDoc(kit.firestoreApi.doc(kit.db, 'rankings', uid), {
-      apelido: progresso.apelido,
-      xp: progresso.xp,
-      dias: progresso.dias,
-      missoesConcluidas,
-      atualizadoEm: new Date().toISOString(),
-    });
-  }
+// Ranking e perfil público: só existe pra quem já escolheu um apelido. Só expõe o essencial
+// (XP, dias estudados e quantas missões foram concluídas) — nunca respostas, notas ou SQL salvo.
+async function enviarRanking(uid: string, progresso: Progresso) {
+  if (!progresso.apelido) return;
+  const kit = await carregarFirebase();
+  const missoesConcluidas = Object.values(progresso.missoes).filter((m) => m.concluidaEm).length;
+  await kit.firestoreApi.setDoc(kit.firestoreApi.doc(kit.db, 'rankings', uid), {
+    apelido: progresso.apelido,
+    xp: progresso.xp,
+    dias: progresso.dias,
+    missoesConcluidas,
+    atualizadoEm: new Date().toISOString(),
+  });
 }
 
 /** Monte uma vez perto da raiz do app: mantém o progresso local e o da nuvem sempre em sincronia. */
@@ -71,6 +74,7 @@ export function useSincronizarProgresso(): StatusSincronizacao {
           referencia,
           (instantaneo) => {
             if (cancelado) return;
+            const primeiraLeitura = !nuvemLida;
             nuvemLida = true;
             const nuvem = instantaneo.exists() ? lerProgresso(instantaneo.data()) : null;
             if (!nuvem) {
@@ -85,7 +89,16 @@ export function useSincronizarProgresso(): StatusSincronizacao {
               aplicarProgressoMesclado(mesclado);
             }
             if (!mesmoConteudo(mesclado, nuvem)) enviarEmBreve();
-            else if (!pendente.current) setStatus('sincronizado');
+            else if (primeiraLeitura) {
+              // Mesmo sem nada novo, regrava o ranking uma vez por visita: ele se corrige sozinho
+              // se uma gravação anterior tiver falhado.
+              enviarRanking(usuario.uid, obterProgresso())
+                .then(() => !cancelado && !pendente.current && setStatus('sincronizado'))
+                .catch((erro: unknown) => {
+                  console.error('Falha ao atualizar o ranking:', erro);
+                  if (!cancelado) setStatus('erro');
+                });
+            } else if (!pendente.current) setStatus('sincronizado');
           },
           (erro) => {
             console.error('Falha ao escutar o progresso na nuvem:', erro);
