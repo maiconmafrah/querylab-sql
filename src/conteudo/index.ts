@@ -1,4 +1,5 @@
 // Carrega todo o conteúdo de /content. Arquivos novos aparecem automaticamente no site.
+import { carregarComRecarga } from '../lib/recarregar.ts';
 import type { Dificuldade, QuestaoMultipla, SecaoReferencia, Simulado, Tema, Treinamento, Trilha } from '../tipos.ts';
 import temasJson from '../../content/temas.json';
 import referenciaJson from '../../content/referencia.json';
@@ -72,5 +73,5 @@ export const datasetsDisponiveis: string[] = Object.keys(modulosDatasets)
 export async function carregarDataset(arquivo: string): Promise<string> {
   const carregar = modulosDatasets[`../../content/datasets/${arquivo}`];
   if (!carregar) throw new Error(`O dataset "${arquivo}" não existe em content/datasets.`);
-  return carregar();
+  return carregarComRecarga(carregar);
 }

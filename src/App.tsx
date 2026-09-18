@@ -1,7 +1,9 @@
 import { lazy, Suspense, type ReactNode } from 'react';
-import { HashRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { Carregando } from './componentes/comum.tsx';
+import { LimiteDeErro } from './componentes/LimiteDeErro.tsx';
 import { Shell } from './componentes/Shell.tsx';
+import { carregarComRecarga } from './lib/recarregar.ts';
 import { Catalogo } from './paginas/Catalogo.tsx';
 import { Entrevista } from './paginas/Entrevista.tsx';
 import { Inicio } from './paginas/Inicio.tsx';
@@ -15,27 +17,39 @@ import { Simulados } from './paginas/Simulados.tsx';
 import { PaginaTrilha, Trilhas } from './paginas/Trilhas.tsx';
 
 // Páginas com banco de dados e editor carregam sob demanda (DuckDB e CodeMirror são pesados).
-const PaginaMissao = lazy(() => import('./paginas/Missao.tsx').then((m) => ({ default: m.PaginaMissao })));
-const Playground = lazy(() => import('./paginas/Playground.tsx').then((m) => ({ default: m.Playground })));
-const PaginaProva = lazy(() => import('./paginas/Prova.tsx').then((m) => ({ default: m.PaginaProva })));
+const PaginaMissao = lazy(() => carregarComRecarga(() => import('./paginas/Missao.tsx')).then((m) => ({ default: m.PaginaMissao })));
+const Playground = lazy(() => carregarComRecarga(() => import('./paginas/Playground.tsx')).then((m) => ({ default: m.Playground })));
+const PaginaProva = lazy(() => carregarComRecarga(() => import('./paginas/Prova.tsx')).then((m) => ({ default: m.PaginaProva })));
 
 function SobDemanda({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
   return (
-    <Suspense
-      fallback={
-        <div className="pagina">
-          <Carregando texto="Abrindo…" />
-        </div>
-      }
-    >
-      {children}
-    </Suspense>
+    <LimiteDeErro chave={pathname}>
+      <Suspense
+        fallback={
+          <div className="pagina">
+            <Carregando texto="Abrindo…" />
+          </div>
+        }
+      >
+        {children}
+      </Suspense>
+    </LimiteDeErro>
   );
 }
 
 export function App() {
   return (
     <HashRouter>
+      <Rotas />
+    </HashRouter>
+  );
+}
+
+function Rotas() {
+  const { pathname } = useLocation();
+  return (
+    <LimiteDeErro chave={pathname}>
       <Routes>
         {/* A prova ocupa a tela inteira, sem o menu lateral. */}
         <Route
@@ -77,6 +91,6 @@ export function App() {
           <Route path="*" element={<NaoEncontrado />} />
         </Route>
       </Routes>
-    </HashRouter>
+    </LimiteDeErro>
   );
 }
