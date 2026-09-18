@@ -74,6 +74,8 @@ export interface Progresso {
    * snapshot que chega da nuvem é mais novo que o que já está na tela — nunca é mostrado.
    */
   atualizadoEm: string;
+  /** Avisar por e-mail quando a sequência de dias estiver prestes a quebrar. Padrão: ativado. */
+  lembreteSequencia?: boolean;
 }
 
 /** Sentinela "nunca atualizado": qualquer dado real da nuvem é sempre mais novo que isso. */
@@ -295,6 +297,10 @@ export function responderDesafio(data: string, escolhida: number, acertou: boole
 }
 
 // ---------- Configurações ----------
+
+export function definirLembreteSequencia(ativo: boolean) {
+  atualizar((p) => ({ ...p, lembreteSequencia: ativo }));
+}
 
 export function definirModoLivre(ativo: boolean) {
   atualizar((p) => ({ ...p, modoLivre: ativo }));
