@@ -1,6 +1,7 @@
 // Progresso do aluno, guardado no navegador (localStorage).
 import { useSyncExternalStore } from 'react';
 import { dataLocal, xpCheckpoint } from '../lib/niveis.ts';
+import { mesclarProgresso } from './mesclar.ts';
 
 const CHAVE = 'querylab:progresso:v1';
 const PREFIXO_CONSULTA = 'querylab:consulta:';
@@ -76,6 +77,10 @@ export interface Progresso {
   atualizadoEm: string;
   /** Avisar por e-mail quando a sequência de dias estiver prestes a quebrar. Padrão: ativado. */
   lembreteSequencia?: boolean;
+  /** Quando o aluno apagou o progresso: ao mesclar com outro aparelho, tudo antes disso é descartado. */
+  zeradoEm?: string;
+  /** Quando importou um backup: se for depois do último "apagar", o apagar deixa de valer. */
+  restauradoEm?: string;
 }
 
 /** Sentinela "nunca atualizado": qualquer dado real da nuvem é sempre mais novo que isso. */
@@ -325,20 +330,33 @@ export function apagarProgresso() {
   } catch {
     // ignora
   }
-  publicar(progressoVazio());
+  atualizar(() => ({ ...progressoVazio(), zeradoEm: agora() }));
 }
 
 export function exportarProgresso(): string {
   return JSON.stringify(estado, null, 2);
 }
 
+/** Valida um progresso vindo de fora (backup ou nuvem). */
+export function lerProgresso(dados: unknown): Progresso | null {
+  const parcial = dados as Partial<Progresso> | null;
+  if (!parcial || parcial.versao !== 1 || typeof parcial.xp !== 'number') return null;
+  return { ...progressoVazio(), ...parcial };
+}
+
+/** Junta um backup ao progresso atual, sem apagar o que já existe aqui. */
 export function importarProgresso(texto: string): boolean {
   try {
-    const dados = JSON.parse(texto) as Partial<Progresso>;
-    if (dados.versao !== 1 || typeof dados.xp !== 'number') return false;
-    publicar({ ...progressoVazio(), ...dados });
+    const importado = lerProgresso(JSON.parse(texto));
+    if (!importado) return false;
+    atualizar((atual) => mesclarProgresso({ ...atual, restauradoEm: agora() }, importado));
     return true;
   } catch {
     return false;
   }
+}
+
+/** Troca o progresso por uma versão já mesclada com a nuvem, sem marcar como mudança feita aqui. */
+export function aplicarProgressoMesclado(mesclado: Progresso) {
+  publicar(mesclado);
 }

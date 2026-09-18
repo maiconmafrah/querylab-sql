@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { carregarFirebase, firebaseDisponivel } from '../lib/firebase.ts';
 import { useAutenticacao } from './autenticacao.ts';
-import { assinarProgresso, exportarProgresso, importarProgresso, obterProgresso, type Progresso } from './progresso.ts';
+import { mesclarProgresso, mesmoConteudo } from './mesclar.ts';
+import { aplicarProgressoMesclado, assinarProgresso, exportarProgresso, lerProgresso, obterProgresso, type Progresso } from './progresso.ts';
 
 const ATRASO_ENVIO_MS = 1500;
 
@@ -42,40 +43,49 @@ export function useSincronizarProgresso(): StatusSincronizacao {
     }
     let cancelado = false;
     let pararDeEscutarNuvem: (() => void) | undefined;
+    // Até a primeira leitura da nuvem, nada é enviado: senão um aparelho desatualizado apagaria
+    // o que foi feito em outro (ex.: os dias de estudo da sequência).
+    let nuvemLida = false;
+
+    const enviarEmBreve = () => {
+      setStatus('sincronizando');
+      if (pendente.current) clearTimeout(pendente.current);
+      pendente.current = setTimeout(() => {
+        pendente.current = null;
+        enviar(usuario.uid)
+          .then(() => !cancelado && setStatus('sincronizado'))
+          .catch((erro: unknown) => {
+            console.error('Falha ao enviar progresso para a nuvem:', erro);
+            if (!cancelado) setStatus('erro');
+          });
+      }, ATRASO_ENVIO_MS);
+    };
 
     (async () => {
       try {
         const kit = await carregarFirebase();
         if (cancelado) return;
         const referencia = kit.firestoreApi.doc(kit.db, 'progressos', usuario.uid);
-        let primeiraLeitura = true;
 
         pararDeEscutarNuvem = kit.firestoreApi.onSnapshot(
           referencia,
           (instantaneo) => {
             if (cancelado) return;
-            if (instantaneo.exists()) {
-              // Só aplica o snapshot se ele não for mais velho que a última mudança feita aqui:
-              // sem isso, um snapshot atrasado da nuvem pode chegar bem na hora em que acabamos de
-              // salvar algo localmente (ex.: terminar um simulado) e apagar essa mudança antes do
-              // envio (que é adiado por ATRASO_ENVIO_MS) terminar.
-              const dadosNuvem = instantaneo.data() as Partial<{ atualizadoEm: string }>;
-              const localAtual = obterProgresso();
-              const podeAplicar = !dadosNuvem.atualizadoEm || dadosNuvem.atualizadoEm > localAtual.atualizadoEm;
-              if (podeAplicar) {
-                ignorarProximaMudanca.current = true;
-                importarProgresso(JSON.stringify(dadosNuvem));
-              }
-              setStatus('sincronizado');
-            } else if (primeiraLeitura) {
-              enviar(usuario.uid)
-                .then(() => !cancelado && setStatus('sincronizado'))
-                .catch((erro: unknown) => {
-                  console.error('Falha ao enviar progresso inicial para a nuvem:', erro);
-                  if (!cancelado) setStatus('erro');
-                });
+            nuvemLida = true;
+            const nuvem = instantaneo.exists() ? lerProgresso(instantaneo.data()) : null;
+            if (!nuvem) {
+              enviarEmBreve();
+              return;
             }
-            primeiraLeitura = false;
+            // Mescla em vez de escolher um lado: o que só existe aqui ou só na nuvem sobrevive.
+            const local = obterProgresso();
+            const mesclado = mesclarProgresso(local, nuvem);
+            if (!mesmoConteudo(mesclado, local)) {
+              ignorarProximaMudanca.current = true;
+              aplicarProgressoMesclado(mesclado);
+            }
+            if (!mesmoConteudo(mesclado, nuvem)) enviarEmBreve();
+            else if (!pendente.current) setStatus('sincronizado');
           },
           (erro) => {
             console.error('Falha ao escutar o progresso na nuvem:', erro);
@@ -93,16 +103,8 @@ export function useSincronizarProgresso(): StatusSincronizacao {
         ignorarProximaMudanca.current = false;
         return;
       }
-      setStatus('sincronizando');
-      if (pendente.current) clearTimeout(pendente.current);
-      pendente.current = setTimeout(() => {
-        enviar(usuario.uid)
-          .then(() => !cancelado && setStatus('sincronizado'))
-          .catch((erro: unknown) => {
-            console.error('Falha ao enviar progresso para a nuvem:', erro);
-            if (!cancelado) setStatus('erro');
-          });
-      }, ATRASO_ENVIO_MS);
+      if (nuvemLida) enviarEmBreve();
+      else setStatus('sincronizando');
     });
 
     return () => {
@@ -110,6 +112,7 @@ export function useSincronizarProgresso(): StatusSincronizacao {
       pararDeEscutarNuvem?.();
       pararDeOuvirLocal();
       if (pendente.current) clearTimeout(pendente.current);
+      pendente.current = null;
     };
   }, [usuario]);
 
